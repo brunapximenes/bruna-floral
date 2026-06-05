@@ -1,0 +1,231 @@
+/* ============================================================
+   Bruna Floral — CSS Compartilhado
+   ============================================================ */
+
+:root {
+  --verde:       #3d5a47;
+  --verde-claro: #6b8f72;
+  --verde-escuro:#2e4436;
+  --rosa:        #c9847a;
+  --rosa-escuro: #b8706a;
+  --creme:       #faf7f2;
+  --creme2:      #f2ede4;
+  --texto:       #2a2a2a;
+  --texto2:      #6b6b6b;
+  --borda:       #ddd6cc;
+  --branco:      #ffffff;
+
+  /* Status */
+  --status-novo:      #3b82f6;
+  --status-analise:   #f59e0b;
+  --status-orc:       #f97316;
+  --status-fechado:   #16a34a;
+  --status-cancelado: #6b7280;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--creme);
+  color: var(--texto);
+  font-family: 'Jost', sans-serif;
+  font-weight: 300;
+  min-height: 100vh;
+}
+
+/* ── UTILITÁRIOS ─────────────────────────────────────── */
+.hidden  { display: none !important; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
+
+/* ── HEADER ──────────────────────────────────────────── */
+.header {
+  background: var(--verde);
+  padding: 48px 24px 40px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.header::before { content: '✦'; position: absolute; top: 20px; left: 40px; color: rgba(255,255,255,.15); font-size: 40px; }
+.header::after  { content: '✦'; position: absolute; bottom: 20px; right: 40px; color: rgba(255,255,255,.15); font-size: 24px; }
+.header h1 { font-family: 'Cormorant Garamond', serif; font-size: 38px; font-weight: 300; color: #fff; letter-spacing: .02em; margin-bottom: 8px; }
+.header p  { color: rgba(255,255,255,.7); font-size: 14px; letter-spacing: .08em; text-transform: uppercase; }
+
+.header-compact { padding: 32px 24px; }
+.header-compact h1 { font-size: 28px; }
+
+/* ── TIPO / ABAS ─────────────────────────────────────── */
+.tipo-wrap  { background: var(--verde); padding: 0 24px 32px; }
+.tipo-label { text-align: center; color: rgba(255,255,255,.6); font-size: 12px; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 12px; }
+.tipo-row   { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+.tipo-btn {
+  padding: 9px 20px; border-radius: 40px;
+  border: 1px solid rgba(255,255,255,.3);
+  background: transparent; color: rgba(255,255,255,.7);
+  cursor: pointer; font-family: 'Jost', sans-serif;
+  font-size: 13px; font-weight: 400; transition: all .2s;
+}
+.tipo-btn.active,
+.tipo-btn:hover { background: rgba(255,255,255,.15); color: #fff; border-color: rgba(255,255,255,.7); }
+
+/* ── FORMULÁRIOS ─────────────────────────────────────── */
+.campo { margin-bottom: 20px; }
+.campo label {
+  display: block; font-size: 12px;
+  letter-spacing: .07em; text-transform: uppercase;
+  color: var(--texto2); margin-bottom: 7px;
+}
+.campo input,
+.campo select,
+.campo textarea {
+  width: 100%; padding: 12px 14px;
+  font-family: 'Jost', sans-serif; font-size: 14px; font-weight: 300;
+  border: 1px solid var(--borda); border-radius: 6px;
+  background: #fff; color: var(--texto);
+  outline: none; transition: border-color .2s;
+}
+.campo input:focus,
+.campo select:focus,
+.campo textarea:focus { border-color: var(--verde-claro); }
+.campo textarea { height: 80px; resize: vertical; }
+.campo select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b6b6b' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 36px;
+}
+
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+@media(max-width: 560px) { .row2, .row3 { grid-template-columns: 1fr; } }
+
+/* ── BOTÕES ──────────────────────────────────────────── */
+.btn-primary {
+  padding: 14px 24px; border: none; border-radius: 8px;
+  background: var(--verde); color: #fff;
+  font-family: 'Jost', sans-serif; font-size: 14px; font-weight: 500;
+  cursor: pointer; letter-spacing: .04em; transition: background .2s;
+}
+.btn-primary:hover  { background: var(--verde-escuro); }
+.btn-primary:disabled { opacity: .6; cursor: not-allowed; }
+
+.btn-secondary {
+  padding: 12px 20px;
+  border: 1px solid var(--borda); border-radius: 8px;
+  background: transparent; color: var(--texto2);
+  font-family: 'Jost', sans-serif; font-size: 13px;
+  cursor: pointer; transition: all .2s;
+}
+.btn-secondary:hover { border-color: var(--verde-claro); color: var(--verde); }
+
+.btn-rosa {
+  padding: 14px 24px; border: none; border-radius: 8px;
+  background: var(--rosa); color: #fff;
+  font-family: 'Jost', sans-serif; font-size: 14px; font-weight: 500;
+  cursor: pointer; letter-spacing: .04em; transition: background .2s;
+}
+.btn-rosa:hover { background: var(--rosa-escuro); }
+.btn-rosa:disabled { opacity: .6; cursor: not-allowed; }
+
+.btn-outline-verde {
+  padding: 9px 18px; border-radius: 6px;
+  border: 1px solid var(--verde-claro);
+  background: transparent; color: var(--verde);
+  font-family: 'Jost', sans-serif; font-size: 13px;
+  cursor: pointer; transition: all .2s;
+}
+.btn-outline-verde:hover { background: var(--verde); color: #fff; }
+
+.btn-full  { width: 100%; }
+.btn-block { display: block; width: 100%; text-align: center; }
+
+/* ── TOAST / FEEDBACK ────────────────────────────────── */
+#toast {
+  position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
+  background: var(--verde); color: #fff;
+  padding: 12px 24px; border-radius: 8px;
+  font-size: 14px; font-weight: 400; letter-spacing: .02em;
+  opacity: 0; transition: opacity .3s; pointer-events: none;
+  z-index: 9999; white-space: nowrap;
+}
+#toast.show { opacity: 1; }
+#toast.erro { background: var(--rosa); }
+
+/* ── NOTA / DICA ─────────────────────────────────────── */
+.nota {
+  background: var(--creme2);
+  border-left: 3px solid var(--verde-claro);
+  padding: 12px 16px; border-radius: 0 6px 6px 0;
+  font-size: 13px; color: var(--texto2);
+  margin-bottom: 20px; font-style: italic;
+}
+
+/* ── DIVISOR ─────────────────────────────────────────── */
+.divisor { border: none; border-top: 1px solid var(--borda); margin: 24px 0; }
+
+/* ── FOOTER ──────────────────────────────────────────── */
+.footer {
+  text-align: center; padding: 32px;
+  font-size: 12px; color: var(--texto2); letter-spacing: .05em;
+}
+.footer span { color: var(--verde); }
+
+/* ── BADGE DE STATUS ─────────────────────────────────── */
+.badge {
+  display: inline-block; padding: 3px 10px;
+  border-radius: 20px; font-size: 11px;
+  font-weight: 500; letter-spacing: .04em; text-transform: uppercase;
+}
+.badge-novo      { background: #eff6ff; color: var(--status-novo); }
+.badge-analise   { background: #fffbeb; color: var(--status-analise); }
+.badge-orc       { background: #fff7ed; color: var(--status-orc); }
+.badge-fechado   { background: #f0fdf4; color: var(--status-fechado); }
+.badge-cancelado { background: #f9fafb; color: var(--status-cancelado); }
+
+/* ── CARD ────────────────────────────────────────────── */
+.card {
+  background: #fff; border: 1px solid var(--borda);
+  border-radius: 10px; padding: 20px; margin-bottom: 16px;
+}
+.card-title {
+  font-size: 11px; font-weight: 500;
+  color: var(--texto2); text-transform: uppercase;
+  letter-spacing: .07em; margin-bottom: 16px;
+}
+
+/* ── MÉTRICAS FINANCEIRAS ────────────────────────────── */
+.metrics { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-bottom: 16px; }
+.metric  { background: var(--creme2); border-radius: 8px; padding: 14px; }
+.metric-label { font-size: 11px; color: var(--texto2); margin-bottom: 4px; text-transform: uppercase; letter-spacing: .05em; }
+.metric-value { font-size: 20px; font-weight: 500; }
+.metric-value.ok  { color: #16a34a; }
+.metric-value.bad { color: #dc2626; }
+@media(max-width: 500px) { .metrics { grid-template-columns: 1fr; } }
+
+/* ── ITENS DE ORÇAMENTO ──────────────────────────────── */
+.col-heads { display: grid; gap: 6px; margin-bottom: 4px; }
+.col-head  { font-size: 11px; color: #aaa; }
+.item-row  { display: grid; gap: 6px; align-items: center; margin-bottom: 6px; }
+.item-row input {
+  padding: 7px 10px; font-size: 12px;
+  border: 1px solid var(--borda); border-radius: 6px;
+  font-family: 'Jost', sans-serif; width: 100%;
+}
+.rm-btn { background: none; border: none; cursor: pointer; font-size: 18px; color: #ccc; line-height: 1; }
+.rm-btn:hover { color: var(--rosa); }
+.add-btn {
+  font-size: 12px; color: var(--verde-claro);
+  background: none; border: none; cursor: pointer;
+  padding: 4px 0; margin-top: 4px;
+  font-family: 'Jost', sans-serif;
+}
+
+/* ── LOADING SPINNER ─────────────────────────────────── */
+.spinner {
+  display: inline-block; width: 18px; height: 18px;
+  border: 2px solid rgba(255,255,255,.3);
+  border-top-color: #fff; border-radius: 50%;
+  animation: spin .7s linear infinite;
+  vertical-align: middle; margin-right: 8px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }

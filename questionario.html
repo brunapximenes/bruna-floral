@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Questionário — Decoração Floral · Bruna Floral</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/style.css">
+<style>
+  /* ── Questionário — estilos específicos ── */
+  .tipo-wrap  { background: var(--verde); padding: 0 24px 32px; }
+  .tipo-label { text-align: center; color: rgba(255,255,255,.6); font-size: 12px; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 12px; }
+
+  .progress-wrap  { padding: 24px 24px 0; max-width: 680px; margin: 0 auto; }
+  .progress-steps { display: flex; gap: 0; margin-bottom: 6px; }
+  .step { flex: 1; height: 3px; background: var(--borda); border-radius: 2px; margin: 0 2px; transition: background .3s; }
+  .step.done   { background: var(--verde); }
+  .step.active { background: var(--rosa); }
+  .progress-label { font-size: 12px; color: var(--texto2); letter-spacing: .05em; }
+
+  .form-wrap { max-width: 680px; margin: 0 auto; padding: 32px 24px 48px; }
+  .secao { display: none; }
+  .secao.active { display: block; }
+  .secao-titulo { font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 400; color: var(--verde); margin-bottom: 4px; }
+  .secao-sub    { font-size: 13px; color: var(--texto2); margin-bottom: 28px; letter-spacing: .02em; }
+
+  .nav-btns   { display: flex; gap: 12px; margin-top: 32px; }
+  .btn-voltar { flex: 1; padding: 14px; border: 1px solid var(--borda); border-radius: 8px; background: transparent; font-family: 'Jost', sans-serif; font-size: 14px; cursor: pointer; color: var(--texto2); }
+  .btn-proximo { flex: 2; }
+  .btn-enviar  { width: 100%; margin-top: 32px; font-size: 15px; padding: 16px; }
+
+  /* Tela de confirmação */
+  #tela-confirmacao {
+    display: none; max-width: 680px; margin: 0 auto;
+    padding: 60px 24px; text-align: center;
+  }
+  #tela-confirmacao .icon  { font-size: 56px; margin-bottom: 20px; }
+  #tela-confirmacao h2     { font-family: 'Cormorant Garamond', serif; font-size: 32px; font-weight: 400; color: var(--verde); margin-bottom: 12px; }
+  #tela-confirmacao p      { font-size: 15px; color: var(--texto2); line-height: 1.7; max-width: 420px; margin: 0 auto 28px; }
+  #tela-confirmacao small  { font-size: 12px; color: var(--texto2); display: block; margin-top: 16px; }
+</style>
+</head>
+<body>
+
+<div id="tela-formulario">
+  <div class="header">
+    <h1>Vamos criar algo incrível juntos</h1>
+    <p>Questionário de decoração floral</p>
+  </div>
+
+  <div class="tipo-wrap">
+    <div class="tipo-label">Tipo de evento</div>
+    <div class="tipo-row" id="tipo-row"></div>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-steps" id="progress-steps"></div>
+    <div class="progress-label"  id="progress-label"></div>
+  </div>
+
+  <div class="form-wrap" id="form-wrap">
+
+    <!-- SEÇÃO 1: GERAL -->
+    <div class="secao active" id="sec-geral">
+      <div class="secao-titulo">Conte-nos sobre o evento</div>
+      <div class="secao-sub">Vamos começar com as informações gerais</div>
+
+      <div class="campo">
+        <label id="label-nomes">Nome do casal</label>
+        <input id="nomes" type="text" placeholder="Ex: Dalya e Eduardo">
+      </div>
+      <div class="row2 campo-origem">
+        <div class="campo"><label>De onde são?</label><input id="origem" type="text" placeholder="Ex: Recife, PE"></div>
+        <div class="campo campo-cerimonial"><label>Cerimonial / assessoria</label><input id="cerimonial" type="text" placeholder="Nome da assessoria"></div>
+      </div>
+
+      <!-- Aniversário -->
+      <div class="row2 campo-aniver hidden">
+        <div class="campo"><label>Aniversário de quantos anos?</label><input id="aniver-idade" type="number" placeholder="Ex: 1, 15, 30..." oninput="checkIdade()"></div>
+        <div class="campo campo-mae-aniver hidden"><label>Nome da mãe / responsável pela festa</label><input id="mae-aniver" type="text"></div>
+      </div>
+
+      <!-- Batizado -->
+      <div class="campo campo-mae-batizado hidden">
+        <label>Nome da mãe / responsável pela festa</label>
+        <input id="mae-batizado" type="text">
+      </div>
+
+      <div class="row2">
+        <div class="campo"><label>Local do evento</label><input id="local" type="text" placeholder="Nome e endereço do espaço"></div>
+        <div class="campo"><label>Data</label><input id="data" type="date"></div>
+      </div>
+      <div class="row2">
+        <div class="campo"><label>Horário</label><input id="horario" type="time"></div>
+        <div class="campo"><label>Número de convidados</label><input id="pessoas" type="number" placeholder="Ex: 150"></div>
+      </div>
+      <div class="row2">
+        <div class="campo"><label>Estilo de decoração</label><input id="estilo" type="text" placeholder="Ex: Tropical elegante, romântico, boho..."></div>
+        <div class="campo"><label>Paleta de cores</label><input id="paleta" type="text" placeholder="Ex: Pink, laranja e verde"></div>
+      </div>
+      <div class="campo campo-tema-corp hidden">
+        <label>Tema / identidade visual da empresa</label>
+        <input id="tema-corp" type="text" placeholder="Ex: Cores da marca, slogan...">
+      </div>
+      <div class="campo">
+        <label>Orçamento previsto para decoração floral</label>
+        <input id="budget" type="text" placeholder="Ex: R$ 10.000 a R$ 15.000">
+      </div>
+      <div class="campo">
+        <label>Observações gerais</label>
+        <textarea id="obs-geral" placeholder="Referências, pedidos especiais, inspirações..."></textarea>
+      </div>
+
+      <div class="nav-btns">
+        <button class="btn-primary btn-proximo" onclick="proximo()">Próximo →</button>
+      </div>
+    </div>
+
+    <!-- SEÇÃO 2: CERIMÔNIA -->
+    <div class="secao" id="sec-cerimonia">
+      <div class="secao-titulo">A cerimônia</div>
+      <div class="secao-sub">Como você imagina esse momento tão especial?</div>
+
+      <div class="row2">
+        <div class="campo"><label>Cerimônia e recepção no mesmo endereço?</label>
+          <select id="mesmo-end"><option value="">Selecione</option><option>Sim</option><option>Não</option></select></div>
+        <div class="campo"><label>Ambientes juntos ou separados?</label>
+          <select id="ambientes"><option value="">Selecione</option><option>Juntos</option><option>Separados</option><option>N/A</option></select></div>
+      </div>
+      <div class="campo"><label>Precisa de locação de bancos / cadeiras?</label>
+        <select id="loc-cadeiras"><option value="">Selecione</option><option>Sim — bancos</option><option>Sim — cadeiras</option><option>Sim — outro</option><option>Não precisa</option></select></div>
+      <div class="campo"><label>Como pensa as flores para o caminho da cerimônia?</label>
+        <input id="flores-caminho" type="text" placeholder="Ex: Arranjos cheios, em cestos, amarrados em cadeiras..."></div>
+      <div class="row2 campo-altar">
+        <div class="campo"><label>Altar: estilo</label>
+          <select id="altar-estilo"><option value="">Selecione</option><option>Imponente / completo de flores</option><option>Minimalista / poucos pontos de flor</option></select></div>
+        <div class="campo"><label>Altar: tipo de estrutura</label>
+          <input id="altar-estrutura" type="text" placeholder="Ex: Arco, pergolado, ferro, madeira..."></div>
+      </div>
+      <div class="campo campo-welcome"><label>Vai ter mesa de welcome drinks?</label>
+        <select id="welcome"><option value="">Selecione</option><option>Sim</option><option>Não</option></select></div>
+      <div class="campo"><label>Observações da cerimônia</label>
+        <textarea id="obs-cerimonia" placeholder="Qualquer detalhe extra..."></textarea></div>
+
+      <div class="nav-btns">
+        <button class="btn-voltar" onclick="voltar()">← Voltar</button>
+        <button class="btn-primary btn-proximo" onclick="proximo()">Próximo →</button>
+      </div>
+    </div>
+
+    <!-- SEÇÃO 3: CONVIDADOS -->
+    <div class="secao" id="sec-convidados">
+      <div class="secao-titulo">Mesas dos convidados</div>
+      <div class="secao-sub">Como você imagina o ambiente da recepção?</div>
+
+      <div class="row2">
+        <div class="campo"><label>O local tem mesas e cadeiras ou precisa locar?</label>
+          <select id="loc-mesas"><option value="">Selecione</option><option>Local tem — não precisa locar</option><option>Precisa de locação</option><option>Parcial — só cadeiras</option><option>Parcial — só mesas</option></select></div>
+        <div class="campo"><label>Deseja mesa posta?</label>
+          <select id="mesa-posta"><option value="">Selecione</option><option>Sim — completa (sousplat, guardanapo, taças)</option><option>Sim — parcial</option><option>Não</option></select></div>
+      </div>
+      <div class="campo"><label>Estilo de arranjo para mesa dos convidados</label>
+        <input id="arranjo-conv" type="text" placeholder="Ex: Arranjos altos centrais, baixos, misturados..."></div>
+      <div class="row2 campo-familia">
+        <div class="campo"><label>Mesa da família separada?</label>
+          <select id="mesa-familia"><option value="">Selecione</option><option>Sim</option><option>Não</option></select></div>
+        <div class="campo"><label>Estilo do arranjo da família</label>
+          <input id="arranjo-familia" type="text" placeholder="Ex: Igual aos convidados, diferenciado..."></div>
+      </div>
+      <div class="campo"><label>Observações</label>
+        <textarea id="obs-conv" placeholder="Detalhes extras..."></textarea></div>
+
+      <div class="nav-btns">
+        <button class="btn-voltar" onclick="voltar()">← Voltar</button>
+        <button class="btn-primary btn-proximo" onclick="proximo()">Próximo →</button>
+      </div>
+    </div>
+
+    <!-- SEÇÃO 4: BOLO -->
+    <div class="secao" id="sec-bolo">
+      <div class="secao-titulo">Bolo e doces</div>
+      <div class="secao-sub">A mesa de doces também merece florescer!</div>
+
+      <div class="row2">
+        <div class="campo"><label>Bolo e doces na mesma mesa?</label>
+          <select id="bolo-junto"><option value="">Selecione</option><option>Sim</option><option>Não — separados</option></select></div>
+        <div class="campo"><label>Tamanho do bolo (diâmetro)</label>
+          <input id="bolo-tam" type="text" placeholder="Ex: 20cm, 25cm..."></div>
+      </div>
+      <div class="campo"><label>Quantos doces na mesa?</label>
+        <input id="qtd-doces" type="number" placeholder="Ex: 400"></div>
+      <div class="campo"><label id="label-lembranca">Bem casado / palha italiana / lembrancinha?</label>
+        <select id="lembranca"><option value="">Selecione</option><option>Sim</option><option>Não</option></select></div>
+      <div class="campo"><label>Deseja área / mesa / estante exclusiva para isso?</label>
+        <select id="lembranca-area"><option value="">Selecione</option><option>Sim — área exclusiva</option><option>Não — pode ficar junto com os doces</option><option>A definir</option></select></div>
+      <div class="campo"><label>Observações</label>
+        <textarea id="obs-doces" placeholder="Detalhes extras..."></textarea></div>
+
+      <div class="nav-btns">
+        <button class="btn-voltar" onclick="voltar()">← Voltar</button>
+        <button class="btn-primary btn-proximo" onclick="proximo()">Próximo →</button>
+      </div>
+    </div>
+
+    <!-- SEÇÃO 5: BUFFET -->
+    <div class="secao" id="sec-buffet">
+      <div class="secao-titulo">Buffet e bar</div>
+      <div class="secao-sub">Como será servida a festa?</div>
+
+      <div class="row2">
+        <div class="campo"><label>Formato do buffet</label>
+          <select id="buffet-tipo"><option value="">Selecione</option><option>Volante</option><option>Servido empratado</option><option>Mesa americana</option></select></div>
+        <div class="campo"><label>Buffet leva mesas ou precisa locar?</label>
+          <select id="buffet-mesas"><option value="">Selecione</option><option>Buffet traz as mesas</option><option>Precisa de locação</option></select></div>
+      </div>
+      <div class="row2">
+        <div class="campo"><label>Vai ter bar?</label>
+          <select id="bar"><option value="">Selecione</option><option>Sim — precisa de estrutura</option><option>Sim — estrutura já tem</option><option>Não</option></select></div>
+        <div class="campo"><label>Observações</label>
+          <input id="obs-buffet" type="text"></div>
+      </div>
+
+      <div class="nav-btns">
+        <button class="btn-voltar" onclick="voltar()">← Voltar</button>
+        <button class="btn-primary btn-proximo" onclick="proximo()">Próximo →</button>
+      </div>
+    </div>
+
+    <!-- SEÇÃO 6: DEMAIS -->
+    <div class="secao" id="sec-demais">
+      <div class="secao-titulo">Demais áreas</div>
+      <div class="secao-sub">Últimos detalhes para completar o cenário</div>
+
+      <div class="row2">
+        <div class="campo"><label>Área de lounge?</label>
+          <select id="lounge"><option value="">Selecione</option><option>Sim — precisa de mobiliário</option><option>Sim — mobiliário já tem</option><option>Não</option></select></div>
+        <div class="campo campo-banda"><label>Banda / palco?</label>
+          <select id="banda"><option value="">Selecione</option><option>Sim — precisa de palco</option><option>Sim — palco já tem</option><option>Não / DJ</option></select></div>
+      </div>
+      <div class="row2">
+        <div class="campo"><label>Iluminação contratada?</label>
+          <input id="iluminacao" type="text" placeholder="Nome da empresa ou 'não contratado'"></div>
+        <div class="campo"><label>Cenário para fotos / mesa de digestivos?</label>
+          <input id="cenario" type="text" placeholder="Ex: Painel floral, mesa de digestivos..."></div>
+      </div>
+      <div class="campo campo-buque"><label>Buquê da noiva?</label>
+        <select id="buque"><option value="">Selecione</option><option>Sim — modelo a definir</option><option>Sim — modelo escolhido</option><option>Não</option></select></div>
+      <div class="campo"><label>Alguma observação extra?</label>
+        <textarea id="obs-extras" placeholder="Algo que não foi perguntado e você considera importante..."></textarea></div>
+
+      <button class="btn-rosa btn-enviar" id="btn-enviar" onclick="enviar()">✦ Enviar questionário</button>
+
+      <div style="text-align:center;margin-top:16px">
+        <button class="btn-voltar" style="width:auto;padding:10px 24px" onclick="voltar()">← Voltar</button>
+      </div>
+    </div>
+
+  </div><!-- /form-wrap -->
+</div><!-- /tela-formulario -->
+
+<!-- TELA DE CONFIRMAÇÃO -->
+<div id="tela-confirmacao">
+  <div class="icon">🌸</div>
+  <h2>Questionário enviado!</h2>
+  <p>Suas informações foram recebidas. Em breve a Bruna entrará em contato para dar continuidade ao planejamento do seu evento.</p>
+  <button class="btn-primary" onclick="window.location.reload()">Preencher novo questionário</button>
+  <small>Dúvidas? Entre em contato pelo WhatsApp.</small>
+</div>
+
+<div class="footer">Feito com <span>✦</span> por Bruna — Decoração Floral</div>
+<div id="toast"></div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/js/config.js"></script>
+<script src="/js/supabase-client.js"></script>
+<script src="/js/utils.js"></script>
+<script src="/js/questionario.js"></script>
+</body>
+</html>

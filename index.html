@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bruna Floral — Decoração Floral</title>
+<meta name="description" content="Decoração floral para casamentos, aniversários, batizados e eventos corporativos.">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/style.css">
+<style>
+  body { min-height: 100vh; display: flex; flex-direction: column; }
+
+  .hero {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    background: var(--verde);
+    padding: 80px 24px; text-align: center;
+    position: relative; overflow: hidden;
+  }
+  .hero::before { content: '✦'; position: absolute; top: 40px; left: 60px; color: rgba(255,255,255,.1); font-size: 60px; }
+  .hero::after  { content: '✦'; position: absolute; bottom: 40px; right: 60px; color: rgba(255,255,255,.1); font-size: 36px; }
+
+  .hero-logo { height: 80px; object-fit: contain; margin-bottom: 24px; }
+  .hero-logo-placeholder { font-size: 64px; margin-bottom: 16px; }
+
+  .hero h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(38px, 7vw, 64px);
+    font-weight: 300; color: #fff;
+    letter-spacing: .02em; margin-bottom: 16px;
+    line-height: 1.15;
+  }
+  .hero p {
+    font-size: 16px; color: rgba(255,255,255,.7);
+    max-width: 480px; line-height: 1.7;
+    margin-bottom: 40px;
+  }
+
+  .hero-btns { display: flex; gap: 14px; flex-wrap: wrap; justify-content: center; }
+  .btn-hero-main {
+    padding: 16px 36px; border: none; border-radius: 8px;
+    background: var(--rosa); color: #fff;
+    font-family: 'Jost', sans-serif; font-size: 15px;
+    font-weight: 500; cursor: pointer; letter-spacing: .04em;
+    text-decoration: none; display: inline-block;
+    transition: background .2s;
+  }
+  .btn-hero-main:hover { background: var(--rosa-escuro); }
+  .btn-hero-sec {
+    padding: 16px 28px; border: 1px solid rgba(255,255,255,.4); border-radius: 8px;
+    background: transparent; color: rgba(255,255,255,.7);
+    font-family: 'Jost', sans-serif; font-size: 14px;
+    cursor: pointer; text-decoration: none; display: inline-block;
+    transition: all .2s;
+  }
+  .btn-hero-sec:hover { border-color: #fff; color: #fff; }
+
+  .tipos {
+    background: var(--creme2); padding: 48px 24px;
+    display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;
+  }
+  .tipo-card {
+    background: #fff; border: 1px solid var(--borda);
+    border-radius: 10px; padding: 20px 28px;
+    text-align: center; min-width: 120px;
+  }
+  .tipo-card .emoji { font-size: 28px; margin-bottom: 10px; }
+  .tipo-card p { font-size: 14px; color: var(--texto2); }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <img src="/assets/logo.png" alt="Bruna Floral" class="hero-logo"
+    onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+  <div class="hero-logo-placeholder" style="display:none">🌸</div>
+
+  <h1>Decoração floral<br><em>que conta histórias</em></h1>
+  <p>Transformamos espaços em cenários únicos para os momentos mais especiais da sua vida.</p>
+
+  <div class="hero-btns">
+    <a href="/questionario" class="btn-hero-main">✦ Quero decorar meu evento</a>
+    <a href="/painel" class="btn-hero-sec">Área profissional</a>
+  </div>
+</div>
+
+<div class="tipos">
+  <div class="tipo-card"><div class="emoji">💍</div><p>Casamentos</p></div>
+  <div class="tipo-card"><div class="emoji">🎂</div><p>Aniversários</p></div>
+  <div class="tipo-card"><div class="emoji">🕊️</div><p>Batizados</p></div>
+  <div class="tipo-card"><div class="emoji">🏢</div><p>Corporativos</p></div>
+</div>
+
+<div class="footer">Feito com <span>✦</span> por Bruna — Decoração Floral</div>
+
+</body>
+</html>

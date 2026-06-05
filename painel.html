@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel — Bruna Floral</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/style.css">
+<style>
+/* ── LOGIN ──────────────────────────────────────────── */
+#tela-login {
+  min-height: 100vh; display: flex;
+  align-items: center; justify-content: center;
+  background: var(--verde);
+}
+.login-box {
+  background: var(--creme); border-radius: 16px;
+  padding: 48px 40px; width: 100%; max-width: 380px; text-align: center;
+}
+.login-box .logo-wrap { margin-bottom: 20px; }
+.login-box .logo-wrap img { height: 60px; object-fit: contain; }
+.login-box .logo-placeholder { font-size: 40px; margin-bottom: 4px; }
+.login-box h1 { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 400; color: var(--verde); margin-bottom: 6px; }
+.login-box p  { font-size: 13px; color: var(--texto2); margin-bottom: 24px; }
+.login-box input {
+  width: 100%; padding: 12px 16px;
+  font-family: 'Jost', sans-serif; font-size: 14px;
+  border: 1px solid var(--borda); border-radius: 8px;
+  background: #fff; outline: none; margin-bottom: 10px;
+}
+.login-box input:focus { border-color: var(--verde-claro); }
+.login-erro { color: var(--rosa); font-size: 13px; margin-top: 8px; min-height: 20px; }
+
+/* ── APP ────────────────────────────────────────────── */
+#tela-app { display: none; }
+
+.app-header {
+  background: var(--verde); padding: 20px 24px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.app-header-left { display: flex; align-items: center; gap: 14px; }
+.app-header-left img { height: 36px; object-fit: contain; }
+.app-header-left h1 { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 300; color: #fff; }
+.app-header-right { display: flex; align-items: center; gap: 12px; }
+.btn-logout { padding: 7px 14px; border: 1px solid rgba(255,255,255,.4); border-radius: 6px; background: transparent; color: rgba(255,255,255,.7); font-family: 'Jost', sans-serif; font-size: 12px; cursor: pointer; }
+.btn-logout:hover { border-color: #fff; color: #fff; }
+.btn-novo-evento { padding: 8px 16px; border: none; border-radius: 6px; background: var(--rosa); color: #fff; font-family: 'Jost', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; }
+
+/* ── TELA LISTA ─────────────────────────────────────── */
+#tela-lista { display: none; }
+#tela-lista.active { display: block; }
+
+.filtros-wrap {
+  background: #fff; border-bottom: 1px solid var(--borda);
+  padding: 14px 24px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
+}
+.filtro-busca { flex: 1; min-width: 180px; padding: 9px 14px; border: 1px solid var(--borda); border-radius: 6px; font-family: 'Jost', sans-serif; font-size: 13px; outline: none; }
+.filtro-busca:focus { border-color: var(--verde-claro); }
+.filtro-select { padding: 9px 32px 9px 12px; border: 1px solid var(--borda); border-radius: 6px; font-family: 'Jost', sans-serif; font-size: 13px; background: #fff; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b6b6b' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; cursor: pointer; outline: none; }
+
+.lista-content { max-width: 960px; margin: 0 auto; padding: 24px; }
+.lista-vazia { text-align: center; padding: 60px 24px; color: var(--texto2); }
+.lista-vazia .icon { font-size: 48px; margin-bottom: 16px; }
+
+.evento-card {
+  background: #fff; border: 1px solid var(--borda); border-radius: 10px;
+  padding: 18px 20px; margin-bottom: 10px; cursor: pointer;
+  display: flex; align-items: center; gap: 16px;
+  transition: border-color .2s, box-shadow .2s;
+}
+.evento-card:hover { border-color: var(--verde-claro); box-shadow: 0 2px 8px rgba(61,90,71,.08); }
+.evento-card-info { flex: 1; min-width: 0; }
+.evento-card-nome { font-size: 15px; font-weight: 500; color: var(--texto); margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.evento-card-meta { font-size: 12px; color: var(--texto2); display: flex; gap: 12px; flex-wrap: wrap; }
+.evento-card-tipo { font-size: 11px; background: var(--creme2); color: var(--verde); padding: 3px 10px; border-radius: 20px; font-weight: 500; }
+
+/* ── TELA EVENTO ────────────────────────────────────── */
+#tela-evento { display: none; }
+#tela-evento.active { display: block; }
+
+.evento-header {
+  background: var(--verde); padding: 16px 24px;
+  display: flex; align-items: center; gap: 16px;
+}
+.btn-voltar-lista {
+  padding: 8px 14px; border: 1px solid rgba(255,255,255,.4); border-radius: 6px;
+  background: transparent; color: rgba(255,255,255,.7);
+  font-family: 'Jost', sans-serif; font-size: 13px; cursor: pointer; white-space: nowrap;
+}
+.btn-voltar-lista:hover { border-color: #fff; color: #fff; }
+.evento-header-nome { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 300; color: #fff; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.status-select { padding: 7px 30px 7px 12px; border: 1px solid rgba(255,255,255,.4); border-radius: 6px; background: transparent; color: #fff; font-family: 'Jost', sans-serif; font-size: 12px; cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23ffffff' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 8px center; outline: none; }
+
+/* Abas do evento */
+.abas-wrap {
+  background: #fff; border-bottom: 1px solid var(--borda);
+  padding: 0 24px; display: flex; gap: 0; overflow-x: auto;
+  max-width: 960px; margin: 0 auto;
+}
+.aba {
+  padding: 14px 18px; font-size: 13px; color: var(--texto2); cursor: pointer;
+  border-bottom: 2px solid transparent; white-space: nowrap;
+  font-family: 'Jost', sans-serif; background: none;
+  border-top: none; border-left: none; border-right: none;
+  transition: color .2s;
+}
+.aba.active { color: var(--verde); border-bottom-color: var(--verde); font-weight: 500; }
+.aba:hover  { color: var(--verde); }
+
+.evento-content { max-width: 960px; margin: 0 auto; padding: 24px 24px 60px; }
+.pag { display: none; }
+.pag.active { display: block; }
+
+/* Botões de ação do evento */
+.acoes-wrap {
+  display: flex; gap: 10px; flex-wrap: wrap;
+  margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--borda);
+}
+
+/* ── NOTAS INTERNAS ─────────────────────────────────── */
+.campo-nota label { color: var(--rosa) !important; }
+.campo-nota textarea { border-color: rgba(201,132,122,.3); background: #fff9f8; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ TELA DE LOGIN ═══════════════ -->
+<div id="tela-login">
+  <div class="login-box">
+    <div class="logo-wrap">
+      <img src="/assets/logo.png" alt="Bruna Floral" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+      <div class="logo-placeholder" style="display:none">🌸</div>
+    </div>
+    <h1>Painel Profissional</h1>
+    <p>Bruna Floral — acesso restrito</p>
+    <input type="email" id="login-email" placeholder="seu@email.com" value="bruna.p.ximenes@gmail.com">
+    <input type="password" id="login-senha" placeholder="Senha" onkeydown="if(event.key==='Enter')entrar()">
+    <button class="btn-primary btn-full" onclick="entrar()" id="btn-entrar">Entrar</button>
+    <p class="login-erro" id="login-erro"></p>
+  </div>
+</div>
+
+<!-- ═══════════════ APP ═══════════════════════════ -->
+<div id="tela-app">
+
+  <!-- Header fixo -->
+  <div class="app-header">
+    <div class="app-header-left">
+      <img src="/assets/logo.png" alt="Bruna Floral" onerror="this.style.display='none'">
+      <h1>Painel Bruna Floral</h1>
+    </div>
+    <div class="app-header-right">
+      <button class="btn-novo-evento" onclick="novoEvento()">+ Novo evento</button>
+      <button class="btn-logout" onclick="sair()">Sair</button>
+    </div>
+  </div>
+
+  <!-- ── TELA: LISTA DE EVENTOS ── -->
+  <div id="tela-lista" class="active">
+    <div class="filtros-wrap">
+      <input class="filtro-busca" id="f-busca" type="text" placeholder="🔍  Buscar por nome..." oninput="filtrar()">
+      <select class="filtro-select" id="f-status" onchange="filtrar()">
+        <option value="">Todos os status</option>
+        <option value="novo">Novo</option>
+        <option value="em_analise">Em análise</option>
+        <option value="orcamento_enviado">Orçamento enviado</option>
+        <option value="fechado">Fechado</option>
+        <option value="cancelado">Cancelado</option>
+      </select>
+      <select class="filtro-select" id="f-tipo" onchange="filtrar()">
+        <option value="">Todos os tipos</option>
+        <option value="casamento">Casamento</option>
+        <option value="aniversario">Aniversário</option>
+        <option value="batizado">Batizado</option>
+        <option value="corporativo">Corporativo</option>
+      </select>
+    </div>
+    <div class="lista-content">
+      <div id="lista-eventos"></div>
+    </div>
+  </div>
+
+  <!-- ── TELA: EVENTO ── -->
+  <div id="tela-evento">
+    <div class="evento-header">
+      <button class="btn-voltar-lista" onclick="voltarLista()">← Eventos</button>
+      <div class="evento-header-nome" id="evento-nome-header">—</div>
+      <select class="status-select" id="status-select" onchange="salvarStatus()">
+        <option value="novo">Novo</option>
+        <option value="em_analise">Em análise</option>
+        <option value="orcamento_enviado">Orçamento enviado</option>
+        <option value="fechado">Fechado</option>
+        <option value="cancelado">Cancelado</option>
+      </select>
+    </div>
+
+    <div class="abas-wrap" id="abas-wrap">
+      <button class="aba active" data-aba="geral"       onclick="goAba('geral',this)">Geral</button>
+      <button class="aba"        data-aba="cerimonia"   onclick="goAba('cerimonia',this)" id="aba-cerimonia">Cerimônia</button>
+      <button class="aba"        data-aba="convidados"  onclick="goAba('convidados',this)">Convidados</button>
+      <button class="aba"        data-aba="bolo"        onclick="goAba('bolo',this)">Bolo e doces</button>
+      <button class="aba"        data-aba="buffet"      onclick="goAba('buffet',this)">Buffet</button>
+      <button class="aba"        data-aba="demais"      onclick="goAba('demais',this)">Demais áreas</button>
+      <button class="aba"        data-aba="orcamento"   onclick="goAba('orcamento',this)">Orçamento</button>
+      <button class="aba"        data-aba="interno"     onclick="goAba('interno',this)">Controle interno</button>
+    </div>
+
+    <div class="evento-content">
+
+      <!-- GERAL -->
+      <div class="pag active" id="pag-geral">
+        <div class="card">
+          <div class="card-title">Dados gerais</div>
+          <div class="row2">
+            <div class="campo"><label id="label-nomes">Nome do casal</label><input id="nomes" type="text" onchange="salvarCampo('nomes')"></div>
+            <div class="campo q-origem"><label>De onde são?</label><input id="origem" type="text" onchange="salvarCampo('origem')"></div>
+          </div>
+          <div class="row2 q-aniver hidden">
+            <div class="campo"><label>Aniversário de quantos anos?</label><input id="aniver-idade" type="number" onchange="salvarCampo('aniver_idade')"></div>
+            <div class="campo q-mae-aniver hidden"><label>Nome da mãe / responsável</label><input id="mae-aniver" type="text" onchange="salvarCampoMae()"></div>
+          </div>
+          <div class="campo q-mae-batizado hidden"><label>Nome da mãe / responsável</label><input id="mae-batizado" type="text" onchange="salvarCampoMae()"></div>
+          <div class="row2">
+            <div class="campo"><label>Local do evento</label><input id="local" type="text" onchange="salvarCampo('local_evento')"></div>
+            <div class="campo"><label>Data</label><input id="data" type="date" onchange="salvarCampo('data_evento')"></div>
+          </div>
+          <div class="row3">
+            <div class="campo"><label>Horário</label><input id="horario" type="time" onchange="salvarCampo('horario')"></div>
+            <div class="campo"><label>Nº de convidados</label><input id="pessoas" type="number" onchange="salvarCampo('num_convidados')"></div>
+            <div class="campo q-cerimonial"><label>Cerimonial</label><input id="cerimonial" type="text" onchange="salvarCampo('cerimonial')"></div>
+          </div>
+          <div class="row2">
+            <div class="campo"><label>Estilo</label><input id="estilo" type="text" onchange="salvarCampo('estilo')"></div>
+            <div class="campo"><label>Paleta</label><input id="paleta" type="text" onchange="salvarCampo('paleta')"></div>
+          </div>
+          <div class="campo q-tema-corp hidden"><label>Tema / identidade visual</label><input id="tema-corp" type="text" onchange="salvarCampo('tema_corp')"></div>
+          <div class="campo"><label>Orçamento previsto pelo cliente</label><input id="budget-cliente" type="text" onchange="salvarCampo('budget_cliente');updateTotais()"></div>
+          <div class="campo"><label>Obs. gerais</label><textarea id="obs-geral" onchange="salvarCampo('obs_geral')"></textarea></div>
+          <div class="campo campo-nota">
+            <label>📝 Notas internas (visível só para você)</label>
+            <textarea id="notas-internas" placeholder="Anotações privadas sobre este evento..." onchange="salvarCampo('notas_internas')"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- CERIMÔNIA -->
+      <div class="pag" id="pag-cerimonia">
+        <div class="card">
+          <div class="card-title">Cerimônia</div>
+          <div class="row2">
+            <div class="campo"><label>Mesmo endereço?</label><select id="mesmo-end" onchange="salvarCampo('mesmo_end')"><option value="">Selecione</option><option>Sim</option><option>Não</option></select></div>
+            <div class="campo"><label>Ambientes</label><select id="ambientes" onchange="salvarCampo('ambientes')"><option value="">Selecione</option><option>Juntos</option><option>Separados</option><option>N/A</option></select></div>
+          </div>
+          <div class="campo"><label>Locação cadeiras/bancos</label><select id="loc-cadeiras" onchange="salvarCampo('loc_cadeiras')"><option value="">Selecione</option><option>Sim — bancos</option><option>Sim — cadeiras</option><option>Sim — outro</option><option>Não precisa</option></select></div>
+          <div class="campo"><label>Flores caminho cerimônia</label><input id="flores-caminho" type="text" onchange="salvarCampo('flores_caminho')"></div>
+          <div class="row2 q-altar">
+            <div class="campo"><label>Altar: estilo</label><select id="altar-estilo" onchange="salvarCampo('altar_estilo')"><option value="">Selecione</option><option>Imponente / completo de flores</option><option>Minimalista</option></select></div>
+            <div class="campo"><label>Altar: estrutura</label><input id="altar-estrutura" type="text" onchange="salvarCampo('altar_estrutura')"></div>
+          </div>
+          <div class="campo q-welcome"><label>Welcome drinks</label><select id="welcome" onchange="salvarCampo('welcome')"><option value="">Selecione</option><option>Sim</option><option>Não</option></select></div>
+          <div class="campo"><label>Obs.</label><textarea id="obs-cerimonia" onchange="salvarCampo('obs_cerimonia')"></textarea></div>
+        </div>
+      </div>
+
+      <!-- CONVIDADOS -->
+      <div class="pag" id="pag-convidados">
+        <div class="card">
+          <div class="card-title">Mesas dos convidados</div>
+          <div class="row2">
+            <div class="campo"><label>Locação mesas/cadeiras</label><select id="loc-mesas" onchange="salvarCampo('loc_mesas')"><option value="">Selecione</option><option>Local tem — não precisa locar</option><option>Precisa de locação</option><option>Parcial — só cadeiras</option><option>Parcial — só mesas</option></select></div>
+            <div class="campo"><label>Mesa posta</label><select id="mesa-posta" onchange="salvarCampo('mesa_posta')"><option value="">Selecione</option><option>Sim — completa</option><option>Sim — parcial</option><option>Não</option></select></div>
+          </div>
+          <div class="campo"><label>Arranjo convidados</label><input id="arranjo-conv" type="text" onchange="salvarCampo('arranjo_conv')"></div>
+          <div class="row2 q-familia">
+            <div class="campo"><label>Mesa família separada</label><select id="mesa-familia" onchange="salvarCampo('mesa_familia')"><option value="">Selecione</option><option>Sim</option><option>Não</option></select></div>
+            <div class="campo"><label>Arranjo família</label><input id="arranjo-familia" type="text" onchange="salvarCampo('arranjo_familia')"></div>
+          </div>
+          <div class="campo"><label>Obs.</label><textarea id="obs-conv" onchange="salvarCampo('obs_conv')"></textarea></div>
+        </div>
+      </div>
+
+      <!-- BOLO -->
+      <div class="pag" id="pag-bolo">
+        <div class="card">
+          <div class="card-title">Bolo e doces</div>
+          <div class="row2">
+            <div class="campo"><label>Bolo e doces juntos?</label><select id="bolo-junto" onchange="salvarCampo('bolo_junto')"><option value="">Selecione</option><option>Sim</option><option>Não — separados</option></select></div>
+            <div class="campo"><label>Tamanho bolo</label><input id="bolo-tam" type="text" onchange="salvarCampo('bolo_tam')"></div>
+          </div>
+          <div class="campo"><label>Qtd doces</label><input id="qtd-doces" type="number" onchange="salvarCampo('qtd_doces')"></div>
+          <div class="campo"><label id="label-lembranca">Bem casado / palha italiana / lembrancinha?</label><select id="lembranca" onchange="salvarCampo('lembranca')"><option value="">Selecione</option><option>Sim</option><option>Não</option></select></div>
+          <div class="campo"><label>Área / mesa exclusiva para isso?</label><select id="lembranca-area" onchange="salvarCampo('lembranca_area')"><option value="">Selecione</option><option>Sim — área exclusiva</option><option>Não — junto com os doces</option><option>A definir</option></select></div>
+          <div class="campo"><label>Obs.</label><textarea id="obs-doces" onchange="salvarCampo('obs_doces')"></textarea></div>
+        </div>
+      </div>
+
+      <!-- BUFFET -->
+      <div class="pag" id="pag-buffet">
+        <div class="card">
+          <div class="card-title">Buffet e bar</div>
+          <div class="row2">
+            <div class="campo"><label>Formato buffet</label><select id="buffet-tipo" onchange="salvarCampo('buffet_tipo')"><option value="">Selecione</option><option>Volante</option><option>Servido empratado</option><option>Mesa americana</option></select></div>
+            <div class="campo"><label>Buffet leva mesas?</label><select id="buffet-mesas" onchange="salvarCampo('buffet_mesas')"><option value="">Selecione</option><option>Buffet traz as mesas</option><option>Precisa de locação</option></select></div>
+          </div>
+          <div class="row2">
+            <div class="campo"><label>Bar</label><select id="bar" onchange="salvarCampo('bar')"><option value="">Selecione</option><option>Sim — precisa de estrutura</option><option>Sim — estrutura já tem</option><option>Não</option></select></div>
+            <div class="campo"><label>Obs.</label><input id="obs-buffet" type="text" onchange="salvarCampo('obs_buffet')"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DEMAIS -->
+      <div class="pag" id="pag-demais">
+        <div class="card">
+          <div class="card-title">Demais áreas</div>
+          <div class="row2">
+            <div class="campo"><label>Lounge</label><select id="lounge" onchange="salvarCampo('lounge')"><option value="">Selecione</option><option>Sim — precisa de mobiliário</option><option>Sim — mobiliário já tem</option><option>Não</option></select></div>
+            <div class="campo q-banda"><label>Banda / palco</label><select id="banda" onchange="salvarCampo('banda')"><option value="">Selecione</option><option>Sim — precisa de palco</option><option>Sim — palco já tem</option><option>Não / DJ</option></select></div>
+          </div>
+          <div class="row2">
+            <div class="campo"><label>Iluminação</label><input id="iluminacao" type="text" onchange="salvarCampo('iluminacao')"></div>
+            <div class="campo"><label>Cenário / fotos</label><input id="cenario" type="text" onchange="salvarCampo('cenario')"></div>
+          </div>
+          <div class="campo q-buque"><label>Buquê da noiva</label><select id="buque" onchange="salvarCampo('buque')"><option value="">Selecione</option><option>Sim — modelo a definir</option><option>Sim — modelo escolhido</option><option>Não</option></select></div>
+          <div class="campo"><label>Obs. adicionais</label><textarea id="obs-extras" onchange="salvarCampo('obs_extras')"></textarea></div>
+        </div>
+      </div>
+
+      <!-- ORÇAMENTO -->
+      <div class="pag" id="pag-orcamento">
+        <div class="card" id="card-orc-cerimonia">
+          <div class="card-title">Cerimônia</div>
+          <div class="col-heads" style="grid-template-columns:1fr 70px 90px 28px">
+            <div class="col-head">Item</div><div class="col-head">Qtd</div><div class="col-head">Valor R$</div><div></div>
+          </div>
+          <div id="items-cerimonia"></div>
+          <button class="add-btn" onclick="addItem('cerimonia')">+ Adicionar item</button>
+        </div>
+        <div class="card">
+          <div class="card-title">Recepção</div>
+          <div class="col-heads" style="grid-template-columns:1fr 70px 90px 28px">
+            <div class="col-head">Item</div><div class="col-head">Qtd</div><div class="col-head">Valor R$</div><div></div>
+          </div>
+          <div id="items-recepcao"></div>
+          <button class="add-btn" onclick="addItem('recepcao')">+ Adicionar item</button>
+        </div>
+        <div class="card">
+          <div class="card-title">Locações / operacional / outros</div>
+          <div class="col-heads" style="grid-template-columns:1fr 70px 90px 28px">
+            <div class="col-head">Item</div><div class="col-head">Qtd</div><div class="col-head">Valor R$</div><div></div>
+          </div>
+          <div id="items-outros"></div>
+          <button class="add-btn" onclick="addItem('outros')">+ Adicionar item</button>
+        </div>
+        <div class="metrics" id="metrics-orc"></div>
+        <div class="acoes-wrap">
+          <button class="btn-rosa" onclick="gerarPDF()">📄 Gerar PDF do orçamento</button>
+          <button class="btn-outline-verde" onclick="exportarSheets()">📊 Exportar para Google Sheets</button>
+        </div>
+      </div>
+
+      <!-- CONTROLE INTERNO -->
+      <div class="pag" id="pag-interno">
+        <div class="card">
+          <div class="card-title">Fornecedores de flores</div>
+          <div class="col-heads" style="grid-template-columns:1fr 100px 28px"><div class="col-head">Fornecedor</div><div class="col-head">Valor R$</div><div></div></div>
+          <div id="items-flores"></div>
+          <button class="add-btn" onclick="addForn('flores')">+ Adicionar</button>
+        </div>
+        <div class="card">
+          <div class="card-title">Fornecedores de peças e mobília</div>
+          <div class="col-heads" style="grid-template-columns:1fr 100px 28px"><div class="col-head">Fornecedor</div><div class="col-head">Valor R$</div><div></div></div>
+          <div id="items-mobilia"></div>
+          <button class="add-btn" onclick="addForn('mobilia')">+ Adicionar</button>
+        </div>
+        <div class="card">
+          <div class="card-title">Equipe e fretes</div>
+          <div class="col-heads" style="grid-template-columns:1fr 1fr 100px 28px"><div class="col-head">Nome</div><div class="col-head">Função / dia</div><div class="col-head">Valor R$</div><div></div></div>
+          <div id="items-equipe"></div>
+          <button class="add-btn" onclick="addEquipe()">+ Adicionar</button>
+        </div>
+        <div class="metrics" id="metrics-int"></div>
+        <div class="acoes-wrap">
+          <button class="btn-outline-verde" onclick="exportarSheets()">📊 Exportar para Google Sheets</button>
+        </div>
+      </div>
+
+    </div><!-- /evento-content -->
+  </div><!-- /tela-evento -->
+
+</div><!-- /tela-app -->
+
+<!-- Template oculto para geração de PDF -->
+<div id="pdf-template" style="position:fixed;left:-9999px;top:0;width:794px;background:#fff;padding:40px;font-family:Jost,sans-serif;font-size:13px;color:#2a2a2a;z-index:-1;"></div>
+
+<div id="toast"></div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="/js/config.js"></script>
+<script src="/js/supabase-client.js"></script>
+<script src="/js/utils.js"></script>
+<script src="/js/painel-auth.js"></script>
+<script src="/js/painel-lista.js"></script>
+<script src="/js/painel-evento.js"></script>
+<script src="/js/painel-orcamento.js"></script>
+<script src="/js/painel-interno.js"></script>
+<script src="/js/gerar-pdf.js"></script>
+<script src="/js/exportar-sheets.js"></script>
+</body>
+</html>

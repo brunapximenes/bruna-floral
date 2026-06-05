@@ -1,0 +1,10 @@
+{
+  "name": "bruna-floral",
+  "version": "1.0.0",
+  "description": "Portal de questionários e orçamentos — Bruna Floral",
+  "private": true,
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.0",
+    "googleapis": "^140.0.0"
+  }
+}
