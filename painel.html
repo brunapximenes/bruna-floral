@@ -201,6 +201,7 @@
       <button class="aba"        data-aba="bolo"        onclick="goAba('bolo',this)">Bolo e doces</button>
       <button class="aba"        data-aba="buffet"      onclick="goAba('buffet',this)">Buffet</button>
       <button class="aba"        data-aba="demais"      onclick="goAba('demais',this)">Demais áreas</button>
+      <button class="aba"        data-aba="descritivo"  onclick="goAba('descritivo',this);carregarDescritivo()">Descritivo</button>
       <button class="aba"        data-aba="orcamento"   onclick="goAba('orcamento',this)">Orçamento</button>
       <button class="aba"        data-aba="interno"     onclick="goAba('interno',this)">Controle interno</button>
     </div>
@@ -326,6 +327,15 @@
         </div>
       </div>
 
+      <!-- DESCRITIVO -->
+      <div class="pag" id="pag-descritivo">
+        <div class="desc-toolbar">
+          <button class="desc-btn-fill" onclick="preencherDescritivo()">↺ Preencher do formulário</button>
+          <button class="desc-btn-print" onclick="imprimirDescritivo()">🖨 Imprimir / PDF</button>
+        </div>
+        <div id="descritivo-doc" contenteditable="true"></div>
+      </div>
+
       <!-- ORÇAMENTO -->
       <div class="pag" id="pag-orcamento">
         <div class="card" id="card-orc-cerimonia">
@@ -409,5 +419,6 @@
 <script src="/js/painel-interno.js"></script>
 <script src="/js/gerar-pdf.js"></script>
 <script src="/js/exportar-sheets.js"></script>
+<script src="/js/painel-descritivo.js"></script>
 </body>
 </html>
