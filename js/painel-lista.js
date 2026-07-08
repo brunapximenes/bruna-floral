@@ -13,8 +13,21 @@ async function carregarLista() {
     .select('id, nomes, tipo_evento, data_evento, status, created_at, num_convidados, local_evento')
     .order('created_at', { ascending: false });
 
-  if (error) {
-    container.innerHTML = '<p style="color:var(--rosa)">Erro ao carregar eventos. Verifique a conexão.</p>';
+  if (error || !data) {
+    container.innerHTML = `
+      <div style="background:#fff;border:1px solid #f3d0cd;border-radius:10px;padding:24px 20px;max-width:480px;">
+        <p style="font-weight:500;color:#b8706a;margin-bottom:8px;">Não foi possível carregar os eventos</p>
+        <p style="font-size:13px;color:#888;line-height:1.6;margin-bottom:16px;">
+          O banco de dados provavelmente está <strong>pausado</strong> por inatividade.<br>
+          Acesse <a href="https://supabase.com" target="_blank" style="color:#3d5a47;">supabase.com</a>,
+          abra o projeto e clique em <strong>Restore project</strong>.<br>
+          Após restaurar, clique em "Tentar novamente" abaixo.
+        </p>
+        <button onclick="carregarLista()"
+          style="background:#3d5a47;color:#fff;border:none;padding:9px 20px;border-radius:8px;cursor:pointer;font-family:'Jost',sans-serif;font-size:13px;">
+          Tentar novamente
+        </button>
+      </div>`;
     return;
   }
 
