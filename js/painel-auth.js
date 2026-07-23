@@ -2,13 +2,12 @@
    painel-auth.js — Login e sessão via Supabase Auth
    ============================================================ */
 
-/* Verifica sessão ao carregar a página */
-(async function verificarSessao() {
+async function verificarSessao() {
   const { data: { session } } = await sb.auth.getSession();
   if (session) {
     mostrarApp();
   }
-})();
+}
 
 async function entrar() {
   const email = document.getElementById('login-email').value.trim();
