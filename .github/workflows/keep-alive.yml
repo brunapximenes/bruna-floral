@@ -1,0 +1,24 @@
+name: Supabase Keep-Alive
+
+on:
+  schedule:
+    - cron: '0 9 */3 * *'  # a cada 3 dias às 9h UTC (6h no Brasil)
+  workflow_dispatch:        # permite disparar manualmente pelo GitHub
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            "https://jimkkxlrrsjdylrccnpb.supabase.co/rest/v1/events?select=id&limit=1" \
+            -H "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImppbWtreGxycnNqZHlscmNjbnBiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2MDgzNjAsImV4cCI6MjA5NjE4NDM2MH0.Vjhy8qQlYfQMG7gvaxIVrvsrMhRcRaMV2eMQDvZCyg0" \
+            -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImppbWtreGxycnNqZHlscmNjbnBiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2MDgzNjAsImV4cCI6MjA5NjE4NDM2MH0.Vjhy8qQlYfQMG7gvaxIVrvsrMhRcRaMV2eMQDvZCyg0")
+          echo "Status HTTP: $STATUS"
+          if [ "$STATUS" -ge 200 ] && [ "$STATUS" -lt 300 ]; then
+            echo "Supabase ativo."
+          else
+            echo "Resposta inesperada: $STATUS"
+            exit 1
+          fi
