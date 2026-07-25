@@ -11,6 +11,7 @@ async function carregarLista() {
   const { data, error } = await sb
     .from('events')
     .select('id, nomes, tipo_evento, data_evento, status, created_at, num_convidados, local_evento')
+    .neq('status', 'arquivado')
     .order('created_at', { ascending: false });
 
   if (error || !data) {

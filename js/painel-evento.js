@@ -77,6 +77,40 @@ function voltarLista() {
   carregarLista();
 }
 
+/* ── EXCLUIR / ARQUIVAR ─────────────────────────────────────── */
+function confirmarExcluir() {
+  if (!eventoAtual) return;
+  document.getElementById('modal-excluir').style.display = 'flex';
+}
+
+function fecharModalExcluir() {
+  document.getElementById('modal-excluir').style.display = 'none';
+}
+
+async function arquivarEvento() {
+  if (!eventoAtual) return;
+  const { error } = await sb
+    .from('events')
+    .update({ status: 'arquivado' })
+    .eq('id', eventoAtual.id);
+  fecharModalExcluir();
+  if (error) { toast('Erro ao arquivar.', 'erro'); return; }
+  toast('Evento arquivado ✓');
+  voltarLista();
+}
+
+async function excluirEvento() {
+  if (!eventoAtual) return;
+  const { error } = await sb
+    .from('events')
+    .delete()
+    .eq('id', eventoAtual.id);
+  fecharModalExcluir();
+  if (error) { toast('Erro ao excluir.', 'erro'); return; }
+  toast('Evento excluído ✓');
+  voltarLista();
+}
+
 function goAba(id, btn) {
   document.querySelectorAll('.pag').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.aba').forEach(a => a.classList.remove('active'));

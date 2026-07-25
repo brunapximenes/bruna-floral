@@ -94,6 +94,40 @@
   font-family: 'Jost', sans-serif; font-size: 13px; cursor: pointer; white-space: nowrap;
 }
 .btn-ver-orcamento:hover { background: rgba(255,255,255,.24); }
+.btn-excluir-evento {
+  padding: 7px 11px; border: 1px solid rgba(255,255,255,.4); border-radius: 6px;
+  background: transparent; color: rgba(255,255,255,.85);
+  font-size: 15px; cursor: pointer; line-height: 1;
+}
+.btn-excluir-evento:hover { border-color: #e9a79f; background: rgba(233,167,159,.2); }
+
+/* ── Modal de exclusão ── */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,.45);
+  display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px;
+}
+.modal-box {
+  background: #fff; border-radius: 14px; padding: 26px 24px 20px;
+  max-width: 420px; width: 100%; text-align: center; box-shadow: 0 12px 40px rgba(0,0,0,.25);
+}
+.modal-titulo {
+  font-family: 'Cormorant Garamond', serif; font-size: 22px; color: var(--verde); margin-bottom: 10px;
+}
+.modal-texto { font-size: 13px; color: #777; line-height: 1.7; margin-bottom: 22px; }
+.modal-botoes { display: flex; gap: 10px; margin-bottom: 12px; }
+.modal-btn-arquivar, .modal-btn-excluir {
+  flex: 1; padding: 12px; border-radius: 8px; border: none; cursor: pointer;
+  font-family: 'Jost', sans-serif; font-size: 13.5px;
+}
+.modal-btn-arquivar { background: var(--verde); color: #fff; }
+.modal-btn-arquivar:hover { background: #2c4234; }
+.modal-btn-excluir { background: #fff; color: #c0544a; border: 1px solid #e6b3ad; }
+.modal-btn-excluir:hover { background: #fbeeec; }
+.modal-btn-cancelar {
+  background: transparent; border: none; color: #999; cursor: pointer;
+  font-family: 'Jost', sans-serif; font-size: 13px; padding: 6px;
+}
+.modal-btn-cancelar:hover { color: #555; }
 .evento-header-nome { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 300; color: #fff; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .status-select { padding: 7px 30px 7px 12px; border: 1px solid rgba(255,255,255,.4); border-radius: 6px; background: transparent; color: #fff; font-family: 'Jost', sans-serif; font-size: 12px; cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23ffffff' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 8px center; outline: none; }
 
@@ -199,6 +233,7 @@
         <option value="fechado">Fechado</option>
         <option value="cancelado">Cancelado</option>
       </select>
+      <button class="btn-excluir-evento" title="Excluir ou arquivar" onclick="confirmarExcluir()">🗑</button>
     </div>
 
     <div class="abas-wrap" id="abas-wrap">
@@ -409,6 +444,22 @@
 
 <!-- Template oculto para geração de PDF -->
 <div id="pdf-template" style="position:fixed;left:-9999px;top:0;width:794px;background:#fff;padding:40px;font-family:Jost,sans-serif;font-size:13px;color:#2a2a2a;z-index:-1;"></div>
+
+<!-- Modal de confirmação de exclusão / arquivamento -->
+<div id="modal-excluir" class="modal-overlay" style="display:none">
+  <div class="modal-box">
+    <div class="modal-titulo">O que deseja fazer com este registro?</div>
+    <p class="modal-texto">
+      <strong>Arquivar</strong> tira o evento da lista, mas mantém tudo salvo — dá pra recuperar depois.<br>
+      <strong>Excluir</strong> apaga de vez, sem como voltar atrás.
+    </p>
+    <div class="modal-botoes">
+      <button class="modal-btn-arquivar" onclick="arquivarEvento()">📥 Arquivar</button>
+      <button class="modal-btn-excluir" onclick="excluirEvento()">🗑 Excluir de vez</button>
+    </div>
+    <button class="modal-btn-cancelar" onclick="fecharModalExcluir()">Cancelar</button>
+  </div>
+</div>
 
 <div id="toast"></div>
 
