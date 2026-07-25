@@ -5,6 +5,30 @@
 let eventoAtual = null;   // objeto completo do evento aberto
 let tipoAtual   = 'casamento';
 
+/* ── Mapa de orçamentos prontos (nome do cliente → arquivo em /orcamentos) ──
+   Para vincular um novo orçamento a um cliente, basta adicionar uma linha aqui
+   com o nome exatamente como aparece no painel e o nome do arquivo (sem .html). */
+const ORCAMENTOS = {
+  'aline e mateus':          'aline-mateus',
+  'ana laura e luis':        'ana-laura-luis',
+  'pedro e sabrina':         'pedro-sabrina',
+  'cynthia e josuelligton':  'cynthia-josuelligton',
+};
+
+/* Normaliza o nome para casar sem depender de acento/maiúscula/espaço */
+function _normNome(s) {
+  return (s || '')
+    .toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g, '') // remove acentos
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function orcamentoDoEvento(ev) {
+  if (!ev) return null;
+  return ev.orcamento_slug || ORCAMENTOS[_normNome(ev.nomes)] || null;
+}
+
 /* ── NAVEGAÇÃO ──────────────────────────────────────────────── */
 async function abrirEvento(id) {
   document.getElementById('tela-lista').classList.remove('active');
@@ -29,11 +53,7 @@ async function abrirEvento(id) {
 
   // Botão "Ver orçamento" — só aparece se o evento tiver um orçamento vinculado
   const btnOrc = document.getElementById('btn-ver-orcamento');
-  if (data.orcamento_slug) {
-    btnOrc.style.display = '';
-  } else {
-    btnOrc.style.display = 'none';
-  }
+  btnOrc.style.display = orcamentoDoEvento(data) ? '' : 'none';
 
   // Carregar aba ativa (padrão = geral)
   goAba('geral', document.querySelector('.aba[data-aba="geral"]'));
@@ -46,8 +66,9 @@ async function abrirEvento(id) {
 }
 
 function abrirOrcamentoExterno() {
-  if (!eventoAtual || !eventoAtual.orcamento_slug) return;
-  window.open('/orcamentos/' + eventoAtual.orcamento_slug + '.html', '_blank');
+  const slug = orcamentoDoEvento(eventoAtual);
+  if (!slug) return;
+  window.open('/orcamentos/' + slug + '.html', '_blank');
 }
 
 function voltarLista() {
