@@ -88,6 +88,12 @@
   font-family: 'Jost', sans-serif; font-size: 13px; cursor: pointer; white-space: nowrap;
 }
 .btn-voltar-lista:hover { border-color: #fff; color: #fff; }
+.btn-ver-orcamento {
+  padding: 8px 14px; border: 1px solid rgba(255,255,255,.4); border-radius: 6px;
+  background: rgba(255,255,255,.12); color: #fff;
+  font-family: 'Jost', sans-serif; font-size: 13px; cursor: pointer; white-space: nowrap;
+}
+.btn-ver-orcamento:hover { background: rgba(255,255,255,.24); }
 .evento-header-nome { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 300; color: #fff; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .status-select { padding: 7px 30px 7px 12px; border: 1px solid rgba(255,255,255,.4); border-radius: 6px; background: transparent; color: #fff; font-family: 'Jost', sans-serif; font-size: 12px; cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23ffffff' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 8px center; outline: none; }
 
@@ -185,6 +191,7 @@
     <div class="evento-header">
       <button class="btn-voltar-lista" onclick="voltarLista()">← Eventos</button>
       <div class="evento-header-nome" id="evento-nome-header">—</div>
+      <button class="btn-ver-orcamento" id="btn-ver-orcamento" style="display:none" onclick="abrirOrcamentoExterno()">📄 Ver orçamento</button>
       <select class="status-select" id="status-select" onchange="salvarStatus()">
         <option value="novo">Novo</option>
         <option value="em_analise">Em análise</option>

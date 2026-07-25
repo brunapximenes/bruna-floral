@@ -27,6 +27,14 @@ async function abrirEvento(id) {
   document.getElementById('status-select').value = data.status || 'novo';
   document.getElementById('evento-nome-header').textContent = data.nomes || '(sem nome)';
 
+  // Botão "Ver orçamento" — só aparece se o evento tiver um orçamento vinculado
+  const btnOrc = document.getElementById('btn-ver-orcamento');
+  if (data.orcamento_slug) {
+    btnOrc.style.display = '';
+  } else {
+    btnOrc.style.display = 'none';
+  }
+
   // Carregar aba ativa (padrão = geral)
   goAba('geral', document.querySelector('.aba[data-aba="geral"]'));
 
@@ -35,6 +43,11 @@ async function abrirEvento(id) {
     carregarItensOrcamento(),
     carregarItensInterno()
   ]);
+}
+
+function abrirOrcamentoExterno() {
+  if (!eventoAtual || !eventoAtual.orcamento_slug) return;
+  window.open('/orcamentos/' + eventoAtual.orcamento_slug + '.html', '_blank');
 }
 
 function voltarLista() {
