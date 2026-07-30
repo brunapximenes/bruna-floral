@@ -14,6 +14,7 @@ const ORCAMENTOS = {
   'pedro e sabrina':         'pedro-sabrina',
   'cynthia e josuelligton':  'cynthia-josuelligton',
   'isabella e david':        'isabella-david',
+  'julia e arthur':          'julia-arthur',
 };
 
 /* Normaliza o nome para casar sem depender de acento/maiúscula/espaço */
