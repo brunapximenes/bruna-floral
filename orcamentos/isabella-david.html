@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Orçamento — Isabella & David</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --verde: #3d5a47;
+      --rosa: #c9847a;
+      --creme: #faf7f2;
+      --texto: #2c2c2c;
+      --cinza: #888;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Jost', sans-serif; font-size: 12.5px; color: var(--texto);
+      background: #fff; padding: 40px 48px; max-width: 960px; margin: 0 auto; line-height: 1.65;
+    }
+    .cabecalho {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      border-bottom: 2px solid var(--verde); padding-bottom: 16px; margin-bottom: 20px;
+    }
+    .cabecalho h1 {
+      font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 600;
+      color: var(--verde); letter-spacing: 0.03em;
+    }
+    .cabecalho .data-evento { font-size: 11.5px; color: var(--cinza); margin-top: 3px; font-style: italic; }
+    .cabecalho-direita { text-align: right; font-size: 11px; color: var(--cinza); line-height: 1.8; }
+    .logo-texto {
+      font-family: 'Cormorant Garamond', serif; font-size: 15px; font-weight: 600;
+      color: var(--rosa); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 3px;
+    }
+    .ficha {
+      background: var(--creme); border-left: 3px solid var(--rosa);
+      padding: 10px 14px; margin-bottom: 20px; font-size: 12px;
+    }
+    .ficha-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px 20px; }
+    .ficha strong { color: var(--verde); font-weight: 500; }
+    .layout-principal { display: grid; grid-template-columns: 1fr 220px; gap: 32px; align-items: start; }
+    .fotos-titulo {
+      font-size: 10px; font-weight: 500; text-transform: uppercase;
+      letter-spacing: 0.18em; color: var(--cinza); margin-bottom: 10px;
+    }
+    .fotos-grid { display: flex; flex-direction: column; gap: 8px; }
+    .foto-item { width: 100%; aspect-ratio: 4/3; object-fit: cover; border-radius: 4px; display: block; }
+    .foto-placeholder {
+      width: 100%; aspect-ratio: 4/3; background: #f0ece6; border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+      color: #bbb; font-size: 11px; text-align: center; padding: 12px;
+    }
+    .titulo-orcamento {
+      font-family: 'Cormorant Garamond', serif; font-size: 17px; font-weight: 700;
+      color: var(--texto); text-transform: uppercase; letter-spacing: 0.14em; margin-bottom: 18px;
+    }
+    .secao { margin-bottom: 18px; }
+    .secao-titulo {
+      font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.18em;
+      color: var(--verde); border-bottom: 1px solid #d5cfc7; padding-bottom: 4px; margin-bottom: 10px;
+    }
+    .subsecao { margin-bottom: 10px; }
+    .subsecao-titulo { font-weight: 500; margin-bottom: 3px; font-size: 12.5px; }
+    ul { list-style: none; padding-left: 0; }
+    ul li { padding-left: 14px; position: relative; margin-bottom: 1px; font-size: 12px; }
+    ul li::before { content: "–"; position: absolute; left: 0; color: var(--rosa); }
+    .nota { font-style: italic; color: var(--cinza); font-size: 11.5px; margin-top: 4px; padding-left: 14px; }
+    .nota::before { content: "* "; color: var(--rosa); }
+    .bloco-total { margin-top: 20px; border-top: 2px solid var(--verde); padding-top: 12px; }
+    .total-linha { display: grid; grid-template-columns: 1fr 240px; align-items: center; }
+    .total-label {
+      font-family: 'Cormorant Garamond', serif; font-size: 17px; font-weight: 700;
+      color: var(--verde); text-transform: uppercase; letter-spacing: 0.06em;
+    }
+    .total-valor .editavel {
+      font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 700; color: var(--verde);
+      border-bottom: 2px dashed var(--verde); min-width: 140px; display: inline-block; text-align: right; outline: none;
+    }
+    .total-valor .editavel:empty::before { content: attr(data-placeholder); color: #bbb; }
+    .descritivo { margin-top: 16px; display: grid; grid-template-columns: 1fr 240px; gap: 16px 24px; }
+    .descritivo-col h4 {
+      font-size: 10px; font-weight: 500; text-transform: uppercase;
+      letter-spacing: 0.15em; color: var(--cinza); margin-bottom: 6px;
+    }
+    .descritivo-col:first-child {
+      display: grid; grid-template-columns: max-content 1fr; column-gap: 12px; align-content: start;
+    }
+    .descritivo-col:first-child h4 { grid-column: 1 / -1; margin-bottom: 6px; }
+    .descritivo-item { display: contents; }
+    .descritivo-item span, .descritivo-item .editavel {
+      padding: 3px 0; border-bottom: 1px dotted #e0dbd4; font-size: 12px;
+    }
+    .descritivo-item .editavel {
+      font-family: 'Jost', sans-serif; font-size: 12px; color: var(--verde); font-weight: 500;
+      border-bottom: 1px dashed #bbb; outline: none; min-width: 80px; display: inline-block;
+    }
+    .descritivo-item .editavel:empty::before { content: attr(data-placeholder); color: #bbb; }
+    .condicoes {
+      margin-top: 20px; border-top: 1px solid #d5cfc7; padding-top: 14px;
+      display: grid; grid-template-columns: 1fr 240px; gap: 20px 24px; font-size: 11.5px;
+    }
+    .condicoes h4 {
+      font-size: 10px; font-weight: 500; text-transform: uppercase;
+      letter-spacing: 0.15em; color: var(--cinza); margin-bottom: 6px;
+    }
+    .condicoes p { line-height: 2; }
+    .condicoes strong { color: var(--verde); }
+    .validade { margin-top: 18px; font-size: 10.5px; color: var(--cinza); text-align: center; font-style: italic; }
+    @media print {
+      body { padding: 24px 32px; }
+      .editavel { border-bottom-color: transparent !important; }
+      .editavel:empty::before { content: ''; }
+      .btn-imprimir { display: none !important; }
+    }
+    .btn-imprimir {
+      position: fixed; bottom: 24px; right: 24px; background: var(--verde); color: #fff;
+      border: none; padding: 11px 20px; border-radius: 8px; font-family: 'Jost', sans-serif;
+      font-size: 13px; cursor: pointer; box-shadow: 0 4px 14px rgba(0,0,0,0.2); transition: background 0.2s;
+    }
+    .btn-imprimir:hover { background: #2c4234; }
+    #documento [contenteditable]:focus { outline: none; background: rgba(201,132,122,0.07); border-radius: 2px; }
+  </style>
+</head>
+<body>
+
+  <div id="documento" contenteditable="true">
+
+  <!-- CABEÇALHO -->
+  <div class="cabecalho">
+    <div>
+      <h1>Isabella &amp; David</h1>
+      <div class="data-evento">Casamento · 10 de julho de 2027</div>
+    </div>
+    <div class="cabecalho-direita">
+      <div class="logo-texto">Bruna Ximenes</div>
+      <div>Decoração floral para eventos</div>
+      <div>bruna.p.ximenes@gmail.com</div>
+      <div>(81) 99272-6432</div>
+    </div>
+  </div>
+
+  <!-- FICHA DO EVENTO -->
+  <div class="ficha">
+    <div class="ficha-grid">
+      <div><strong>Local:</strong> Nommade</div>
+      <div><strong>Horário:</strong> 18:00</div>
+      <div><strong>Ambientes:</strong> Cerimônia e recepção separados (mesmo endereço)</div>
+      <div><strong>Cerimonial:</strong> Sofistik</div>
+      <div><strong>Estilo:</strong> Vintage · jantar à luz de velas · botânico</div>
+      <div><strong>Convidados:</strong> 90 pessoas</div>
+      <div><strong>Paleta:</strong> Branco e tons de verde</div>
+      <div><strong>Orçamento previsto:</strong> R$ 7.000 a R$ 9.000</div>
+    </div>
+  </div>
+
+  <!-- LAYOUT DOIS COLUNAS -->
+  <div class="layout-principal">
+
+    <!-- COLUNA ESQUERDA -->
+    <div class="coluna-conteudo">
+
+      <div class="titulo-orcamento">Orçamento</div>
+
+      <!-- CONCEITO -->
+      <div class="secao">
+        <div class="secao-titulo">Conceito</div>
+        <ul>
+          <li>Jantar vintage à luz de velas — intimista e acolhedor</li>
+          <li>Base botânica: folhagens e texturas verdes com flores brancas pontuais (menos flores tradicionais)</li>
+          <li>Cúpulas / luminárias vintage com franjas como assinatura da iluminação</li>
+          <li>Detalhes de renda integrados à decoração</li>
+        </ul>
+      </div>
+
+      <!-- CERIMÔNIA -->
+      <div class="secao">
+        <div class="secao-titulo">Cerimônia — Nommade</div>
+
+        <div class="subsecao">
+          <div class="subsecao-titulo">Altar / jardim de chão</div>
+          <ul>
+            <li>Jardim de chão minimalista — poucos pontos de flor</li>
+            <li>Composição botânica: folhagens e verdes com flores brancas</li>
+            <li>Cúpulas vintage com franjas compondo o cenário</li>
+          </ul>
+        </div>
+
+        <div class="subsecao">
+          <div class="subsecao-titulo">Caminho / cadeiras</div>
+          <ul>
+            <li>Sem locação de cadeiras — o local já possui</li>
+            <li>Laços de renda nas cadeiras do caminho</li>
+            <li>Poucas flores no caminho (espaço estreito) — leveza e delicadeza</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- RECEPÇÃO -->
+      <div class="secao">
+        <div class="secao-titulo">Recepção — Nommade</div>
+
+        <div class="subsecao">
+          <div class="subsecao-titulo">Mesas dos convidados</div>
+          <ul>
+            <li>Sem locação de mesas — o local já possui</li>
+            <li>Mesa posta parcial</li>
+            <li>Arranjos baixos e simples: velas e vasos com poucas flores brancas + folhagens</li>
+            <li>Luminárias / cúpulas vintage com franjas para a luz intimista</li>
+          </ul>
+        </div>
+
+        <div class="subsecao">
+          <div class="subsecao-titulo">Mesa da família</div>
+          <ul>
+            <li>Composição igual à das demais mesas</li>
+          </ul>
+        </div>
+
+        <div class="subsecao">
+          <div class="subsecao-titulo">Bolo e doces</div>
+          <ul>
+            <li>Bolo — tamanho a definir</li>
+            <li>200 doces</li>
+            <li>Bem-casados, palha italiana e lembrancinhas: sim</li>
+            <li>Área exclusiva de doces — composição decorativa</li>
+          </ul>
+        </div>
+
+        <div class="subsecao">
+          <div class="subsecao-titulo">Buffet</div>
+          <ul>
+            <li>Formato mesa americana — buffet responsável pelas mesas</li>
+            <li>Bar: estrutura própria</li>
+          </ul>
+        </div>
+
+        <div class="subsecao">
+          <div class="subsecao-titulo">Pista de dança</div>
+          <ul>
+            <li>Globo espelhado</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- BUQUÊ -->
+      <div class="secao">
+        <div class="secao-titulo">Buquê da noiva</div>
+        <ul>
+          <li>Modelo a definir — moderno e volumoso, no conceito botânico (folhagens + flores brancas)</li>
+        </ul>
+      </div>
+
+      <!-- OPERACIONAL -->
+      <div class="secao">
+        <div class="secao-titulo">Operacional</div>
+        <ul>
+          <li>Taxa de serviço / elaboração</li>
+          <li>Equipe de floristas</li>
+          <li>Equipe de montagem</li>
+          <li>Equipe de desmontagem</li>
+          <li>Alimentação e deslocamento da equipe</li>
+          <li>Frete de flores, peças e estruturas</li>
+        </ul>
+      </div>
+
+      <!-- TOTAL -->
+      <div class="bloco-total">
+        <div class="total-linha">
+          <span class="total-label">Total geral</span>
+          <span class="total-valor" style="display:flex;align-items:center;gap:4px;">
+            <span style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;color:var(--verde);">R$</span>
+            <span class="editavel" contenteditable="true" data-placeholder="__________"></span>
+          </span>
+        </div>
+
+        <div class="descritivo">
+          <div class="descritivo-col">
+            <h4>Descritivo</h4>
+            <div class="descritivo-item">
+              <span>Decoração floral</span>
+              <span class="editavel" contenteditable="true" data-placeholder="R$ ______"></span>
+            </div>
+            <div class="descritivo-item">
+              <span>Locação de peças e estruturas</span>
+              <span class="editavel" contenteditable="true" data-placeholder="R$ ______"></span>
+            </div>
+            <div class="descritivo-item">
+              <span>Cúpulas, luminárias e globo espelhado</span>
+              <span class="editavel" contenteditable="true" data-placeholder="R$ ______"></span>
+            </div>
+            <div class="descritivo-item">
+              <span>Operacional</span>
+              <span class="editavel" contenteditable="true" data-placeholder="R$ ______"></span>
+            </div>
+          </div>
+
+          <div class="descritivo-col">
+            <h4>Forma de pagamento</h4>
+            <p style="font-size:12px; line-height:2;">
+              Pix<br>
+              <strong>30%</strong> no fechamento<br>
+              <strong>70%</strong> até 10 dias antes do evento
+            </p>
+            <br>
+            <h4>Chave Pix</h4>
+            <p style="font-size:12px;">CNPJ: 23.667.854/0001-21</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- CONDIÇÕES -->
+      <div class="condicoes">
+        <div>
+          <h4>Sobre montagem e desmontagem</h4>
+          <p>
+            A montagem é feita dentro do horário permitido pela casa
+            e entregamos até 1h antes do horário agendado para o evento.<br>
+            A desmontagem é feita logo após o término, em horário acordado com cliente.
+          </p>
+        </div>
+        <div>
+          <h4>Observações</h4>
+          <p>
+            Orçamento baseado nas informações do questionário.
+            Sujeito a ajustes após visita ao local e alinhamento final com a cliente.
+          </p>
+        </div>
+      </div>
+
+      <div class="validade">
+        Orçamento válido por 15 dias · Bruna Ximenes · bruna.p.ximenes@gmail.com
+      </div>
+
+    </div>
+
+    <!-- COLUNA DIREITA: FOTOS DE REFERÊNCIA -->
+    <div class="coluna-fotos">
+      <div class="fotos-titulo">Referências</div>
+      <div class="fotos-grid">
+
+        <img src="ref-id-1.jpeg" alt="Referência 1" class="foto-item"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <div class="foto-placeholder" style="display:none;">Adicione fotos<br>de referência</div>
+
+        <img src="ref-id-2.jpeg" alt="Referência 2" class="foto-item"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <div class="foto-placeholder" style="display:none;">Adicione fotos<br>de referência</div>
+
+        <img src="ref-id-3.jpeg" alt="Referência 3" class="foto-item"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <div class="foto-placeholder" style="display:none;">Adicione fotos<br>de referência</div>
+
+      </div>
+    </div>
+
+  </div>
+
+  </div><!-- fim documento -->
+
+  <button class="btn-imprimir" contenteditable="false" onclick="window.print()">🖨️ Imprimir / Salvar PDF</button>
+
+  <script>
+    const CHAVE = 'orcamento-isabella-david-v1';
+    const IMAGENS = ['ref-id-1.jpeg', 'ref-id-2.jpeg', 'ref-id-3.jpeg'];
+    const doc = document.getElementById('documento');
+    const salvo = localStorage.getItem(CHAVE);
+    if (salvo) {
+      doc.innerHTML = salvo;
+      doc.querySelectorAll('img.foto-item').forEach((img, i) => {
+        if (IMAGENS[i]) img.src = IMAGENS[i];
+      });
+    }
+    doc.addEventListener('input', () => {
+      localStorage.setItem(CHAVE, doc.innerHTML);
+    });
+  </script>
+
+</body>
+</html>

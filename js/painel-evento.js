@@ -13,6 +13,7 @@ const ORCAMENTOS = {
   'ana laura e luis':        'ana-laura-luis',
   'pedro e sabrina':         'pedro-sabrina',
   'cynthia e josuelligton':  'cynthia-josuelligton',
+  'isabella e david':        'isabella-david',
 };
 
 /* Normaliza o nome para casar sem depender de acento/maiúscula/espaço */
