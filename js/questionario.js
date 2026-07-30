@@ -238,22 +238,27 @@ async function enviar() {
 
   const dados = montarPayload();
 
-  // 1. Salvar no banco
-  let salvoNoBanco = false;
+  // 1. Montar link do WhatsApp e ABRIR JÁ.
+  //    Tem que ser antes de qualquer espera (await): se abrir depois de esperar
+  //    o banco responder, o celular bloqueia a nova aba como pop-up.
+  const msg = montarMsgWhatsApp(dados);
+  const url = `https://wa.me/${WHATSAPP_NUM}?text=${encodeURIComponent(msg)}`;
+
+  // Deixa o botão da tela de confirmação pronto (garantia caso o automático seja bloqueado)
+  const linkConf = document.getElementById('whatsapp-confirmacao');
+  if (linkConf) linkConf.href = url;
+
+  // Abre o WhatsApp imediatamente, dentro do toque do usuário
+  window.open(url, '_blank');
+
+  // 2. Salvar no banco (mesmo que falhe, o WhatsApp já foi aberto)
   try {
     const { error } = await sb.from('events').insert([dados]);
     if (error) throw error;
-    salvoNoBanco = true;
   } catch (err) {
     console.error('Erro ao salvar no banco:', err);
-    // Não bloqueia o WhatsApp — sempre abre mesmo se o banco falhar
-    toast('Não foi possível salvar no sistema, mas seu WhatsApp será aberto normalmente.', 'erro');
+    toast('Não foi possível salvar no sistema, mas seu WhatsApp foi aberto.', 'erro');
   }
-
-  // 2. Abrir WhatsApp (sempre)
-  const msg = montarMsgWhatsApp(dados);
-  const url  = `https://wa.me/${WHATSAPP_NUM}?text=${encodeURIComponent(msg)}`;
-  window.open(url, '_blank');
 
   // 3. Mostrar confirmação
   document.getElementById('tela-formulario').style.display = 'none';
