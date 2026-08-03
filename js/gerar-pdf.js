@@ -83,7 +83,7 @@ function montarTemplatePDF() {
   const tabelaCerimonia   = c.cerimonia ? linhasSecao('cerimonia', 'Floral da cerimônia') : '';
   const tabelaRecepcao    = linhasSecao('recepcao', 'Floral da recepção');
   const tabelaOperacional = linhasSecao('operacional', 'Operacional');
-  const tabelaLocacoes    = linhasSecao('locacoes', 'Locações');
+  const tabelaLocacoes    = linhasSecao('locacoes', 'Locações extras');
   const tabelaExtras      = linhasSecao('extras', 'Extras');
   const temItens = tabelaCerimonia || tabelaRecepcao || tabelaOperacional || tabelaLocacoes || tabelaExtras;
 
