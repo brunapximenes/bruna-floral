@@ -2,7 +2,7 @@
    painel-orcamento.js — Itens de orçamento (budget_items)
    ============================================================ */
 
-let budgetItems = { cerimonia: [], recepcao: [], outros: [] };
+let budgetItems = { cerimonia: [], recepcao: [], operacional: [], locacoes: [], extras: [] };
 
 /* ── CARREGAR ───────────────────────────────────────────────── */
 async function carregarItensOrcamento() {
@@ -16,7 +16,7 @@ async function carregarItensOrcamento() {
 
   if (error) return;
 
-  budgetItems = { cerimonia: [], recepcao: [], outros: [] };
+  budgetItems = { cerimonia: [], recepcao: [], operacional: [], locacoes: [], extras: [] };
   (data || []).forEach(item => {
     if (budgetItems[item.secao]) budgetItems[item.secao].push(item);
   });
@@ -26,7 +26,7 @@ async function carregarItensOrcamento() {
 
 /* ── RENDERIZAR ─────────────────────────────────────────────── */
 function renderOrcamento() {
-  ['cerimonia', 'recepcao', 'outros'].forEach(sec => renderSecao(sec));
+  ['cerimonia', 'recepcao', 'operacional', 'locacoes', 'extras'].forEach(sec => renderSecao(sec));
   updateTotais();
 }
 
@@ -95,7 +95,7 @@ async function removerItemOrc(sec, idx) {
 /* ── CÁLCULOS ───────────────────────────────────────────────── */
 function calcVenda() {
   let total = 0;
-  ['cerimonia', 'recepcao', 'outros'].forEach(sec => {
+  ['cerimonia', 'recepcao', 'operacional', 'locacoes', 'extras'].forEach(sec => {
     budgetItems[sec].forEach(i => {
       total += (parseFloat(i.valor_venda) || 0) * (parseFloat(i.qtd) || 1);
     });

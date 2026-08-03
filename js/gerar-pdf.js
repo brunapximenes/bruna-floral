@@ -80,10 +80,12 @@ function montarTemplatePDF() {
       ${linhas}`;
   }
 
-  const tabelaCerimonia  = c.cerimonia ? linhasSecao('cerimonia', 'Cerimônia') : '';
-  const tabelaRecepcao   = linhasSecao('recepcao', 'Recepção');
-  const tabelaOutros     = linhasSecao('outros', 'Locações / Outros');
-  const temItens = tabelaCerimonia || tabelaRecepcao || tabelaOutros;
+  const tabelaCerimonia   = c.cerimonia ? linhasSecao('cerimonia', 'Floral da cerimônia') : '';
+  const tabelaRecepcao    = linhasSecao('recepcao', 'Floral da recepção');
+  const tabelaOperacional = linhasSecao('operacional', 'Operacional');
+  const tabelaLocacoes    = linhasSecao('locacoes', 'Locações');
+  const tabelaExtras      = linhasSecao('extras', 'Extras');
+  const temItens = tabelaCerimonia || tabelaRecepcao || tabelaOperacional || tabelaLocacoes || tabelaExtras;
 
   const dataGeracao = new Date().toLocaleDateString('pt-BR');
   const validade    = new Date(Date.now() + 15 * 86400000).toLocaleDateString('pt-BR');
@@ -132,7 +134,7 @@ function montarTemplatePDF() {
           </tr>
         </thead>
         <tbody>
-          ${tabelaCerimonia}${tabelaRecepcao}${tabelaOutros}
+          ${tabelaCerimonia}${tabelaRecepcao}${tabelaOperacional}${tabelaLocacoes}${tabelaExtras}
         </tbody>
       </table>
     </div>` : ''}
