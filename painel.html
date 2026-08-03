@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Painel — Bruna Floral</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/style.css?v=2">
+<link rel="stylesheet" href="/css/style.css?v=3">
 <style>
 /* ── LOGIN ──────────────────────────────────────────── */
 #tela-login {
@@ -382,6 +382,13 @@
           <button class="desc-btn-fill" onclick="preencherDescritivo()">↺ Preencher do formulário</button>
           <button class="desc-btn-print" onclick="imprimirDescritivo()">🖨 Imprimir / PDF</button>
         </div>
+        <div class="desc-format-bar">
+          <span class="desc-format-label">Formatar a linha:</span>
+          <button onmousedown="event.preventDefault()" onclick="aplicarEstiloDesc('secao')">Título de seção</button>
+          <button onmousedown="event.preventDefault()" onclick="aplicarEstiloDesc('sub')">Subtítulo</button>
+          <button onmousedown="event.preventDefault()" onclick="aplicarEstiloDesc('item')">• Item da lista</button>
+          <button onmousedown="event.preventDefault()" onclick="aplicarEstiloDesc('normal')">Texto normal</button>
+        </div>
         <div id="descritivo-doc" contenteditable="true"></div>
       </div>
 
@@ -484,7 +491,7 @@
 <script src="/js/painel-interno.js"></script>
 <script src="/js/gerar-pdf.js"></script>
 <script src="/js/exportar-sheets.js"></script>
-<script src="/js/painel-descritivo.js?v=2"></script>
+<script src="/js/painel-descritivo.js?v=3"></script>
 <script>verificarSessao();</script>
 </body>
 </html>

@@ -58,6 +58,58 @@ function _bindDescInput(doc, CHAVE) {
   doc.onclick       = _descClick;
 }
 
+/* ── FORMATAR A LINHA no estilo do documento (1 clique) ─────── */
+function aplicarEstiloDesc(tipo) {
+  const doc = document.getElementById('descritivo-doc');
+  const sel = window.getSelection();
+  if (!sel || !sel.rangeCount) { toast('Clique na linha que quer formatar.', 'erro'); return; }
+
+  // Sobe do cursor até o "bloco/linha" (filho direto do doc, de uma seção, ou um item de lista)
+  let node = sel.anchorNode;
+  if (node && node.nodeType === 3) node = node.parentNode;   // texto → elemento
+  let blk = node;
+  while (blk && blk !== doc) {
+    const p = blk.parentNode;
+    if (!p || p === doc) break;
+    if (p.classList && (p.classList.contains('ds-secao') || p.classList.contains('ds-subsecao'))) break;
+    if (blk.tagName === 'LI') break;
+    blk = p;
+  }
+  if (!blk || blk === doc) { toast('Clique dentro de uma linha do documento.', 'erro'); return; }
+
+  const texto = blk.textContent.trim();
+  if (!texto) { toast('A linha está vazia.', 'erro'); return; }
+
+  // Monta o novo elemento no estilo escolhido
+  let novo;
+  if (tipo === 'secao') {
+    novo = document.createElement('div'); novo.className = 'ds-secao-titulo'; novo.textContent = texto;
+  } else if (tipo === 'sub') {
+    novo = document.createElement('div'); novo.className = 'ds-sub-titulo'; novo.textContent = texto;
+  } else if (tipo === 'item') {
+    novo = document.createElement('ul');
+    const li = document.createElement('li'); li.textContent = texto; novo.appendChild(li);
+  } else { // normal
+    novo = document.createElement('div'); novo.textContent = texto;
+  }
+
+  // Substitui a linha antiga pela nova, tratando o caso de item de lista
+  if (blk.tagName === 'LI' && tipo !== 'item') {
+    const ul = blk.closest('ul');
+    blk.remove();
+    if (ul) { ul.after(novo); if (!ul.querySelector('li')) ul.remove(); }
+    else doc.appendChild(novo);
+  } else if (blk.tagName === 'LI' && tipo === 'item') {
+    blk.textContent = texto;   // já é item, nada a trocar
+    novo = blk;
+  } else {
+    blk.replaceWith(novo);
+  }
+
+  _salvarDescritivo();
+  toast('Formatação aplicada ✓');
+}
+
 /* HTML do descritivo sem os controles temporários (alça e botão de excluir) */
 function _htmlDescritivoLimpo() {
   const clone = _descDoc.cloneNode(true);
