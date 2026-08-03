@@ -213,6 +213,19 @@ body {
 }
 .rm-btn { background: none; border: none; cursor: pointer; font-size: 18px; color: #ccc; line-height: 1; }
 .rm-btn:hover { color: var(--rosa); }
+
+/* ── Arraste (⠿) para reordenar itens e blocos ── */
+.orc-dica { font-size: 12px; color: var(--texto2); margin-bottom: 14px; }
+.item-drag, .bloco-handle {
+  cursor: grab; color: #c4c4c4; user-select: none; touch-action: none;
+  font-size: 15px; line-height: 1;
+}
+.item-drag { align-self: center; text-align: center; }
+.bloco-handle { margin-right: 8px; display: inline-block; vertical-align: middle; }
+.item-drag:hover, .bloco-handle:hover { color: var(--verde); }
+.item-row.arrastando { opacity: .55; background: var(--creme2); border-radius: 6px; }
+.card.arrastando-bloco { opacity: .75; outline: 2px dashed var(--rosa); }
+#orc-blocos .card { position: relative; }
 .add-btn {
   font-size: 12px; color: var(--verde-claro);
   background: none; border: none; cursor: pointer;

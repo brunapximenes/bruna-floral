@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Painel — Bruna Floral</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/style.css?v=4">
+<link rel="stylesheet" href="/css/style.css?v=5">
 <style>
 /* ── LOGIN ──────────────────────────────────────────── */
 #tela-login {
@@ -394,53 +394,56 @@
 
       <!-- ORÇAMENTO -->
       <div class="pag" id="pag-orcamento">
-        <div class="card" id="card-orc-cerimonia">
-          <div class="card-title">Floral da cerimônia</div>
-          <div class="col-heads" style="grid-template-columns:1fr 70px 90px 90px 28px">
-            <div class="col-head">Item</div><div class="col-head">Qtd</div><div class="col-head">Valor R$</div><div class="col-head">Total</div><div></div>
+        <div class="orc-dica">⠿ Arraste pela alça para reordenar blocos e itens. Você pode até mover um item de um bloco para outro.</div>
+        <div id="orc-blocos">
+        <div class="card" id="card-orc-cerimonia" data-sec="cerimonia">
+          <div class="card-title"><span class="bloco-handle" title="Arraste para reordenar o bloco">⠿</span>Floral da cerimônia</div>
+          <div class="col-heads" style="grid-template-columns:22px 1fr 70px 90px 90px 28px">
+            <div></div><div class="col-head">Item</div><div class="col-head">Qtd</div><div class="col-head">Valor R$</div><div class="col-head">Total</div><div></div>
           </div>
-          <div id="items-cerimonia"></div>
+          <div id="items-cerimonia" class="orc-items"></div>
           <button class="add-btn" onclick="addItem('cerimonia')">+ Adicionar item</button>
         </div>
-        <div class="card">
-          <div class="card-title">Floral da recepção</div>
-          <div class="col-heads" style="grid-template-columns:1fr 70px 90px 90px 28px">
-            <div class="col-head">Item</div><div class="col-head">Qtd</div><div class="col-head">Valor R$</div><div class="col-head">Total</div><div></div>
+        <div class="card" data-sec="recepcao">
+          <div class="card-title"><span class="bloco-handle" title="Arraste para reordenar o bloco">⠿</span>Floral da recepção</div>
+          <div class="col-heads" style="grid-template-columns:22px 1fr 70px 90px 90px 28px">
+            <div></div><div class="col-head">Item</div><div class="col-head">Qtd</div><div class="col-head">Valor R$</div><div class="col-head">Total</div><div></div>
           </div>
-          <div id="items-recepcao"></div>
+          <div id="items-recepcao" class="orc-items"></div>
           <button class="add-btn" onclick="addItem('recepcao')">+ Adicionar item</button>
         </div>
-        <div class="card">
-          <div class="card-title">Operacional</div>
-          <div class="col-heads" style="grid-template-columns:1fr 70px 90px 90px 28px">
-            <div class="col-head">Item</div><div class="col-head">Qtd</div><div class="col-head">Valor R$</div><div class="col-head">Total</div><div></div>
+        <div class="card" data-sec="operacional">
+          <div class="card-title"><span class="bloco-handle" title="Arraste para reordenar o bloco">⠿</span>Operacional</div>
+          <div class="col-heads" style="grid-template-columns:22px 1fr 70px 90px 90px 28px">
+            <div></div><div class="col-head">Item</div><div class="col-head">Qtd</div><div class="col-head">Valor R$</div><div class="col-head">Total</div><div></div>
           </div>
-          <div id="items-operacional"></div>
+          <div id="items-operacional" class="orc-items"></div>
           <button class="add-btn" onclick="addItem('operacional')">+ Adicionar item</button>
         </div>
-        <div class="card">
-          <div class="card-title">Locações internas</div>
-          <div class="col-heads" style="grid-template-columns:1fr 70px 90px 90px 28px">
-            <div class="col-head">Item</div><div class="col-head">Qtd</div><div class="col-head">Valor R$</div><div class="col-head">Total</div><div></div>
+        <div class="card" data-sec="locacoes_internas">
+          <div class="card-title"><span class="bloco-handle" title="Arraste para reordenar o bloco">⠿</span>Locações internas</div>
+          <div class="col-heads" style="grid-template-columns:22px 1fr 70px 90px 90px 28px">
+            <div></div><div class="col-head">Item</div><div class="col-head">Qtd</div><div class="col-head">Valor R$</div><div class="col-head">Total</div><div></div>
           </div>
-          <div id="items-locacoes_internas"></div>
+          <div id="items-locacoes_internas" class="orc-items"></div>
           <button class="add-btn" onclick="addItem('locacoes_internas')">+ Adicionar item</button>
         </div>
-        <div class="card">
-          <div class="card-title">Locações extras</div>
-          <div class="col-heads" style="grid-template-columns:1fr 70px 90px 90px 28px">
-            <div class="col-head">Item</div><div class="col-head">Qtd</div><div class="col-head">Valor R$</div><div class="col-head">Total</div><div></div>
+        <div class="card" data-sec="locacoes">
+          <div class="card-title"><span class="bloco-handle" title="Arraste para reordenar o bloco">⠿</span>Locações extras</div>
+          <div class="col-heads" style="grid-template-columns:22px 1fr 70px 90px 90px 28px">
+            <div></div><div class="col-head">Item</div><div class="col-head">Qtd</div><div class="col-head">Valor R$</div><div class="col-head">Total</div><div></div>
           </div>
-          <div id="items-locacoes"></div>
+          <div id="items-locacoes" class="orc-items"></div>
           <button class="add-btn" onclick="addItem('locacoes')">+ Adicionar item</button>
         </div>
-        <div class="card">
-          <div class="card-title">Extras</div>
-          <div class="col-heads" style="grid-template-columns:1fr 70px 90px 90px 28px">
-            <div class="col-head">Item</div><div class="col-head">Qtd</div><div class="col-head">Valor R$</div><div class="col-head">Total</div><div></div>
+        <div class="card" data-sec="extras">
+          <div class="card-title"><span class="bloco-handle" title="Arraste para reordenar o bloco">⠿</span>Extras</div>
+          <div class="col-heads" style="grid-template-columns:22px 1fr 70px 90px 90px 28px">
+            <div></div><div class="col-head">Item</div><div class="col-head">Qtd</div><div class="col-head">Valor R$</div><div class="col-head">Total</div><div></div>
           </div>
-          <div id="items-extras"></div>
+          <div id="items-extras" class="orc-items"></div>
           <button class="add-btn" onclick="addItem('extras')">+ Adicionar item</button>
+        </div>
         </div>
         <div class="metrics" id="metrics-orc"></div>
         <div class="acoes-wrap">
@@ -511,9 +514,9 @@
 <script src="/js/painel-auth.js"></script>
 <script src="/js/painel-lista.js?v=2"></script>
 <script src="/js/painel-evento.js?v=2"></script>
-<script src="/js/painel-orcamento.js?v=4"></script>
+<script src="/js/painel-orcamento.js?v=5"></script>
 <script src="/js/painel-interno.js?v=3"></script>
-<script src="/js/gerar-pdf.js?v=4"></script>
+<script src="/js/gerar-pdf.js?v=5"></script>
 <script src="/js/exportar-sheets.js"></script>
 <script src="/js/painel-descritivo.js?v=3"></script>
 <script>verificarSessao();</script>

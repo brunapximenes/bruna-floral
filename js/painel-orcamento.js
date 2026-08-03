@@ -25,8 +25,12 @@ async function carregarItensOrcamento() {
 }
 
 /* ── RENDERIZAR ─────────────────────────────────────────────── */
+const _ORC_SECS = ['cerimonia', 'recepcao', 'operacional', 'locacoes_internas', 'locacoes', 'extras'];
+
 function renderOrcamento() {
-  ['cerimonia', 'recepcao', 'operacional', 'locacoes_internas', 'locacoes', 'extras'].forEach(sec => renderSecao(sec));
+  _ORC_SECS.forEach(sec => renderSecao(sec));
+  aplicarOrdemBlocos();
+  initOrcSortable();
   updateTotais();
 }
 
@@ -38,9 +42,11 @@ function renderSecao(sec) {
   budgetItems[sec].forEach((item, idx) => {
     const row = document.createElement('div');
     row.className = 'item-row';
-    row.style.gridTemplateColumns = '1fr 70px 90px 90px 28px';
+    row.dataset.id = item.id;
+    row.style.gridTemplateColumns = '22px 1fr 70px 90px 90px 28px';
     const subtotal = (parseFloat(item.valor_venda) || 0) * (parseFloat(item.qtd) || 1);
     row.innerHTML = `
+      <span class="item-drag" title="Arraste para mover">⠿</span>
       <input type="text" placeholder="Descrição do item" value="${item.descricao || ''}"
         style="width:100%" oninput="budgetItems['${sec}'][${idx}].descricao=this.value"
         onblur="salvarItemOrc('${sec}',${idx})">
@@ -150,4 +156,129 @@ function updateTotais() {
 
 function metricHTML(label, valor, cls) {
   return `<div class="metric"><div class="metric-label">${label}</div><div class="metric-value ${cls}">${valor}</div></div>`;
+}
+
+/* ============================================================
+   Reordenar por arraste (⠿) — funciona com mouse e toque.
+   Itens podem ser movidos dentro do bloco E entre blocos.
+   ============================================================ */
+function initOrcSortable() {
+  const wrap = document.getElementById('orc-blocos');
+  if (!wrap || wrap._sortOn) return;
+  wrap._sortOn = true;
+  wrap.addEventListener('pointerdown', (e) => {
+    if (e.target.closest('.item-drag'))        _iniciarArrasteItem(e);
+    else if (e.target.closest('.bloco-handle')) _iniciarArrasteBloco(e);
+  });
+}
+
+/* ── ITENS (inclusive trocando de bloco) ─────────────────────── */
+function _iniciarArrasteItem(e) {
+  const row = e.target.closest('.item-row');
+  if (!row) return;
+  e.preventDefault();
+  row.classList.add('arrastando');
+
+  const mover = (ev) => {
+    row.style.pointerEvents = 'none';
+    const sob = document.elementFromPoint(ev.clientX, ev.clientY);
+    row.style.pointerEvents = '';
+    if (!sob) return;
+    const cont = sob.closest('.orc-items');
+    if (!cont) return;
+    const irmaos = Array.from(cont.querySelectorAll('.item-row')).filter(r => r !== row);
+    let alvo = null;
+    for (const r of irmaos) {
+      const rect = r.getBoundingClientRect();
+      if (ev.clientY < rect.top + rect.height / 2) { alvo = r; break; }
+    }
+    if (alvo) cont.insertBefore(row, alvo);
+    else cont.appendChild(row);
+  };
+  const soltar = () => {
+    document.removeEventListener('pointermove', mover);
+    document.removeEventListener('pointerup', soltar);
+    row.classList.remove('arrastando');
+    _commitOrdemItens();
+  };
+  document.addEventListener('pointermove', mover);
+  document.addEventListener('pointerup', soltar);
+}
+
+/* Reconstrói as seções a partir da ordem no DOM, salva e recalcula os totais */
+function _commitOrdemItens() {
+  const mapa = {};
+  Object.keys(budgetItems).forEach(sec => budgetItems[sec].forEach(it => { mapa[it.id] = it; }));
+
+  const novo = {};
+  _ORC_SECS.forEach(s => { novo[s] = []; });
+  const mudados = [];
+
+  _ORC_SECS.forEach(sec => {
+    const cont = document.getElementById('items-' + sec);
+    if (!cont) return;
+    Array.from(cont.querySelectorAll('.item-row')).forEach((row, idx) => {
+      const it = mapa[row.dataset.id];
+      if (!it) return;
+      if (it.secao !== sec || it.ordem !== idx) mudados.push({ id: it.id, sec, idx });
+      it.secao = sec;
+      it.ordem = idx;
+      novo[sec].push(it);
+    });
+  });
+
+  budgetItems = novo;
+  mudados.forEach(m => {
+    sb.from('budget_items').update({ secao: m.sec, ordem: m.idx }).eq('id', m.id);
+  });
+  renderOrcamento();   // reconstrói índices + recalcula (locações extras já entram certas)
+}
+
+/* ── BLOCOS ──────────────────────────────────────────────────── */
+function _iniciarArrasteBloco(e) {
+  const wrap = document.getElementById('orc-blocos');
+  const card = e.target.closest('.card');
+  if (!card || card.parentElement !== wrap) return;
+  e.preventDefault();
+  card.classList.add('arrastando-bloco');
+
+  const mover = (ev) => {
+    const cards = Array.from(wrap.children).filter(c => c !== card && c.style.display !== 'none');
+    let alvo = null;
+    for (const c of cards) {
+      const rect = c.getBoundingClientRect();
+      if (ev.clientY < rect.top + rect.height / 2) { alvo = c; break; }
+    }
+    if (alvo) wrap.insertBefore(card, alvo);
+    else wrap.appendChild(card);
+  };
+  const soltar = () => {
+    document.removeEventListener('pointermove', mover);
+    document.removeEventListener('pointerup', soltar);
+    card.classList.remove('arrastando-bloco');
+    _commitOrdemBlocos();
+  };
+  document.addEventListener('pointermove', mover);
+  document.addEventListener('pointerup', soltar);
+}
+
+function _commitOrdemBlocos() {
+  if (!eventoAtual) return;
+  const wrap = document.getElementById('orc-blocos');
+  const ordem = Array.from(wrap.children).map(c => c.dataset.sec).filter(Boolean);
+  eventoAtual.orcamento_ordem_blocos = JSON.stringify(ordem);
+  sb.from('events').update({ orcamento_ordem_blocos: eventoAtual.orcamento_ordem_blocos }).eq('id', eventoAtual.id);
+}
+
+/* Aplica a ordem de blocos salva (reancora os cards na ordem do banco) */
+function aplicarOrdemBlocos() {
+  const wrap = document.getElementById('orc-blocos');
+  if (!wrap || !eventoAtual || !eventoAtual.orcamento_ordem_blocos) return;
+  let ordem;
+  try { ordem = JSON.parse(eventoAtual.orcamento_ordem_blocos); } catch (e) { return; }
+  if (!Array.isArray(ordem)) return;
+  ordem.forEach(sec => {
+    const card = wrap.querySelector('.card[data-sec="' + sec + '"]');
+    if (card) wrap.appendChild(card);
+  });
 }

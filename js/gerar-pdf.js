@@ -97,7 +97,23 @@ function montarTemplatePDF() {
   const tabelaExtras       = linhasSecao('extras', 'Extras');
   const tabelaLocExtras    = linhasSecao('locacoes', 'Locações extras');
 
-  const decoTabelas  = tabelaCerimonia + tabelaRecepcao + tabelaOperacional + tabelaLocInternas + tabelaExtras;
+  // Ordem das seções da decoração segue o que foi arrastado no painel (se houver)
+  const _tabPorSec = {
+    cerimonia: tabelaCerimonia, recepcao: tabelaRecepcao, operacional: tabelaOperacional,
+    locacoes_internas: tabelaLocInternas, extras: tabelaExtras,
+  };
+  let _ordemDeco = ['cerimonia', 'recepcao', 'operacional', 'locacoes_internas', 'extras'];
+  if (d.orcamento_ordem_blocos) {
+    try {
+      const ord = JSON.parse(d.orcamento_ordem_blocos);
+      if (Array.isArray(ord)) {
+        const filtrada = ord.filter(s => s !== 'locacoes' && _tabPorSec[s] !== undefined);
+        _ordemDeco.forEach(s => { if (!filtrada.includes(s)) filtrada.push(s); });
+        _ordemDeco = filtrada;
+      }
+    } catch (e) { /* ordem padrão */ }
+  }
+  const decoTabelas  = _ordemDeco.map(s => _tabPorSec[s] || '').join('');
   const temDeco      = !!decoTabelas;
   const temLocExtras = !!tabelaLocExtras;
   const temItens     = temDeco || temLocExtras;
