@@ -15,7 +15,7 @@ function carregarDescritivo() {
   if (daNuvem) {
     // A nuvem é a fonte da verdade — vale em qualquer aparelho
     doc.innerHTML = daNuvem;
-    localStorage.setItem(CHAVE, daNuvem);
+    _guardarLocal(CHAVE, daNuvem);
   } else if (local) {
     // Ainda não está na nuvem, mas este aparelho tem uma edição local
     // (ex.: o que foi editado no tablet) → usa e migra para a nuvem
@@ -25,7 +25,7 @@ function carregarDescritivo() {
     // Nada salvo ainda → gera o modelo. NÃO salva na nuvem até a Bruna editar,
     // para não sobrescrever uma edição feita em outro aparelho.
     doc.innerHTML = templateDescritivo(eventoAtual);
-    localStorage.setItem(CHAVE, doc.innerHTML);
+    _guardarLocal(CHAVE, doc.innerHTML);
   }
 
   _bindDescInput(doc, CHAVE);
@@ -37,19 +37,172 @@ function preencherDescritivo() {
   const CHAVE = 'desc-v1-' + eventoAtual.id;
   const doc   = document.getElementById('descritivo-doc');
   doc.innerHTML = templateDescritivo(eventoAtual);
-  localStorage.setItem(CHAVE, doc.innerHTML);
+  _guardarLocal(CHAVE, doc.innerHTML);
   salvarDescritivoNuvem(doc.innerHTML);
   _bindDescInput(doc, CHAVE);
 }
 
-/* Liga o salvamento automático (local na hora + nuvem com pequeno atraso) */
+let _descDoc = null;
+let _descChave = null;
+let _imgSel = null;      // wrapper de imagem selecionado
+let _arrasto = null;     // estado de arraste/redimensionamento
+
+/* Liga o salvamento automático + colar/arrastar/redimensionar imagens */
 function _bindDescInput(doc, CHAVE) {
-  doc.oninput = () => {
-    const html = doc.innerHTML;
-    localStorage.setItem(CHAVE, html);          // guarda já neste aparelho
-    clearTimeout(_descTimer);
-    _descTimer = setTimeout(() => salvarDescritivoNuvem(html), 1000);  // sobe pra nuvem
+  _descDoc = doc;
+  _descChave = CHAVE;
+  _imgSel = null;
+  doc.oninput       = _salvarDescritivo;
+  doc.onpaste       = _colarNoDescritivo;
+  doc.onpointerdown = _descPointerDown;
+  doc.onclick       = _descClick;
+}
+
+/* HTML do descritivo sem os controles temporários (alça e botão de excluir) */
+function _htmlDescritivoLimpo() {
+  const clone = _descDoc.cloneNode(true);
+  clone.querySelectorAll('.ds-ui').forEach(el => el.remove());
+  clone.querySelectorAll('.ds-img-sel').forEach(el => el.classList.remove('ds-img-sel'));
+  return clone.innerHTML;
+}
+
+/* Guarda no aparelho, sem quebrar se estourar o limite (imagens pesam) */
+function _guardarLocal(chave, html) {
+  try { localStorage.setItem(chave, html); }
+  catch (e) { /* limite do navegador atingido — a nuvem continua salvando */ }
+}
+
+/* Salva local (na hora) + nuvem (com pequeno atraso) */
+function _salvarDescritivo() {
+  if (!_descDoc) return;
+  const html = _htmlDescritivoLimpo();
+  _guardarLocal(_descChave, html);
+  clearTimeout(_descTimer);
+  _descTimer = setTimeout(() => salvarDescritivoNuvem(html), 1000);
+}
+
+/* ── COLAR IMAGEM (Ctrl+V) ─────────────────────────────────── */
+function _colarNoDescritivo(e) {
+  const itens = (e.clipboardData && e.clipboardData.items) || [];
+  for (let i = 0; i < itens.length; i++) {
+    if (itens[i].type && itens[i].type.indexOf('image') === 0) {
+      e.preventDefault();
+      const file = itens[i].getAsFile();
+      _redimensionarImagem(file, 1100, 0.82).then((dataUrl) => {
+        _inserirImagemNoDoc(dataUrl);
+        _salvarDescritivo();
+      });
+      return;   // imagem tratada
+    }
+  }
+  // se não for imagem, deixa o colar normal de texto acontecer
+}
+
+/* Reduz a imagem (max largura) e comprime, para não pesar no banco */
+function _redimensionarImagem(file, maxLarg, qualidade) {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        let w = img.width, h = img.height;
+        if (w > maxLarg) { h = Math.round(h * maxLarg / w); w = maxLarg; }
+        const c = document.createElement('canvas');
+        c.width = w; c.height = h;
+        c.getContext('2d').drawImage(img, 0, 0, w, h);
+        resolve(c.toDataURL('image/jpeg', qualidade));
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+/* Cria a imagem flutuante (posição livre por cima do texto) */
+function _inserirImagemNoDoc(dataUrl) {
+  const wrap = document.createElement('span');
+  wrap.className = 'ds-img-wrap';
+  wrap.setAttribute('contenteditable', 'false');
+  wrap.style.left  = '32px';
+  wrap.style.top   = '32px';
+  wrap.style.width = '260px';
+  const img = document.createElement('img');
+  img.className = 'ds-img';
+  img.src = dataUrl;
+  wrap.appendChild(img);
+  _descDoc.appendChild(wrap);
+  _selecionarImagem(wrap);
+}
+
+/* ── SELEÇÃO ───────────────────────────────────────────────── */
+function _selecionarImagem(wrap) {
+  _desselecionarImagem();
+  _imgSel = wrap;
+  wrap.classList.add('ds-img-sel');
+  const del = document.createElement('span');
+  del.className = 'ds-img-del ds-ui';
+  del.textContent = '×';
+  const alca = document.createElement('span');
+  alca.className = 'ds-img-handle ds-ui';
+  wrap.appendChild(del);
+  wrap.appendChild(alca);
+}
+
+function _desselecionarImagem() {
+  if (!_imgSel) return;
+  _imgSel.classList.remove('ds-img-sel');
+  _imgSel.querySelectorAll('.ds-ui').forEach(el => el.remove());
+  _imgSel = null;
+}
+
+/* ── CLIQUE: seleciona, exclui ou desmarca ─────────────────── */
+function _descClick(e) {
+  if (e.target.classList && e.target.classList.contains('ds-img-del')) {
+    const w = e.target.closest('.ds-img-wrap');
+    if (w) { w.remove(); _imgSel = null; _salvarDescritivo(); }
+    return;
+  }
+  const wrap = e.target.closest ? e.target.closest('.ds-img-wrap') : null;
+  if (wrap) _selecionarImagem(wrap);
+  else _desselecionarImagem();
+}
+
+/* ── ARRASTAR (mover) e REDIMENSIONAR (alça) — mouse e toque ─ */
+function _descPointerDown(e) {
+  const wrap = e.target.closest ? e.target.closest('.ds-img-wrap') : null;
+  if (!wrap) return;
+  if (e.target.classList.contains('ds-img-del')) return;   // deixa o clique excluir
+  e.preventDefault();
+  _selecionarImagem(wrap);
+  const resize = e.target.classList.contains('ds-img-handle');
+  _arrasto = {
+    tipo: resize ? 'resize' : 'mover',
+    wrap,
+    x0: e.clientX, y0: e.clientY,
+    left0: parseFloat(wrap.style.left) || 0,
+    top0:  parseFloat(wrap.style.top)  || 0,
+    w0:    parseFloat(wrap.style.width) || wrap.offsetWidth,
   };
+  document.addEventListener('pointermove', _descPointerMove);
+  document.addEventListener('pointerup', _descPointerUp);
+}
+
+function _descPointerMove(e) {
+  if (!_arrasto) return;
+  const dx = e.clientX - _arrasto.x0;
+  const dy = e.clientY - _arrasto.y0;
+  if (_arrasto.tipo === 'mover') {
+    _arrasto.wrap.style.left = (_arrasto.left0 + dx) + 'px';
+    _arrasto.wrap.style.top  = (_arrasto.top0 + dy) + 'px';
+  } else {
+    _arrasto.wrap.style.width = Math.max(50, _arrasto.w0 + dx) + 'px';
+  }
+}
+
+function _descPointerUp() {
+  if (_arrasto) { _arrasto = null; _salvarDescritivo(); }
+  document.removeEventListener('pointermove', _descPointerMove);
+  document.removeEventListener('pointerup', _descPointerUp);
 }
 
 /* Salva o descritivo na nuvem (banco) — assim aparece em qualquer aparelho */
@@ -68,15 +221,24 @@ async function salvarDescritivoNuvem(html, silencioso) {
 }
 
 function imprimirDescritivo() {
+  _desselecionarImagem();
   const doc  = document.getElementById('descritivo-doc');
   const nome = (eventoAtual && eventoAtual.nomes) ? eventoAtual.nomes : 'Descritivo';
+  const largura  = doc.offsetWidth;                 // mesma largura da edição
+  const conteudo = _htmlDescritivoLimpo();           // sem alças/botões temporários
+  const cssImg =
+    ' body{padding:0;}' +
+    ' .ds-print-wrap{position:relative;box-sizing:border-box;margin:0 auto;padding:36px 44px;}' +
+    ' .ds-img-wrap{position:absolute;display:inline-block;}' +
+    ' .ds-img-wrap .ds-img{width:100%;height:auto;display:block;}' +
+    ' .ds-img-handle,.ds-img-del{display:none!important;}';
   const win  = window.open('', '_blank');
   win.document.write(
     '<!DOCTYPE html><html lang="pt-BR">' +
     '<head><meta charset="UTF-8"><title>Descritivo — ' + nome + '</title>' +
     '<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">' +
-    '<style>' + _dsCssImprimir() + '</style></head>' +
-    '<body>' + doc.innerHTML + '</body></html>'
+    '<style>' + _dsCssImprimir() + cssImg + '</style></head>' +
+    '<body><div class="ds-print-wrap" style="width:' + largura + 'px">' + conteudo + '</div></body></html>'
   );
   win.document.close();
   win.addEventListener('load', function () { win.focus(); win.print(); });
