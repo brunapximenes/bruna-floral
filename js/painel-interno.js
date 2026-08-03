@@ -41,17 +41,19 @@ function renderForn(tipo) {
   internoItems[tipo].forEach((item, idx) => {
     const row = document.createElement('div');
     row.className = 'item-row';
-    row.style.gridTemplateColumns = '1fr 70px 100px 28px';
+    row.style.gridTemplateColumns = '1fr 70px 100px 90px 28px';
+    const subtotal = (parseFloat(item.valor) || 0) * (parseFloat(item.qtd) || 1);
     row.innerHTML = `
       <input type="text" placeholder="Nome do fornecedor" value="${item.nome || ''}"
         style="width:100%" oninput="internoItems['${tipo}'][${idx}].nome=this.value"
         onblur="salvarItemInterno('${tipo}',${idx})">
       <input type="number" min="1" value="${item.qtd || 1}"
-        style="width:100%" oninput="internoItems['${tipo}'][${idx}].qtd=parseFloat(this.value)||1;updateTotais()"
+        style="width:100%" oninput="internoItems['${tipo}'][${idx}].qtd=parseFloat(this.value)||1;updateLinhaInterno('${tipo}',${idx});updateTotais()"
         onblur="salvarItemInterno('${tipo}',${idx})">
       <input type="number" placeholder="0,00" value="${item.valor || ''}"
-        style="width:100%" oninput="internoItems['${tipo}'][${idx}].valor=parseFloat(this.value)||0;updateTotais()"
+        style="width:100%" oninput="internoItems['${tipo}'][${idx}].valor=parseFloat(this.value)||0;updateLinhaInterno('${tipo}',${idx});updateTotais()"
         onblur="salvarItemInterno('${tipo}',${idx})">
+      <div class="item-total" id="toti-${tipo}-${idx}" style="align-self:center;text-align:right;font-size:13px;font-weight:500;color:var(--verde);padding-right:2px">${fmt(subtotal)}</div>
       <button class="rm-btn" onclick="removerItemInterno('${tipo}',${idx})">×</button>`;
     container.appendChild(row);
   });
@@ -65,7 +67,8 @@ function renderEquipe() {
   internoItems.equipe.forEach((item, idx) => {
     const row = document.createElement('div');
     row.className = 'item-row';
-    row.style.gridTemplateColumns = '1fr 1fr 70px 100px 28px';
+    row.style.gridTemplateColumns = '1fr 1fr 70px 100px 90px 28px';
+    const subtotal = (parseFloat(item.valor) || 0) * (parseFloat(item.qtd) || 1);
     row.innerHTML = `
       <input type="text" placeholder="Nome" value="${item.nome || ''}"
         style="width:100%" oninput="internoItems.equipe[${idx}].nome=this.value"
@@ -74,14 +77,24 @@ function renderEquipe() {
         style="width:100%" oninput="internoItems.equipe[${idx}].funcao=this.value"
         onblur="salvarItemInterno('equipe',${idx})">
       <input type="number" min="1" value="${item.qtd || 1}"
-        style="width:100%" oninput="internoItems.equipe[${idx}].qtd=parseFloat(this.value)||1;updateTotais()"
+        style="width:100%" oninput="internoItems.equipe[${idx}].qtd=parseFloat(this.value)||1;updateLinhaInterno('equipe',${idx});updateTotais()"
         onblur="salvarItemInterno('equipe',${idx})">
       <input type="number" placeholder="0,00" value="${item.valor || ''}"
-        style="width:100%" oninput="internoItems.equipe[${idx}].valor=parseFloat(this.value)||0;updateTotais()"
+        style="width:100%" oninput="internoItems.equipe[${idx}].valor=parseFloat(this.value)||0;updateLinhaInterno('equipe',${idx});updateTotais()"
         onblur="salvarItemInterno('equipe',${idx})">
+      <div class="item-total" id="toti-equipe-${idx}" style="align-self:center;text-align:right;font-size:13px;font-weight:500;color:var(--verde);padding-right:2px">${fmt(subtotal)}</div>
       <button class="rm-btn" onclick="removerItemInterno('equipe',${idx})">×</button>`;
     container.appendChild(row);
   });
+}
+
+/* Atualiza só o total (Qtd × Valor) da linha editada */
+function updateLinhaInterno(tipo, idx) {
+  const item = internoItems[tipo] && internoItems[tipo][idx];
+  const cell = document.getElementById(`toti-${tipo}-${idx}`);
+  if (item && cell) {
+    cell.textContent = fmt((parseFloat(item.valor) || 0) * (parseFloat(item.qtd) || 1));
+  }
 }
 
 /* ── ADICIONAR ──────────────────────────────────────────────── */
