@@ -38,20 +38,31 @@ function renderSecao(sec) {
   budgetItems[sec].forEach((item, idx) => {
     const row = document.createElement('div');
     row.className = 'item-row';
-    row.style.gridTemplateColumns = '1fr 70px 90px 28px';
+    row.style.gridTemplateColumns = '1fr 70px 90px 90px 28px';
+    const subtotal = (parseFloat(item.valor_venda) || 0) * (parseFloat(item.qtd) || 1);
     row.innerHTML = `
       <input type="text" placeholder="Descrição do item" value="${item.descricao || ''}"
         style="width:100%" oninput="budgetItems['${sec}'][${idx}].descricao=this.value"
         onblur="salvarItemOrc('${sec}',${idx})">
       <input type="number" min="1" value="${item.qtd || 1}"
-        style="width:100%" oninput="budgetItems['${sec}'][${idx}].qtd=parseFloat(this.value)||1;updateTotais()"
+        style="width:100%" oninput="budgetItems['${sec}'][${idx}].qtd=parseFloat(this.value)||1;updateLinhaOrc('${sec}',${idx});updateTotais()"
         onblur="salvarItemOrc('${sec}',${idx})">
       <input type="number" placeholder="0,00" value="${item.valor_venda || ''}"
-        style="width:100%" oninput="budgetItems['${sec}'][${idx}].valor_venda=parseFloat(this.value)||0;updateTotais()"
+        style="width:100%" oninput="budgetItems['${sec}'][${idx}].valor_venda=parseFloat(this.value)||0;updateLinhaOrc('${sec}',${idx});updateTotais()"
         onblur="salvarItemOrc('${sec}',${idx})">
+      <div class="item-total" id="tot-${sec}-${idx}" style="align-self:center;text-align:right;font-size:13px;font-weight:500;color:var(--verde);padding-right:2px">${fmt(subtotal)}</div>
       <button class="rm-btn" onclick="removerItemOrc('${sec}',${idx})">×</button>`;
     container.appendChild(row);
   });
+}
+
+/* Atualiza só o total (Qtd × Valor) da linha editada, sem redesenhar tudo */
+function updateLinhaOrc(sec, idx) {
+  const item = budgetItems[sec] && budgetItems[sec][idx];
+  const cell = document.getElementById(`tot-${sec}-${idx}`);
+  if (item && cell) {
+    cell.textContent = fmt((parseFloat(item.valor_venda) || 0) * (parseFloat(item.qtd) || 1));
+  }
 }
 
 /* ── ADICIONAR ──────────────────────────────────────────────── */
