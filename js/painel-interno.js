@@ -41,10 +41,13 @@ function renderForn(tipo) {
   internoItems[tipo].forEach((item, idx) => {
     const row = document.createElement('div');
     row.className = 'item-row';
-    row.style.gridTemplateColumns = '1fr 100px 28px';
+    row.style.gridTemplateColumns = '1fr 70px 100px 28px';
     row.innerHTML = `
       <input type="text" placeholder="Nome do fornecedor" value="${item.nome || ''}"
         style="width:100%" oninput="internoItems['${tipo}'][${idx}].nome=this.value"
+        onblur="salvarItemInterno('${tipo}',${idx})">
+      <input type="number" min="1" value="${item.qtd || 1}"
+        style="width:100%" oninput="internoItems['${tipo}'][${idx}].qtd=parseFloat(this.value)||1;updateTotais()"
         onblur="salvarItemInterno('${tipo}',${idx})">
       <input type="number" placeholder="0,00" value="${item.valor || ''}"
         style="width:100%" oninput="internoItems['${tipo}'][${idx}].valor=parseFloat(this.value)||0;updateTotais()"
@@ -62,13 +65,16 @@ function renderEquipe() {
   internoItems.equipe.forEach((item, idx) => {
     const row = document.createElement('div');
     row.className = 'item-row';
-    row.style.gridTemplateColumns = '1fr 1fr 100px 28px';
+    row.style.gridTemplateColumns = '1fr 1fr 70px 100px 28px';
     row.innerHTML = `
       <input type="text" placeholder="Nome" value="${item.nome || ''}"
         style="width:100%" oninput="internoItems.equipe[${idx}].nome=this.value"
         onblur="salvarItemInterno('equipe',${idx})">
       <input type="text" placeholder="Função / dia" value="${item.funcao || ''}"
         style="width:100%" oninput="internoItems.equipe[${idx}].funcao=this.value"
+        onblur="salvarItemInterno('equipe',${idx})">
+      <input type="number" min="1" value="${item.qtd || 1}"
+        style="width:100%" oninput="internoItems.equipe[${idx}].qtd=parseFloat(this.value)||1;updateTotais()"
         onblur="salvarItemInterno('equipe',${idx})">
       <input type="number" placeholder="0,00" value="${item.valor || ''}"
         style="width:100%" oninput="internoItems.equipe[${idx}].valor=parseFloat(this.value)||0;updateTotais()"
@@ -84,7 +90,7 @@ async function addForn(tipo) {
   const ordem = internoItems[tipo].length;
   const { data, error } = await sb
     .from('internal_costs')
-    .insert([{ event_id: eventoAtual.id, tipo, nome: '', valor: 0, ordem }])
+    .insert([{ event_id: eventoAtual.id, tipo, nome: '', qtd: 1, valor: 0, ordem }])
     .select().single();
   if (error) { toast('Erro ao adicionar.', 'erro'); return; }
   internoItems[tipo].push(data);
@@ -96,7 +102,7 @@ async function addEquipe() {
   const ordem = internoItems.equipe.length;
   const { data, error } = await sb
     .from('internal_costs')
-    .insert([{ event_id: eventoAtual.id, tipo: 'equipe', nome: '', funcao: '', valor: 0, ordem }])
+    .insert([{ event_id: eventoAtual.id, tipo: 'equipe', nome: '', funcao: '', qtd: 1, valor: 0, ordem }])
     .select().single();
   if (error) { toast('Erro ao adicionar.', 'erro'); return; }
   internoItems.equipe.push(data);
@@ -108,7 +114,7 @@ async function salvarItemInterno(tipo, idx) {
   const item = internoItems[tipo][idx];
   if (!item || !item.id) return;
 
-  const update = { nome: item.nome || '', valor: item.valor || 0 };
+  const update = { nome: item.nome || '', qtd: item.qtd || 1, valor: item.valor || 0 };
   if (tipo === 'equipe') update.funcao = item.funcao || '';
 
   await sb.from('internal_costs').update(update).eq('id', item.id);
@@ -128,7 +134,7 @@ async function removerItemInterno(tipo, idx) {
 function calcCusto() {
   let total = 0;
   ['flores', 'mobilia', 'equipe'].forEach(tipo => {
-    internoItems[tipo].forEach(i => { total += parseFloat(i.valor) || 0; });
+    internoItems[tipo].forEach(i => { total += (parseFloat(i.valor) || 0) * (parseFloat(i.qtd) || 1); });
   });
   return total;
 }
