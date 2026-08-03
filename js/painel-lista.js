@@ -10,7 +10,7 @@ async function carregarLista() {
 
   const { data, error } = await sb
     .from('events')
-    .select('id, nomes, tipo_evento, data_evento, status, created_at, num_convidados, local_evento')
+    .select('id, nomes, telefone, tipo_evento, data_evento, status, created_at, num_convidados, local_evento')
     .neq('status', 'arquivado')
     .order('created_at', { ascending: false });
 
@@ -71,6 +71,10 @@ function renderLista(eventos) {
     const convidados  = e.num_convidados ? `👥 ${e.num_convidados} pessoas` : '';
     const local       = e.local_evento ? `📍 ${e.local_evento}` : '';
     const chegou      = `Recebido em ${fmtData(e.created_at.split('T')[0])}`;
+    const telDig      = (e.telefone || '').replace(/\D/g, '');
+    const telefone    = (telDig.length === 10 || telDig.length === 11)
+      ? `<a href="https://wa.me/55${telDig}" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="color:#25a15a;text-decoration:none;">📱 ${e.telefone}</a>`
+      : (e.telefone ? `📱 ${e.telefone}` : '');
 
     return `
       <div class="evento-card" onclick="abrirEvento('${e.id}')">
@@ -78,6 +82,7 @@ function renderLista(eventos) {
           <div class="evento-card-nome">${e.nomes || '(sem nome)'}</div>
           <div class="evento-card-meta">
             <span class="evento-card-tipo">${labelTipo}</span>
+            ${telefone ? `<span>${telefone}</span>` : ''}
             ${dataEvento ? `<span>${dataEvento}</span>` : ''}
             ${convidados ? `<span>${convidados}</span>` : ''}
             ${local ? `<span>${local}</span>` : ''}

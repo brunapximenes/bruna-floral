@@ -77,6 +77,11 @@
         <label id="label-nomes">Nome do casal</label>
         <input id="nomes" type="text" placeholder="Ex: Dalya e Eduardo">
       </div>
+      <div class="campo">
+        <label>Celular / WhatsApp (com DDD) <span style="color:var(--rosa)">*</span></label>
+        <input id="telefone" type="tel" inputmode="numeric" placeholder="(81) 99999-9999" maxlength="16" oninput="mascaraTelefone(this)">
+        <div id="erro-telefone" style="color:#c0544a;font-size:12px;margin-top:5px;display:none;">Por favor, informe um celular válido com DDD (11 dígitos).</div>
+      </div>
       <div class="row2 campo-origem">
         <div class="campo"><label>De onde são?</label><input id="origem" type="text" placeholder="Ex: Recife, PE"></div>
         <div class="campo campo-cerimonial"><label>Cerimonial / assessoria</label><input id="cerimonial" type="text" placeholder="Nome da assessoria"></div>
@@ -284,6 +289,6 @@
 <script src="/js/config.js?v=3"></script>
 <script src="/js/supabase-client.js?v=3"></script>
 <script src="/js/utils.js"></script>
-<script src="/js/questionario.js?v=2"></script>
+<script src="/js/questionario.js?v=3"></script>
 </body>
 </html>

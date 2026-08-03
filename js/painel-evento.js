@@ -125,6 +125,7 @@ function preencherCampos(d) {
   // Campos mapeados: id do input → chave no banco
   const mapa = {
     'nomes':          d.nomes,
+    'telefone':       d.telefone,
     'origem':         d.origem,
     'local':          d.local_evento,
     'data':           d.data_evento,
@@ -185,6 +186,20 @@ function preencherCampos(d) {
   };
 
   Object.entries(mapa).forEach(([id, valor]) => setVal(id, valor));
+  atualizarLinkWhats();
+}
+
+/* Mostra/atualiza o botão de abrir a conversa no WhatsApp a partir do celular */
+function atualizarLinkWhats() {
+  const link = document.getElementById('link-whats');
+  if (!link) return;
+  const d = (val('telefone') || '').replace(/\D/g, '');
+  if (d.length === 10 || d.length === 11) {
+    link.href = 'https://wa.me/55' + d;
+    link.style.display = '';
+  } else {
+    link.style.display = 'none';
+  }
 }
 
 /* ── CONFIG POR TIPO ────────────────────────────────────────── */
@@ -245,6 +260,7 @@ async function salvarCampo(chave) {
   // Pega valor do elemento correto pelo id do input HTML
   const elId = {
     'nomes':          'nomes',
+    'telefone':       'telefone',
     'origem':         'origem',
     'local_evento':   'local',
     'data_evento':    'data',

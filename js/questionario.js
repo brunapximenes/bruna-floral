@@ -64,6 +64,20 @@ function checkIdade() {
   (v > 0 && v < 18) ? el.classList.remove('hidden') : el.classList.add('hidden');
 }
 
+/* ── CELULAR / WHATSAPP ─────────────────────────────────────── */
+function mascaraTelefone(el) {
+  const v = el.value.replace(/\D/g, '').slice(0, 11);
+  if (v.length <= 2)      el.value = v.length ? '(' + v : '';
+  else if (v.length <= 7) el.value = '(' + v.slice(0, 2) + ') ' + v.slice(2);
+  else                    el.value = '(' + v.slice(0, 2) + ') ' + v.slice(2, 7) + '-' + v.slice(7);
+  if (validaTelefone()) document.getElementById('erro-telefone').style.display = 'none';
+}
+
+function validaTelefone() {
+  const d = val('telefone').replace(/\D/g, '');
+  return d.length === 10 || d.length === 11;
+}
+
 /* ── NAVEGAÇÃO ──────────────────────────────────────────────── */
 function atualizarSecoes() {
   secoes = ['geral'];
@@ -94,7 +108,15 @@ function atualizarProgress() {
     `${secAtual + 1} de ${secoes.length} — ${labels[secoes[secAtual]]}`;
 }
 
-function proximo() { if (secAtual < secoes.length - 1) { secAtual++; mostrarSecao(); } }
+function proximo() {
+  // Celular é obrigatório — barra a saída da primeira seção sem ele
+  if (secoes[secAtual] === 'geral' && !validaTelefone()) {
+    document.getElementById('erro-telefone').style.display = 'block';
+    document.getElementById('telefone').focus();
+    return;
+  }
+  if (secAtual < secoes.length - 1) { secAtual++; mostrarSecao(); }
+}
 function voltar()  { if (secAtual > 0) { secAtual--; mostrarSecao(); } }
 
 /* ── MONTAR PAYLOAD DO BANCO ────────────────────────────────── */
@@ -109,6 +131,7 @@ function montarPayload() {
 
     // Geral
     nomes:            val('nomes')        || null,
+    telefone:         val('telefone')     || null,
     origem:           val('origem')       || null,
     cerimonial:       val('cerimonial')   || null,
     local_evento:     val('local')        || null,
@@ -174,6 +197,7 @@ function montarMsgWhatsApp(d) {
   let msg = '🌸 *QUESTIONÁRIO DE DECORAÇÃO FLORAL*\n\n';
   msg += `*Tipo de evento:* ${tipoLabel}\n`;
   msg += `*${c.nomes}:* ${d.nomes || '—'}\n`;
+  if (d.telefone)         msg += `*Celular:* ${d.telefone}\n`;
   if (d.origem)           msg += `*De onde são:* ${d.origem}\n`;
   if (d.aniver_idade)     msg += `*Aniversário de:* ${d.aniver_idade} anos\n`;
   if (d.mae_responsavel)  msg += `*Mãe / responsável:* ${d.mae_responsavel}\n`;
@@ -232,6 +256,16 @@ function montarMsgWhatsApp(d) {
 
 /* ── ENVIAR ─────────────────────────────────────────────────── */
 async function enviar() {
+  // Celular é obrigatório — garante mesmo que cheguem ao envio sem preencher
+  if (!validaTelefone()) {
+    secAtual = secoes.indexOf('geral');
+    mostrarSecao();
+    document.getElementById('erro-telefone').style.display = 'block';
+    document.getElementById('telefone').focus();
+    toast('Informe o celular com DDD para enviar.', 'erro');
+    return;
+  }
+
   const btn = document.getElementById('btn-enviar');
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span>Salvando...';

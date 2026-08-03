@@ -258,6 +258,12 @@
             <div class="campo"><label id="label-nomes">Nome do casal</label><input id="nomes" type="text" onchange="salvarCampo('nomes')"></div>
             <div class="campo q-origem"><label>De onde são?</label><input id="origem" type="text" onchange="salvarCampo('origem')"></div>
           </div>
+          <div class="row2">
+            <div class="campo"><label>Celular / WhatsApp</label><input id="telefone" type="tel" oninput="atualizarLinkWhats()" onchange="salvarCampo('telefone')"></div>
+            <div class="campo"><label>&nbsp;</label>
+              <a id="link-whats" href="#" target="_blank" rel="noopener" style="display:none;background:#25a15a;color:#fff;text-decoration:none;padding:11px 16px;border-radius:8px;font-size:13px;text-align:center;">📱 Abrir conversa no WhatsApp</a>
+            </div>
+          </div>
           <div class="row2 q-aniver hidden">
             <div class="campo"><label>Aniversário de quantos anos?</label><input id="aniver-idade" type="number" onchange="salvarCampo('aniver_idade')"></div>
             <div class="campo q-mae-aniver hidden"><label>Nome da mãe / responsável</label><input id="mae-aniver" type="text" onchange="salvarCampoMae()"></div>
