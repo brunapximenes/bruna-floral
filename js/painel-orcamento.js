@@ -2,7 +2,7 @@
    painel-orcamento.js — Itens de orçamento (budget_items)
    ============================================================ */
 
-let budgetItems = { cerimonia: [], recepcao: [], operacional: [], locacoes: [], extras: [] };
+let budgetItems = { cerimonia: [], recepcao: [], operacional: [], locacoes_internas: [], locacoes: [], extras: [] };
 
 /* ── CARREGAR ───────────────────────────────────────────────── */
 async function carregarItensOrcamento() {
@@ -16,7 +16,7 @@ async function carregarItensOrcamento() {
 
   if (error) return;
 
-  budgetItems = { cerimonia: [], recepcao: [], operacional: [], locacoes: [], extras: [] };
+  budgetItems = { cerimonia: [], recepcao: [], operacional: [], locacoes_internas: [], locacoes: [], extras: [] };
   (data || []).forEach(item => {
     if (budgetItems[item.secao]) budgetItems[item.secao].push(item);
   });
@@ -26,7 +26,7 @@ async function carregarItensOrcamento() {
 
 /* ── RENDERIZAR ─────────────────────────────────────────────── */
 function renderOrcamento() {
-  ['cerimonia', 'recepcao', 'operacional', 'locacoes', 'extras'].forEach(sec => renderSecao(sec));
+  ['cerimonia', 'recepcao', 'operacional', 'locacoes_internas', 'locacoes', 'extras'].forEach(sec => renderSecao(sec));
   updateTotais();
 }
 
@@ -93,18 +93,26 @@ async function removerItemOrc(sec, idx) {
 }
 
 /* ── CÁLCULOS ───────────────────────────────────────────────── */
-function calcVenda() {
+function _somaSecoes(secs) {
   let total = 0;
-  ['cerimonia', 'recepcao', 'operacional', 'locacoes', 'extras'].forEach(sec => {
-    budgetItems[sec].forEach(i => {
+  secs.forEach(sec => {
+    (budgetItems[sec] || []).forEach(i => {
       total += (parseFloat(i.valor_venda) || 0) * (parseFloat(i.qtd) || 1);
     });
   });
   return total;
 }
 
+/* Decoração = tudo, menos as locações extras (que são cobradas "por fora").
+   Locações internas fazem parte da decoração e entram no valor dela. */
+function calcDecoracao()      { return _somaSecoes(['cerimonia', 'recepcao', 'operacional', 'locacoes_internas', 'extras']); }
+function calcLocacoesExtras() { return _somaSecoes(['locacoes']); }
+function calcVenda()          { return calcDecoracao() + calcLocacoesExtras(); }
+
 function updateTotais() {
-  const venda     = calcVenda();
+  const decoracao = calcDecoracao();
+  const locExtras = calcLocacoesExtras();
+  const venda     = decoracao + locExtras;   // total geral
   const custo     = calcCusto();
   const lucro     = venda - custo;
   const budgetRaw = parseFloat((val('budget-cliente') || '0').replace(/[^\d,\.]/g, '').replace(',', '.')) || 0;
@@ -113,7 +121,9 @@ function updateTotais() {
   const mOrc = document.getElementById('metrics-orc');
   if (mOrc) {
     mOrc.innerHTML =
-      metricHTML('Total de venda', fmt(venda), '') +
+      metricHTML('Orçamento decoração', fmt(decoracao), '') +
+      metricHTML('Locações extras', fmt(locExtras), '') +
+      metricHTML('Total geral', fmt(venda), 'ok') +
       metricHTML('Budget cliente', budgetRaw > 0 ? fmt(budgetRaw) : '—', '') +
       metricHTML('Diferença', budgetRaw > 0 ? (diff >= 0 ? '+' : '') + fmt(diff) : '—', budgetRaw > 0 ? (diff >= 0 ? 'ok' : 'bad') : '');
   }

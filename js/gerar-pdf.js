@@ -80,12 +80,30 @@ function montarTemplatePDF() {
       ${linhas}`;
   }
 
-  const tabelaCerimonia   = c.cerimonia ? linhasSecao('cerimonia', 'Floral da cerimônia') : '';
-  const tabelaRecepcao    = linhasSecao('recepcao', 'Floral da recepção');
-  const tabelaOperacional = linhasSecao('operacional', 'Operacional');
-  const tabelaLocacoes    = linhasSecao('locacoes', 'Locações extras');
-  const tabelaExtras      = linhasSecao('extras', 'Extras');
-  const temItens = tabelaCerimonia || tabelaRecepcao || tabelaOperacional || tabelaLocacoes || tabelaExtras;
+  // Linha de subtotal / total dentro da tabela
+  function linhaSubtotal(label, valor, forte) {
+    const cor  = forte ? '#3d5a47' : '#6b6b6b';
+    const peso = forte ? '600' : '500';
+    return `<tr>
+      <td colspan="2" style="padding:12px 0 6px;text-align:right;font-size:12px;color:${cor};font-weight:${peso};border-top:1px solid #e6e0d6;text-transform:uppercase;letter-spacing:.04em">${label}</td>
+      <td style="padding:12px 0 6px;text-align:right;font-size:13px;color:${cor};font-weight:${peso};border-top:1px solid #e6e0d6">${fmt(valor)}</td>
+    </tr>`;
+  }
+
+  const tabelaCerimonia    = c.cerimonia ? linhasSecao('cerimonia', 'Floral da cerimônia') : '';
+  const tabelaRecepcao     = linhasSecao('recepcao', 'Floral da recepção');
+  const tabelaOperacional  = linhasSecao('operacional', 'Operacional');
+  const tabelaLocInternas  = linhasSecao('locacoes_internas', 'Locações internas');
+  const tabelaExtras       = linhasSecao('extras', 'Extras');
+  const tabelaLocExtras    = linhasSecao('locacoes', 'Locações extras');
+
+  const decoTabelas  = tabelaCerimonia + tabelaRecepcao + tabelaOperacional + tabelaLocInternas + tabelaExtras;
+  const temDeco      = !!decoTabelas;
+  const temLocExtras = !!tabelaLocExtras;
+  const temItens     = temDeco || temLocExtras;
+
+  const vDeco      = (typeof calcDecoracao === 'function')      ? calcDecoracao()      : venda;
+  const vLocExtras = (typeof calcLocacoesExtras === 'function') ? calcLocacoesExtras() : 0;
 
   const dataGeracao = new Date().toLocaleDateString('pt-BR');
   const validade    = new Date(Date.now() + 15 * 86400000).toLocaleDateString('pt-BR');
@@ -134,16 +152,24 @@ function montarTemplatePDF() {
           </tr>
         </thead>
         <tbody>
-          ${tabelaCerimonia}${tabelaRecepcao}${tabelaOperacional}${tabelaLocacoes}${tabelaExtras}
+          ${decoTabelas}
+          ${temDeco ? linhaSubtotal('Orçamento da decoração', vDeco, true) : ''}
+          ${temLocExtras ? `<tr><td colspan="3" style="height:14px"></td></tr>${tabelaLocExtras}${linhaSubtotal('Locações extras (por fora)', vLocExtras, true)}` : ''}
         </tbody>
       </table>
     </div>` : ''}
 
     <!-- Total -->
     <div style="display:flex;justify-content:flex-end;margin-bottom:40px">
-      <div style="background:#3d5a47;color:#fff;border-radius:8px;padding:16px 24px;min-width:220px;text-align:right">
-        <div style="font-size:12px;text-transform:uppercase;letter-spacing:.06em;opacity:.7;margin-bottom:6px">Total da proposta</div>
-        <div style="font-size:26px;font-weight:500;letter-spacing:.01em">${fmt(venda)}</div>
+      <div style="background:#3d5a47;color:#fff;border-radius:8px;padding:16px 24px;min-width:260px">
+        ${temLocExtras ? `
+        <div style="display:flex;justify-content:space-between;gap:24px;font-size:12px;opacity:.85;margin-bottom:4px"><span>Decoração</span><span>${fmt(vDeco)}</span></div>
+        <div style="display:flex;justify-content:space-between;gap:24px;font-size:12px;opacity:.85;margin-bottom:8px"><span>Locações extras</span><span>${fmt(vLocExtras)}</span></div>
+        <div style="border-top:1px solid rgba(255,255,255,.3);margin-bottom:8px"></div>` : ''}
+        <div style="display:flex;justify-content:space-between;align-items:baseline;gap:24px">
+          <span style="font-size:12px;text-transform:uppercase;letter-spacing:.06em;opacity:.7">Total geral</span>
+          <span style="font-size:26px;font-weight:500;letter-spacing:.01em">${fmt(venda)}</span>
+        </div>
       </div>
     </div>
 
