@@ -83,7 +83,11 @@ function _salvarDescritivo() {
 
 /* ── COLAR IMAGEM (Ctrl+V) ─────────────────────────────────── */
 function _colarNoDescritivo(e) {
-  const itens = (e.clipboardData && e.clipboardData.items) || [];
+  const dt = e.clipboardData;
+  if (!dt) return;
+
+  // 1) Imagem copiada como arquivo (print de tela, foto da galeria, arquivo)
+  const itens = dt.items || [];
   for (let i = 0; i < itens.length; i++) {
     if (itens[i].type && itens[i].type.indexOf('image') === 0) {
       e.preventDefault();
@@ -92,10 +96,43 @@ function _colarNoDescritivo(e) {
         _inserirImagemNoDoc(dataUrl);
         _salvarDescritivo();
       });
-      return;   // imagem tratada
+      return;
     }
   }
-  // se não for imagem, deixa o colar normal de texto acontecer
+
+  // 2) Imagem copiada de uma página da web (vem como HTML com <img src="...">)
+  const html = dt.getData ? dt.getData('text/html') : '';
+  if (html && /<img[^>]+src=/i.test(html)) {
+    const m = html.match(/<img[^>]+src=["']([^"']+)["']/i);
+    if (m && m[1]) {
+      e.preventDefault();
+      _imagemDeUrl(m[1]);
+      return;
+    }
+  }
+  // caso contrário, deixa o colar normal de texto acontecer
+}
+
+/* Baixa a imagem de uma URL, comprime e insere como flutuante.
+   Se o site bloquear (CORS), usa a URL direta como último recurso. */
+function _imagemDeUrl(url) {
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.onload = () => {
+    try {
+      let w = img.width, h = img.height;
+      if (w > 1100) { h = Math.round(h * 1100 / w); w = 1100; }
+      const c = document.createElement('canvas');
+      c.width = w; c.height = h;
+      c.getContext('2d').drawImage(img, 0, 0, w, h);
+      _inserirImagemNoDoc(c.toDataURL('image/jpeg', 0.82));
+    } catch (err) {
+      _inserirImagemNoDoc(url);   // CORS: mantém a URL original
+    }
+    _salvarDescritivo();
+  };
+  img.onerror = () => { _inserirImagemNoDoc(url); _salvarDescritivo(); };
+  img.src = url;
 }
 
 /* Reduz a imagem (max largura) e comprime, para não pesar no banco */
