@@ -2,18 +2,33 @@
    painel-descritivo.js — Aba "Descritivo" do painel
    ============================================================ */
 
+let _descTimer = null;
+
 function carregarDescritivo() {
   if (!eventoAtual) return;
   const CHAVE = 'desc-v1-' + eventoAtual.id;
   const doc   = document.getElementById('descritivo-doc');
-  const salvo = localStorage.getItem(CHAVE);
-  if (salvo) {
-    doc.innerHTML = salvo;
+
+  const daNuvem = eventoAtual.descritivo_html;          // salvo no banco (vale para todos os aparelhos)
+  const local   = localStorage.getItem(CHAVE);          // salvo só neste aparelho
+
+  if (daNuvem) {
+    // A nuvem é a fonte da verdade — vale em qualquer aparelho
+    doc.innerHTML = daNuvem;
+    localStorage.setItem(CHAVE, daNuvem);
+  } else if (local) {
+    // Ainda não está na nuvem, mas este aparelho tem uma edição local
+    // (ex.: o que foi editado no tablet) → usa e migra para a nuvem
+    doc.innerHTML = local;
+    salvarDescritivoNuvem(local, true);
   } else {
+    // Nada salvo ainda → gera o modelo. NÃO salva na nuvem até a Bruna editar,
+    // para não sobrescrever uma edição feita em outro aparelho.
     doc.innerHTML = templateDescritivo(eventoAtual);
     localStorage.setItem(CHAVE, doc.innerHTML);
   }
-  doc.oninput = () => localStorage.setItem(CHAVE, doc.innerHTML);
+
+  _bindDescInput(doc, CHAVE);
 }
 
 function preencherDescritivo() {
@@ -23,7 +38,33 @@ function preencherDescritivo() {
   const doc   = document.getElementById('descritivo-doc');
   doc.innerHTML = templateDescritivo(eventoAtual);
   localStorage.setItem(CHAVE, doc.innerHTML);
-  doc.oninput = () => localStorage.setItem(CHAVE, doc.innerHTML);
+  salvarDescritivoNuvem(doc.innerHTML);
+  _bindDescInput(doc, CHAVE);
+}
+
+/* Liga o salvamento automático (local na hora + nuvem com pequeno atraso) */
+function _bindDescInput(doc, CHAVE) {
+  doc.oninput = () => {
+    const html = doc.innerHTML;
+    localStorage.setItem(CHAVE, html);          // guarda já neste aparelho
+    clearTimeout(_descTimer);
+    _descTimer = setTimeout(() => salvarDescritivoNuvem(html), 1000);  // sobe pra nuvem
+  };
+}
+
+/* Salva o descritivo na nuvem (banco) — assim aparece em qualquer aparelho */
+async function salvarDescritivoNuvem(html, silencioso) {
+  if (!eventoAtual) return;
+  const { error } = await sb
+    .from('events')
+    .update({ descritivo_html: html })
+    .eq('id', eventoAtual.id);
+  if (!error) {
+    eventoAtual.descritivo_html = html;
+    if (!silencioso) toast('Descritivo salvo na nuvem ✓');
+  } else if (!silencioso) {
+    toast('Erro ao salvar o descritivo na nuvem.', 'erro');
+  }
 }
 
 function imprimirDescritivo() {
