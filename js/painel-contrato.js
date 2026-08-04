@@ -157,6 +157,7 @@ function templateContrato(ev) {
   const valor = (typeof calcVenda === 'function' && calcVenda() > 0) ? fmt(calcVenda()) : 'R$ __________';
   const assin = _ctDataExtenso(new Date());
   const f = (v) => '<span class="ct-fill">' + (v || '') + '</span>';
+  const _ph = '<span class="ct-fill"></span>';   // campo em branco pra preencher à mão
 
   return `
   <h1 class="ct-titulo">Contrato Design Floral</h1>
