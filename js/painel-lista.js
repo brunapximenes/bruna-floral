@@ -4,6 +4,18 @@
 
 let todosEventos = [];
 
+/* Copia o link público do questionário para enviar aos clientes */
+function copiarLinkQuestionario() {
+  const url = 'https://bruna-floral.vercel.app/questionario';
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(url)
+      .then(() => toast('Link do questionário copiado ✓ Envie ao cliente pelo WhatsApp.'))
+      .catch(() => prompt('Copie o link do questionário:', url));
+  } else {
+    prompt('Copie o link do questionário:', url);
+  }
+}
+
 async function carregarLista() {
   const container = document.getElementById('lista-eventos');
   container.innerHTML = '<p style="color:var(--texto2);padding:20px 0">Carregando eventos...</p>';

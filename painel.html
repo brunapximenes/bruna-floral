@@ -45,6 +45,8 @@
 .btn-logout { padding: 7px 14px; border: 1px solid rgba(255,255,255,.4); border-radius: 6px; background: transparent; color: rgba(255,255,255,.7); font-family: 'Jost', sans-serif; font-size: 12px; cursor: pointer; }
 .btn-logout:hover { border-color: #fff; color: #fff; }
 .btn-novo-evento { padding: 8px 16px; border: none; border-radius: 6px; background: var(--rosa); color: #fff; font-family: 'Jost', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; }
+.btn-link-quest { padding: 8px 14px; border: 1px solid rgba(255,255,255,.4); border-radius: 6px; background: rgba(255,255,255,.12); color: #fff; font-family: 'Jost', sans-serif; font-size: 13px; cursor: pointer; white-space: nowrap; }
+.btn-link-quest:hover { background: rgba(255,255,255,.24); }
 
 /* ── TELA LISTA ─────────────────────────────────────── */
 #tela-lista { display: none; }
@@ -190,6 +192,7 @@
       <h1>Painel Bruna Floral</h1>
     </div>
     <div class="app-header-right">
+      <button class="btn-link-quest" onclick="copiarLinkQuestionario()">🔗 Link do questionário</button>
       <button class="btn-novo-evento" onclick="novoEvento()">+ Novo evento</button>
       <button class="btn-logout" onclick="sair()">Sair</button>
     </div>
@@ -542,7 +545,7 @@
 <script src="/js/supabase-client.js"></script>
 <script src="/js/utils.js"></script>
 <script src="/js/painel-auth.js"></script>
-<script src="/js/painel-lista.js?v=2"></script>
+<script src="/js/painel-lista.js?v=3"></script>
 <script src="/js/painel-evento.js?v=2"></script>
 <script src="/js/painel-orcamento.js?v=6"></script>
 <script src="/js/painel-interno.js?v=3"></script>
