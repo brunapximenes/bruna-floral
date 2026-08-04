@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Painel — Bruna Floral</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/style.css?v=5">
+<link rel="stylesheet" href="/css/style.css?v=6">
 <style>
 /* ── LOGIN ──────────────────────────────────────────── */
 #tela-login {
@@ -244,6 +244,7 @@
       <button class="aba"        data-aba="buffet"      onclick="goAba('buffet',this)">Buffet</button>
       <button class="aba"        data-aba="demais"      onclick="goAba('demais',this)">Demais áreas</button>
       <button class="aba"        data-aba="descritivo"  onclick="goAba('descritivo',this);carregarDescritivo()">Descritivo</button>
+      <button class="aba"        data-aba="contrato"    onclick="goAba('contrato',this);carregarContrato()">Contrato</button>
       <button class="aba"        data-aba="orcamento"   onclick="goAba('orcamento',this)">Orçamento</button>
       <button class="aba"        data-aba="interno"     onclick="goAba('interno',this)">Controle interno</button>
     </div>
@@ -392,6 +393,17 @@
         <div id="descritivo-doc" contenteditable="true"></div>
       </div>
 
+      <!-- CONTRATO -->
+      <div class="pag" id="pag-contrato">
+        <div class="desc-toolbar">
+          <span class="desc-dica">📄 Contrato editável — salva na nuvem. Preencha os dados que faltam direto no documento.</span>
+          <button class="desc-btn-fill" onclick="preencherContrato()">↺ Preencher do sistema</button>
+          <button class="desc-btn-fill" onclick="anexarDescritivo()">📎 Anexar descritivo</button>
+          <button class="desc-btn-print" onclick="imprimirContrato()">🖨 Imprimir / PDF</button>
+        </div>
+        <div id="contrato-doc" contenteditable="true"></div>
+      </div>
+
       <!-- ORÇAMENTO -->
       <div class="pag" id="pag-orcamento">
         <div class="orc-dica">⠿ Arraste pela alça para reordenar blocos e itens. Você pode até mover um item de um bloco para outro.</div>
@@ -527,6 +539,7 @@
 <script src="/js/gerar-pdf.js?v=6"></script>
 <script src="/js/exportar-sheets.js"></script>
 <script src="/js/painel-descritivo.js?v=3"></script>
+<script src="/js/painel-contrato.js?v=1"></script>
 <script>verificarSessao();</script>
 </body>
 </html>
