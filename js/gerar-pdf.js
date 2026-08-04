@@ -96,6 +96,7 @@ function montarTemplatePDF() {
   const tabelaLocInternas  = linhasSecao('locacoes_internas', 'Locações internas');
   const tabelaExtras       = linhasSecao('extras', 'Extras');
   const tabelaLocExtras    = linhasSecao('locacoes', 'Locações extras');
+  const tabelaFreteLoc     = linhasSecao('frete_locacao', 'Frete de locação');
 
   // Ordem das seções da decoração segue o que foi arrastado no painel (se houver)
   const _tabPorSec = {
@@ -116,10 +117,12 @@ function montarTemplatePDF() {
   const decoTabelas  = _ordemDeco.map(s => _tabPorSec[s] || '').join('');
   const temDeco      = !!decoTabelas;
   const temLocExtras = !!tabelaLocExtras;
-  const temItens     = temDeco || temLocExtras;
+  const temFrete     = !!tabelaFreteLoc;
+  const temItens     = temDeco || temLocExtras || temFrete;
 
   const vDeco      = (typeof calcDecoracao === 'function')      ? calcDecoracao()      : venda;
   const vLocExtras = (typeof calcLocacoesExtras === 'function') ? calcLocacoesExtras() : 0;
+  const vFrete     = (typeof calcFreteLocacao === 'function')   ? calcFreteLocacao()   : 0;
 
   const dataGeracao = new Date().toLocaleDateString('pt-BR');
   const validade    = new Date(Date.now() + 15 * 86400000).toLocaleDateString('pt-BR');
@@ -171,6 +174,7 @@ function montarTemplatePDF() {
           ${decoTabelas}
           ${temDeco ? linhaSubtotal('Orçamento da decoração', vDeco, true) : ''}
           ${temLocExtras ? `<tr><td colspan="3" style="height:14px"></td></tr>${tabelaLocExtras}${linhaSubtotal('Locações extras (por fora)', vLocExtras, true)}` : ''}
+          ${temFrete ? `<tr><td colspan="3" style="height:14px"></td></tr>${tabelaFreteLoc}${linhaSubtotal('Frete de locação', vFrete, true)}` : ''}
         </tbody>
       </table>
     </div>` : ''}
@@ -178,10 +182,11 @@ function montarTemplatePDF() {
     <!-- Total -->
     <div style="display:flex;justify-content:flex-end;margin-bottom:40px">
       <div style="background:#3d5a47;color:#fff;border-radius:8px;padding:16px 24px;min-width:260px">
-        ${temLocExtras ? `
+        ${(temLocExtras || temFrete) ? `
         <div style="display:flex;justify-content:space-between;gap:24px;font-size:12px;opacity:.85;margin-bottom:4px"><span>Decoração</span><span>${fmt(vDeco)}</span></div>
-        <div style="display:flex;justify-content:space-between;gap:24px;font-size:12px;opacity:.85;margin-bottom:8px"><span>Locações extras</span><span>${fmt(vLocExtras)}</span></div>
-        <div style="border-top:1px solid rgba(255,255,255,.3);margin-bottom:8px"></div>` : ''}
+        ${temLocExtras ? `<div style="display:flex;justify-content:space-between;gap:24px;font-size:12px;opacity:.85;margin-bottom:4px"><span>Locações extras</span><span>${fmt(vLocExtras)}</span></div>` : ''}
+        ${temFrete ? `<div style="display:flex;justify-content:space-between;gap:24px;font-size:12px;opacity:.85;margin-bottom:4px"><span>Frete de locação</span><span>${fmt(vFrete)}</span></div>` : ''}
+        <div style="border-top:1px solid rgba(255,255,255,.3);margin:6px 0 8px"></div>` : ''}
         <div style="display:flex;justify-content:space-between;align-items:baseline;gap:24px">
           <span style="font-size:12px;text-transform:uppercase;letter-spacing:.06em;opacity:.7">Total geral</span>
           <span style="font-size:26px;font-weight:500;letter-spacing:.01em">${fmt(venda)}</span>

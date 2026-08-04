@@ -2,7 +2,7 @@
    painel-orcamento.js — Itens de orçamento (budget_items)
    ============================================================ */
 
-let budgetItems = { cerimonia: [], recepcao: [], operacional: [], locacoes_internas: [], locacoes: [], extras: [] };
+let budgetItems = { cerimonia: [], recepcao: [], operacional: [], frete_locacao: [], locacoes_internas: [], locacoes: [], extras: [] };
 
 /* ── CARREGAR ───────────────────────────────────────────────── */
 async function carregarItensOrcamento() {
@@ -16,7 +16,7 @@ async function carregarItensOrcamento() {
 
   if (error) return;
 
-  budgetItems = { cerimonia: [], recepcao: [], operacional: [], locacoes_internas: [], locacoes: [], extras: [] };
+  budgetItems = { cerimonia: [], recepcao: [], operacional: [], frete_locacao: [], locacoes_internas: [], locacoes: [], extras: [] };
   (data || []).forEach(item => {
     if (budgetItems[item.secao]) budgetItems[item.secao].push(item);
   });
@@ -25,7 +25,7 @@ async function carregarItensOrcamento() {
 }
 
 /* ── RENDERIZAR ─────────────────────────────────────────────── */
-const _ORC_SECS = ['cerimonia', 'recepcao', 'operacional', 'locacoes_internas', 'locacoes', 'extras'];
+const _ORC_SECS = ['cerimonia', 'recepcao', 'operacional', 'frete_locacao', 'locacoes_internas', 'locacoes', 'extras'];
 
 function renderOrcamento() {
   _ORC_SECS.forEach(sec => renderSecao(sec));
@@ -120,16 +120,18 @@ function _somaSecoes(secs) {
   return total;
 }
 
-/* Decoração = tudo, menos as locações extras (que são cobradas "por fora").
+/* Decoração = tudo, menos as locações extras e o frete de locação (cobrados "por fora").
    Locações internas fazem parte da decoração e entram no valor dela. */
 function calcDecoracao()      { return _somaSecoes(['cerimonia', 'recepcao', 'operacional', 'locacoes_internas', 'extras']); }
 function calcLocacoesExtras() { return _somaSecoes(['locacoes']); }
-function calcVenda()          { return calcDecoracao() + calcLocacoesExtras(); }
+function calcFreteLocacao()   { return _somaSecoes(['frete_locacao']); }
+function calcVenda()          { return calcDecoracao() + calcLocacoesExtras() + calcFreteLocacao(); }
 
 function updateTotais() {
   const decoracao = calcDecoracao();
   const locExtras = calcLocacoesExtras();
-  const venda     = decoracao + locExtras;   // total geral
+  const freteLoc  = calcFreteLocacao();
+  const venda     = decoracao + locExtras + freteLoc;   // total geral
   const custo     = calcCusto();
   const lucro     = venda - custo;
   const budgetRaw = parseFloat((val('budget-cliente') || '0').replace(/[^\d,\.]/g, '').replace(',', '.')) || 0;
@@ -140,6 +142,7 @@ function updateTotais() {
     mOrc.innerHTML =
       metricHTML('Orçamento decoração', fmt(decoracao), '') +
       metricHTML('Locações extras', fmt(locExtras), '') +
+      metricHTML('Frete de locação', fmt(freteLoc), '') +
       metricHTML('Total geral', fmt(venda), 'ok') +
       metricHTML('Budget cliente', budgetRaw > 0 ? fmt(budgetRaw) : '—', '') +
       metricHTML('Diferença', budgetRaw > 0 ? (diff >= 0 ? '+' : '') + fmt(diff) : '—', budgetRaw > 0 ? (diff >= 0 ? 'ok' : 'bad') : '');
