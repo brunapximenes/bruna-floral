@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dados para o contrato · Bruna Floral</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/style.css">
+<style>
+  body { background: var(--creme, #faf7f2); font-family: 'Jost', sans-serif; color: #2c2c2c; }
+  .topo { background: var(--verde, #3d5a47); color: #fff; padding: 40px 24px 32px; text-align: center; }
+  .topo h1 { font-family: 'Cormorant Garamond', serif; font-weight: 400; font-size: 30px; margin-bottom: 6px; }
+  .topo p { color: rgba(255,255,255,.75); font-size: 14px; }
+  .wrap { max-width: 620px; margin: 0 auto; padding: 28px 20px 60px; }
+  .bloco { background: #fff; border: 1px solid var(--borda, #eee); border-radius: 12px; padding: 22px 20px; margin-bottom: 18px; }
+  .bloco-tit { font-family: 'Cormorant Garamond', serif; font-size: 22px; color: var(--verde, #3d5a47); margin-bottom: 4px; }
+  .bloco-sub { font-size: 12.5px; color: #888; margin-bottom: 16px; }
+  .campo { margin-bottom: 14px; }
+  .campo label { display: block; font-size: 12.5px; color: #666; margin-bottom: 5px; }
+  .campo input { width: 100%; padding: 11px 12px; font-size: 14px; border: 1px solid var(--borda, #ddd); border-radius: 8px; font-family: 'Jost', sans-serif; }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .btn-enviar { width: 100%; padding: 15px; font-size: 15px; border: none; border-radius: 10px; background: var(--rosa, #c9847a); color: #fff; font-family: 'Jost', sans-serif; cursor: pointer; margin-top: 4px; }
+  .btn-enviar:disabled { opacity: .6; }
+  #confirma { display: none; text-align: center; padding: 60px 24px; }
+  #confirma .ic { font-size: 52px; margin-bottom: 16px; }
+  #confirma h2 { font-family: 'Cormorant Garamond', serif; font-size: 28px; color: var(--verde, #3d5a47); margin-bottom: 10px; }
+  #confirma p { color: #777; font-size: 15px; max-width: 420px; margin: 0 auto; }
+  #erro-id { display: none; text-align: center; padding: 60px 24px; color: #b8706a; }
+  @media (max-width: 480px) { .row2 { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<div id="tela">
+  <div class="topo">
+    <h1>Dados para o contrato</h1>
+    <p id="topo-sub">Preencha para gerarmos seu contrato</p>
+  </div>
+
+  <div class="wrap">
+    <div class="bloco">
+      <div class="bloco-tit">Seus dados</div>
+      <div class="bloco-sub">Informações que entram no contrato de prestação de serviço.</div>
+      <div class="campo"><label>Nome completo</label><input id="d-nome" type="text" placeholder="Nome completo de quem assina o contrato"></div>
+      <div class="row2">
+        <div class="campo"><label>CPF</label><input id="d-cpf" type="text" placeholder="000.000.000-00"></div>
+        <div class="campo"><label>Celular</label><input id="d-celular" type="tel" placeholder="(81) 99999-9999"></div>
+      </div>
+      <div class="row2">
+        <div class="campo"><label>Estado civil</label><input id="d-estado" type="text" placeholder="Ex: solteira"></div>
+        <div class="campo"><label>Nacionalidade</label><input id="d-nacionalidade" type="text" placeholder="Ex: brasileira"></div>
+      </div>
+      <div class="campo"><label>Endereço completo</label><input id="d-endereco" type="text" placeholder="Rua, número, complemento, bairro, cidade"></div>
+      <div class="row2">
+        <div class="campo"><label>Instagram</label><input id="d-insta" type="text" placeholder="@seuperfil"></div>
+        <div class="campo"><label>E-mail</label><input id="d-email" type="email" placeholder="seu@email.com"></div>
+      </div>
+    </div>
+
+    <div class="bloco">
+      <div class="bloco-tit">Seus fornecedores</div>
+      <div class="bloco-sub">Pode deixar em branco os que ainda não fechou — dá pra completar depois.</div>
+      <div class="row2">
+        <div class="campo"><label>Fotografia</label><input id="d-fotografia" type="text" placeholder="@ ou nome"></div>
+        <div class="campo"><label>Filmagem</label><input id="d-filmagem" type="text" placeholder="@ ou nome"></div>
+      </div>
+      <div class="row2">
+        <div class="campo"><label>Make / cabelo</label><input id="d-make" type="text" placeholder="@ ou nome"></div>
+        <div class="campo"><label>Vestido</label><input id="d-vestido" type="text" placeholder="@ ou nome"></div>
+      </div>
+      <div class="row2">
+        <div class="campo"><label>Buffet</label><input id="d-buffet" type="text" placeholder="@ ou nome"></div>
+        <div class="campo"><label>Bolo</label><input id="d-bolo" type="text" placeholder="@ ou nome"></div>
+      </div>
+      <div class="row2">
+        <div class="campo"><label>Doces</label><input id="d-doces" type="text" placeholder="@ ou nome"></div>
+        <div class="campo"><label>Assessoria</label><input id="d-assessoria" type="text" placeholder="@ ou nome"></div>
+      </div>
+    </div>
+
+    <button class="btn-enviar" id="btn-enviar" onclick="enviarDados()">Enviar dados</button>
+  </div>
+</div>
+
+<div id="confirma">
+  <div class="ic">🌸</div>
+  <h2>Dados enviados!</h2>
+  <p>Obrigada! Suas informações foram recebidas e a Bruna já pode gerar seu contrato. Qualquer coisa, ela entra em contato pelo WhatsApp.</p>
+</div>
+
+<div id="erro-id">
+  <p>Link inválido. Peça à Bruna o link correto para preencher seus dados. 🌸</p>
+</div>
+
+<div id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/js/config.js?v=3"></script>
+<script src="/js/supabase-client.js?v=3"></script>
+<script src="/js/utils.js"></script>
+<script src="/js/dados.js?v=1"></script>
+</body>
+</html>

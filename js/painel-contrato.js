@@ -127,23 +127,36 @@ function _ctDataExtenso(d) {
 
 function _ctFornLinha(rotuloA, valA, rotuloB, valB) {
   const campo = (v) => '<span class="ct-fill">' + (v || '') + '</span>';
-  let linha = '<div class="ct-forn-linha"><span>' + rotuloA + ': @' + '</span>' + campo(valA);
-  if (rotuloB) linha += '<span>' + rotuloB + ': @' + '</span>' + campo(valB);
+  let linha = '<div class="ct-forn-linha"><span>' + rotuloA + ': </span>' + campo(valA);
+  if (rotuloB) linha += '<span>' + rotuloB + ': </span>' + campo(valB);
   else linha += '<span></span><span></span>';
   return linha + '</div>';
 }
 
+/* Copia o link do formulário de dados do cliente para este evento */
+function copiarLinkDados() {
+  if (!eventoAtual) { toast('Nenhum evento aberto.', 'erro'); return; }
+  const url = 'https://bruna-floral.vercel.app/dados?id=' + eventoAtual.id;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(url)
+      .then(() => toast('Link copiado ✓ Envie ao cliente pelo WhatsApp.'))
+      .catch(() => prompt('Copie o link e envie ao cliente:', url));
+  } else {
+    prompt('Copie o link e envie ao cliente:', url);
+  }
+}
+
 /* ── TEMPLATE DO CONTRATO ────────────────────────────────────── */
 function templateContrato(ev) {
-  const nome  = ev.nomes || '';
-  const cel   = ev.telefone || '';
+  const dc    = ev.dados_contrato || {};   // dados que o cliente preencheu pelo link
+  const nome  = dc.nome_completo || ev.nomes || '';
+  const cel   = dc.celular || ev.telefone || '';
   const data  = _ctData(ev.data_evento);
   const local = ev.local_evento || '';
   const cerim = ev.cerimonial || '';
   const valor = (typeof calcVenda === 'function' && calcVenda() > 0) ? fmt(calcVenda()) : 'R$ __________';
   const assin = _ctDataExtenso(new Date());
-  const f = (v, ph) => '<span class="ct-fill">' + (v || '') + '</span>' + (v ? '' : '');
-  const _ph = '<span class="ct-fill"></span>';
+  const f = (v) => '<span class="ct-fill">' + (v || '') + '</span>';
 
   return `
   <h1 class="ct-titulo">Contrato Design Floral</h1>
@@ -156,21 +169,21 @@ function templateContrato(ev) {
 
   <div class="ct-sub">CONTRATANTE</div>
   <p>Nome: ${f(nome)}</p>
-  <p>CPF: ${_ph} &nbsp;&nbsp; Insta: @${_ph}</p>
-  <p>Estado civil: ${_ph}</p>
-  <p>Nacionalidade: ${_ph}</p>
-  <p>Endereço: ${_ph}</p>
+  <p>CPF: ${f(dc.cpf)} &nbsp;&nbsp; Insta: ${f(dc.insta)}</p>
+  <p>Estado civil: ${f(dc.estado_civil)}</p>
+  <p>Nacionalidade: ${f(dc.nacionalidade)}</p>
+  <p>Endereço: ${f(dc.endereco)}</p>
   <p>Celular: ${f(cel)}</p>
-  <p>Email: ${_ph}</p>
+  <p>Email: ${f(dc.email)}</p>
 
-  <div class="ct-sub">Fornecedores <span class="ct-obs">(preencher/marcar conforme o cliente informar — pode deixar em branco)</span></div>
+  <div class="ct-sub">Fornecedores <span class="ct-obs">(preenchidos pelo cliente ou por você — pode deixar em branco)</span></div>
   <div class="ct-forn">
-    ${_ctFornLinha('Fotografia', '', 'Filmagem', '')}
+    ${_ctFornLinha('Fotografia', dc.forn_fotografia, 'Filmagem', dc.forn_filmagem)}
     ${_ctFornLinha('Cerimonial', cerim, 'Decoração', 'Canga Fulô')}
-    ${_ctFornLinha('Make/cabelo', '', 'Vestido', '')}
-    ${_ctFornLinha('Buffet', '', 'Bolo', '')}
-    ${_ctFornLinha('doces', '', '', null)}
-    ${_ctFornLinha('Local', local, 'Assessoria', '')}
+    ${_ctFornLinha('Make/cabelo', dc.forn_make, 'Vestido', dc.forn_vestido)}
+    ${_ctFornLinha('Buffet', dc.forn_buffet, 'Bolo', dc.forn_bolo)}
+    ${_ctFornLinha('doces', dc.forn_doces, 'Assessoria', dc.forn_assessoria)}
+    ${_ctFornLinha('Local', local, '', null)}
   </div>
 
   <div class="ct-sec">Do objeto</div>

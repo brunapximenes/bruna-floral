@@ -396,7 +396,8 @@
       <!-- CONTRATO -->
       <div class="pag" id="pag-contrato">
         <div class="desc-toolbar">
-          <span class="desc-dica">📄 Contrato editável — salva na nuvem. Preencha os dados que faltam direto no documento.</span>
+          <span class="desc-dica">📄 Contrato editável — salva na nuvem. Envie o link de dados ao cliente para preencher CPF, endereço e fornecedores.</span>
+          <button class="desc-btn-fill" onclick="copiarLinkDados()">🔗 Copiar link de dados</button>
           <button class="desc-btn-fill" onclick="preencherContrato()">↺ Preencher do sistema</button>
           <button class="desc-btn-fill" onclick="anexarDescritivo()">📎 Anexar descritivo</button>
           <button class="desc-btn-print" onclick="imprimirContrato()">🖨 Imprimir / PDF</button>
@@ -539,7 +540,7 @@
 <script src="/js/gerar-pdf.js?v=6"></script>
 <script src="/js/exportar-sheets.js"></script>
 <script src="/js/painel-descritivo.js?v=3"></script>
-<script src="/js/painel-contrato.js?v=1"></script>
+<script src="/js/painel-contrato.js?v=2"></script>
 <script>verificarSessao();</script>
 </body>
 </html>
