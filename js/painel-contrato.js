@@ -28,6 +28,36 @@ function carregarContrato() {
   }
 
   _ctBind(doc, CHAVE);
+  preencherCamposPagamento();
+}
+
+/* Preenche os campos de forma de pagamento com o que está salvo no evento */
+function preencherCamposPagamento() {
+  if (!eventoAtual) return;
+  const setv = (id, v) => { const e = document.getElementById(id); if (e) e.value = v || ''; };
+  setv('ct-valor', eventoAtual.contrato_valor);
+  setv('ct-extenso', eventoAtual.contrato_valor_extenso);
+  setv('ct-parcelas', eventoAtual.contrato_parcelas);
+  setv('ct-vencimentos', eventoAtual.contrato_vencimentos);
+  const vEl = document.getElementById('ct-valor');
+  if (vEl && typeof calcVenda === 'function' && calcVenda() > 0) {
+    vEl.placeholder = 'Orçamento: ' + fmt(calcVenda());
+  }
+}
+
+/* Salva a forma de pagamento no evento (não regenera o contrato — isso é no "Preencher do sistema") */
+async function salvarPagamento() {
+  if (!eventoAtual) return;
+  const g = (id) => { const e = document.getElementById(id); return e ? e.value.trim() : ''; };
+  const upd = {
+    contrato_valor:         g('ct-valor')       || null,
+    contrato_valor_extenso: g('ct-extenso')     || null,
+    contrato_parcelas:      g('ct-parcelas')    || null,
+    contrato_vencimentos:   g('ct-vencimentos') || null,
+  };
+  const { error } = await sb.from('events').update(upd).eq('id', eventoAtual.id);
+  if (!error) { Object.assign(eventoAtual, upd); toast('Forma de pagamento salva ✓'); }
+  else toast('Erro ao salvar a forma de pagamento.', 'erro');
 }
 
 /* Regenera o contrato com os dados atuais do sistema (mantém o Anexo se já houver) */
@@ -154,7 +184,11 @@ function templateContrato(ev) {
   const data  = _ctData(ev.data_evento);
   const local = ev.local_evento || '';
   const cerim = ev.cerimonial || '';
-  const valor = (typeof calcVenda === 'function' && calcVenda() > 0) ? fmt(calcVenda()) : 'R$ __________';
+  const valorSis = (typeof calcVenda === 'function' && calcVenda() > 0) ? fmt(calcVenda()) : '';
+  const valor    = ev.contrato_valor || valorSis || 'R$ __________';
+  const extenso  = ev.contrato_valor_extenso || '';
+  const parcelas = ev.contrato_parcelas || '';
+  const vencs    = ev.contrato_vencimentos || '';
   const assin = _ctDataExtenso(new Date());
   const f = (v) => '<span class="ct-fill">' + (v || '') + '</span>';
   const _ph = '<span class="ct-fill"></span>';   // campo em branco pra preencher à mão
@@ -194,11 +228,11 @@ function templateContrato(ev) {
   <p><em>(DESCRIÇÃO DOS PRODUTOS EM ANEXO)</em></p>
 
   <div class="ct-sec">Do preço e forma de pagamento</div>
-  <p><strong>Cláusula 2º</strong> - Pelo(s) produto(s) e/ou serviço(s) adquiridos pagará a CONTRATANTE à CONTRATADA o valor de <strong>${valor}</strong> ( <span class="ct-fill"></span> ).</p>
+  <p><strong>Cláusula 2º</strong> - Pelo(s) produto(s) e/ou serviço(s) adquiridos pagará a CONTRATANTE à CONTRATADA o valor de <strong>${valor}</strong> ( ${extenso ? extenso : '<span class="ct-fill"></span>'} ).</p>
   <p><strong>§1º</strong> Os valores e a forma de pagamento deverão ser pagos conforme combinado entre CONTRATANTE e CONTRATADA.</p>
   <p><strong>Forma de pagamento</strong></p>
-  <p>Qt. parcelas: ${_ph}</p>
-  <p>Vencimentos: ${_ph}</p>
+  <p>Qt. parcelas: ${parcelas ? parcelas : _ph}</p>
+  <p>Vencimentos: ${vencs ? vencs.replace(/\n/g, '<br>') : _ph}</p>
   <p><strong>§2º</strong> O valor devido será liquidado por meio de depósito bancário, DOC, TED ou PIX em conta da empresa CONTRATADA, no Banco Inter.</p>
   <p>Banco Inter (077) &nbsp; Conta Corrente: 1916738-5 &nbsp; Agência: 0001<br>
   Bruna Padilha Ximenes — CNPJ nº 23.667.854/0001-21 (PIX CNPJ)</p>

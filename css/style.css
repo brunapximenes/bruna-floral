@@ -275,6 +275,14 @@ body {
 .ct-linha-assina { border-top: 1px solid #333; margin-bottom: 4px; height: 28px; }
 .ct-anexo { border-top: 1px dashed #d5cfc7; margin-top: 10px; padding-top: 12px; }
 .ct-anexo-vazio { color: #aaa; font-style: italic; text-align: center; }
+.ct-pagamento { background: var(--creme2); border: 1px solid var(--borda); border-radius: 10px; padding: 16px 18px; margin-bottom: 14px; }
+.ct-pag-tit { font-size: 13px; font-weight: 500; color: var(--verde); margin-bottom: 12px; }
+.ct-pag-obs { font-weight: 400; font-size: 11px; color: #999; }
+.ct-pag-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+.ct-pagamento .campo label { display: block; font-size: 12px; color: #666; margin-bottom: 4px; }
+.ct-pagamento input, .ct-pagamento textarea { width: 100%; padding: 8px 10px; font-size: 13px; border: 1px solid var(--borda); border-radius: 6px; font-family: 'Jost', sans-serif; }
+.ct-pagamento textarea { resize: vertical; }
+@media (max-width: 640px) { .ct-pag-grid { grid-template-columns: 1fr; } }
 
 /* ── Imagens flutuantes coladas no descritivo ── */
 .ds-img-wrap {

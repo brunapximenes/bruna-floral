@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Painel — Bruna Floral</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/style.css?v=6">
+<link rel="stylesheet" href="/css/style.css?v=7">
 <style>
 /* ── LOGIN ──────────────────────────────────────────── */
 #tela-login {
@@ -402,6 +402,15 @@
           <button class="desc-btn-fill" onclick="anexarDescritivo()">📎 Anexar descritivo</button>
           <button class="desc-btn-print" onclick="imprimirContrato()">🖨 Imprimir / PDF</button>
         </div>
+        <div class="ct-pagamento">
+          <div class="ct-pag-tit">💰 Forma de pagamento <span class="ct-pag-obs">(interno — só você vê. Preencha e clique em "↺ Preencher do sistema" para aplicar no contrato)</span></div>
+          <div class="ct-pag-grid">
+            <div class="campo"><label>Valor do contrato</label><input id="ct-valor" type="text" placeholder="R$ 0,00" onchange="salvarPagamento()"></div>
+            <div class="campo"><label>Valor por extenso</label><input id="ct-extenso" type="text" placeholder="ex: onze mil reais" onchange="salvarPagamento()"></div>
+            <div class="campo"><label>Qt. parcelas</label><input id="ct-parcelas" type="text" placeholder="ex: 4 parcelas" onchange="salvarPagamento()"></div>
+          </div>
+          <div class="campo"><label>Vencimentos</label><textarea id="ct-vencimentos" rows="2" placeholder="ex: 1.650 em 04/08/2026  ·  1.650 em 05/09/26  ·  3.000 em dez/26  ·  5.000 até 30/06/27" onchange="salvarPagamento()"></textarea></div>
+        </div>
         <div id="contrato-doc" contenteditable="true"></div>
       </div>
 
@@ -540,7 +549,7 @@
 <script src="/js/gerar-pdf.js?v=6"></script>
 <script src="/js/exportar-sheets.js"></script>
 <script src="/js/painel-descritivo.js?v=3"></script>
-<script src="/js/painel-contrato.js?v=3"></script>
+<script src="/js/painel-contrato.js?v=4"></script>
 <script>verificarSessao();</script>
 </body>
 </html>
