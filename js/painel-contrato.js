@@ -176,6 +176,13 @@ function copiarLinkDados() {
   }
 }
 
+/* Imagem da assinatura da Bruna (embutida em js/assinatura.js), se disponível */
+function _assinaturaImg() {
+  return (typeof ASSINATURA_DATA_URL !== 'undefined')
+    ? '<img class="ct-assinatura-img" src="' + ASSINATURA_DATA_URL + '" alt="Assinatura">'
+    : '';
+}
+
 /* ── TEMPLATE DO CONTRATO ────────────────────────────────────── */
 function templateContrato(ev) {
   const dc    = ev.dados_contrato || {};   // dados que o cliente preencheu pelo link
@@ -282,7 +289,7 @@ function templateContrato(ev) {
   <p class="ct-cidade">${assin}</p>
 
   <div class="ct-assinaturas">
-    <div class="ct-assina"><div class="ct-linha-assina"></div>CONTRATADA:<br>Bruna Padilha Ximenes</div>
+    <div class="ct-assina">${_assinaturaImg()}<div class="ct-linha-assina"></div>CONTRATADA:<br>Bruna Padilha Ximenes</div>
     <div class="ct-assina"><div class="ct-linha-assina"></div>CONTRATANTE:</div>
     <div class="ct-assina"><div class="ct-linha-assina"></div>Testemunha 1:</div>
     <div class="ct-assina"><div class="ct-linha-assina"></div>Testemunha 2:</div>
@@ -311,5 +318,6 @@ function _ctCssImprimir() {
     '.ct-assinaturas{margin-top:30px;display:grid;grid-template-columns:1fr 1fr;gap:36px 40px;}' +
     '.ct-assina{font-size:11.5px;}' +
     '.ct-linha-assina{border-top:1px solid #333;margin-bottom:4px;height:28px;}' +
+    '.ct-assinatura-img{display:block;max-height:58px;margin:0 auto -20px;position:relative;z-index:2;}' +
     '.ct-anexo-vazio{color:#aaa;font-style:italic;}';
 }
