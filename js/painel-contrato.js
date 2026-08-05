@@ -319,5 +319,6 @@ function _ctCssImprimir() {
     '.ct-assina{font-size:11.5px;}' +
     '.ct-linha-assina{border-top:1px solid #333;margin-bottom:4px;height:28px;}' +
     '.ct-assinatura-img{display:block;max-height:58px;margin:0 auto -20px;position:relative;z-index:2;}' +
+    '.ct-anexo{position:relative;}' +
     '.ct-anexo-vazio{color:#aaa;font-style:italic;}';
 }

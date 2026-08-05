@@ -274,7 +274,7 @@ body {
 .ct-assina { font-size: 11.5px; }
 .ct-linha-assina { border-top: 1px solid #333; margin-bottom: 4px; height: 28px; }
 .ct-assinatura-img { display: block; max-height: 58px; margin: 0 auto -20px; position: relative; z-index: 2; }
-.ct-anexo { border-top: 1px dashed #d5cfc7; margin-top: 10px; padding-top: 12px; }
+.ct-anexo { border-top: 1px dashed #d5cfc7; margin-top: 10px; padding-top: 12px; position: relative; }
 .ct-anexo-vazio { color: #aaa; font-style: italic; text-align: center; }
 .ct-pagamento { background: var(--creme2); border: 1px solid var(--borda); border-radius: 10px; padding: 16px 18px; margin-bottom: 14px; }
 .ct-pag-tit { font-size: 13px; font-weight: 500; color: var(--verde); margin-bottom: 12px; }
