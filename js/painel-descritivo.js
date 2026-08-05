@@ -210,7 +210,7 @@ function _colarNoDescritivo(e) {
     if (itens[i].type && itens[i].type.indexOf('image') === 0) {
       e.preventDefault();
       const file = itens[i].getAsFile();
-      _redimensionarImagem(file, 780, 0.66).then((dataUrl) => {
+      _redimensionarImagem(file, 640, 0.55).then((dataUrl) => {
         _inserirImagemNoDoc(dataUrl);
         _salvarDescritivo();
       });
@@ -239,11 +239,11 @@ function _imagemDeUrl(url) {
   img.onload = () => {
     try {
       let w = img.width, h = img.height;
-      if (w > 780) { h = Math.round(h * 780 / w); w = 780; }
+      if (w > 640) { h = Math.round(h * 640 / w); w = 640; }
       const c = document.createElement('canvas');
       c.width = w; c.height = h;
       c.getContext('2d').drawImage(img, 0, 0, w, h);
-      _inserirImagemNoDoc(c.toDataURL('image/jpeg', 0.66));
+      _inserirImagemNoDoc(c.toDataURL('image/jpeg', 0.55));
     } catch (err) {
       _inserirImagemNoDoc(url);   // CORS: mantém a URL original
     }
@@ -287,6 +287,36 @@ function _inserirImagemNoDoc(dataUrl) {
   wrap.appendChild(img);
   _descDoc.appendChild(wrap);
   _selecionarImagem(wrap);
+}
+
+/* ── COMPACTAR todas as imagens do descritivo (1 clique) ───── */
+async function compactarImagensDescritivo() {
+  if (!_descDoc) return;
+  const imgs = Array.from(_descDoc.querySelectorAll('img.ds-img'));
+  if (!imgs.length) { toast('Não há imagens para compactar.'); return; }
+  toast('Compactando ' + imgs.length + ' imagem(ns)...');
+  for (const img of imgs) {
+    try { img.src = await _recompactarSrc(img.src, 640, 0.5); } catch (e) { /* ignora a que falhar */ }
+  }
+  _salvarDescritivo();
+  toast('Imagens compactadas ✓');
+}
+
+function _recompactarSrc(src, maxLarg, qualidade) {
+  return new Promise((resolve, reject) => {
+    const im = new Image();
+    im.onload = () => {
+      try {
+        let w = im.width, h = im.height;
+        if (w > maxLarg) { h = Math.round(h * maxLarg / w); w = maxLarg; }
+        const c = document.createElement('canvas'); c.width = w; c.height = h;
+        c.getContext('2d').drawImage(im, 0, 0, w, h);
+        resolve(c.toDataURL('image/jpeg', qualidade));
+      } catch (e) { reject(e); }
+    };
+    im.onerror = reject;
+    im.src = src;
+  });
 }
 
 /* ── SELEÇÃO (uma ou várias) ───────────────────────────────── */
