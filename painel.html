@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Painel — Bruna Floral</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/style.css?v=12">
+<link rel="stylesheet" href="/css/style.css?v=13">
 <style>
 /* ── LOGIN ──────────────────────────────────────────── */
 #tela-login {
@@ -384,7 +384,8 @@
       <!-- DESCRITIVO -->
       <div class="pag" id="pag-descritivo">
         <div class="desc-toolbar">
-          <span class="desc-dica">💡 Cole imagens com Ctrl+V (ou toque e segure → Colar). Arraste para posicionar e use a bolinha do canto para redimensionar.</span>
+          <span class="desc-dica">💡 Cole imagens com Ctrl+V. Arraste para posicionar (linhas rosas ajudam a alinhar). Ctrl/Shift+clique seleciona várias.</span>
+          <button class="desc-btn-fill" id="btn-multi-sel" onclick="toggleMultiSel(this)">☑ Selecionar várias</button>
           <button class="desc-btn-fill" onclick="preencherDescritivo()">↺ Preencher do formulário</button>
           <button class="desc-btn-print" onclick="imprimirDescritivo()">🖨 Imprimir / PDF</button>
         </div>
@@ -561,7 +562,7 @@
 <script src="/js/painel-interno.js?v=3"></script>
 <script src="/js/gerar-pdf.js?v=6"></script>
 <script src="/js/exportar-sheets.js"></script>
-<script src="/js/painel-descritivo.js?v=5"></script>
+<script src="/js/painel-descritivo.js?v=6"></script>
 <script src="/js/assinatura.js?v=1"></script>
 <script src="/js/painel-contrato.js?v=8"></script>
 <script>verificarSessao();</script>

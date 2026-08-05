@@ -250,6 +250,7 @@ body {
   color: var(--verde); font-family: 'Jost', sans-serif; font-size: 13px;
 }
 .desc-btn-fill:hover { background: #e8e2d8; }
+.desc-btn-fill.ativo { background: var(--verde); color: #fff; border-color: var(--verde); }
 .desc-btn-print {
   padding: 9px 18px; border-radius: 8px; cursor: pointer; border: none;
   background: var(--verde); color: #fff; font-family: 'Jost', sans-serif; font-size: 13px;
