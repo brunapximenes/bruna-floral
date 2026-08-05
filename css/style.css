@@ -179,6 +179,7 @@ body {
 .badge-novo      { background: #eff6ff; color: var(--status-novo); }
 .badge-analise   { background: #fffbeb; color: var(--status-analise); }
 .badge-orc       { background: #fff7ed; color: var(--status-orc); }
+.badge-contrato  { background: #f0f9ff; color: #0369a1; }
 .badge-fechado   { background: #f0fdf4; color: var(--status-fechado); }
 .badge-cancelado { background: #f9fafb; color: var(--status-cancelado); }
 .badge-select {
