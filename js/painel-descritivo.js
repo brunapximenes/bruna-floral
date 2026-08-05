@@ -207,7 +207,7 @@ function _colarNoDescritivo(e) {
     if (itens[i].type && itens[i].type.indexOf('image') === 0) {
       e.preventDefault();
       const file = itens[i].getAsFile();
-      _redimensionarImagem(file, 1100, 0.82).then((dataUrl) => {
+      _redimensionarImagem(file, 780, 0.66).then((dataUrl) => {
         _inserirImagemNoDoc(dataUrl);
         _salvarDescritivo();
       });
@@ -236,11 +236,11 @@ function _imagemDeUrl(url) {
   img.onload = () => {
     try {
       let w = img.width, h = img.height;
-      if (w > 1100) { h = Math.round(h * 1100 / w); w = 1100; }
+      if (w > 780) { h = Math.round(h * 780 / w); w = 780; }
       const c = document.createElement('canvas');
       c.width = w; c.height = h;
       c.getContext('2d').drawImage(img, 0, 0, w, h);
-      _inserirImagemNoDoc(c.toDataURL('image/jpeg', 0.82));
+      _inserirImagemNoDoc(c.toDataURL('image/jpeg', 0.66));
     } catch (err) {
       _inserirImagemNoDoc(url);   // CORS: mantém a URL original
     }
@@ -367,8 +367,14 @@ async function salvarDescritivoNuvem(html, silencioso) {
   if (!error) {
     eventoAtual.descritivo_html = html;
     if (!silencioso) toast('Descritivo salvo na nuvem ✓');
-  } else if (!silencioso) {
-    toast('Erro ao salvar o descritivo na nuvem.', 'erro');
+  } else {
+    console.error('Erro ao salvar descritivo:', error);
+    if (!silencioso) {
+      const pesado = html && html.length > 3800000;
+      toast(pesado
+        ? 'Não salvou: descritivo muito pesado (imagens grandes/demais). Remova ou reduza imagens.'
+        : 'Erro ao salvar o descritivo na nuvem.', 'erro');
+    }
   }
 }
 
