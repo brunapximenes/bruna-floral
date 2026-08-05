@@ -48,13 +48,18 @@ async function carregarLista() {
   renderLista(todosEventos);
 }
 
+/* tira acentos e deixa minúsculo, para a busca ignorar acentuação */
+function _semAcento(s) {
+  return (s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+}
+
 function filtrar() {
-  const busca  = document.getElementById('f-busca').value.toLowerCase();
+  const busca  = _semAcento(document.getElementById('f-busca').value);
   const status = document.getElementById('f-status').value;
   const tipo   = document.getElementById('f-tipo').value;
 
   const filtrados = todosEventos.filter(e => {
-    const matchBusca  = !busca  || (e.nomes || '').toLowerCase().includes(busca);
+    const matchBusca  = !busca  || _semAcento(e.nomes).includes(busca);
     const matchStatus = !status || e.status === status;
     const matchTipo   = !tipo   || e.tipo_evento === tipo;
     return matchBusca && matchStatus && matchTipo;
@@ -101,9 +106,28 @@ function renderLista(eventos) {
             <span style="margin-left:auto;opacity:.6">${chegou}</span>
           </div>
         </div>
-        <span class="badge ${badgeCls}">${labelStatus}</span>
+        ${_selectStatus(e)}
       </div>`;
   }).join('');
+}
+
+/* Selo de status como seletor — muda direto na lista */
+function _selectStatus(e) {
+  const badgeCls = STATUS_BADGE[e.status] || 'badge-novo';
+  const opts = Object.keys(STATUS_LABELS).map(k =>
+    `<option value="${k}" ${e.status === k ? 'selected' : ''}>${STATUS_LABELS[k]}</option>`).join('');
+  return `<select class="badge-select ${badgeCls}" title="Mudar status"
+    onclick="event.stopPropagation()"
+    onchange="event.stopPropagation();mudarStatusLista('${e.id}',this.value,this)">${opts}</select>`;
+}
+
+async function mudarStatusLista(id, novo, el) {
+  const { error } = await sb.from('events').update({ status: novo }).eq('id', id);
+  if (error) { toast('Erro ao mudar status.', 'erro'); return; }
+  const ev = todosEventos.find(x => x.id === id);
+  if (ev) ev.status = novo;
+  el.className = 'badge-select ' + (STATUS_BADGE[novo] || 'badge-novo');
+  toast('Status atualizado ✓');
 }
 
 async function novoEvento() {

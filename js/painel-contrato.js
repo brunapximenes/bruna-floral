@@ -29,6 +29,11 @@ function carregarContrato() {
 
   _ctBind(doc, CHAVE);
   preencherCamposPagamento();
+
+  if (!doc._hist && typeof criarHistorico === 'function') {
+    doc._hist = criarHistorico(doc, _ctHtmlLimpo, (h) => { doc.innerHTML = h; _ctSalvar(); });
+  }
+  if (doc._hist) doc._hist.reset(_ctHtmlLimpo());
 }
 
 /* Preenche os campos de forma de pagamento com o que está salvo no evento */

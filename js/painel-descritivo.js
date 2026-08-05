@@ -4,6 +4,64 @@
 
 let _descTimer = null;
 
+/* ============================================================
+   Histórico de desfazer/refazer (Ctrl+Z / Ctrl+Y) confiável.
+   Guarda snapshots do HTML e restaura exatamente como estava —
+   necessário porque as edições por JS quebram o "desfazer" nativo.
+   ============================================================ */
+function criarHistorico(doc, getHtml, setHtml) {
+  let undo = [getHtml()];
+  let redo = [];
+  let timer = null;
+  let restaurando = false;
+
+  function snap() {
+    if (restaurando) return;
+    const atual = getHtml();
+    if (atual === undo[undo.length - 1]) return;   // nada mudou
+    undo.push(atual);
+    if (undo.length > 60) undo.shift();
+    redo = [];
+  }
+
+  // Observa qualquer mudança no documento (digitação, botões, imagens) e
+  // agenda um snapshot pouco depois de a pessoa parar de mexer.
+  const obs = new MutationObserver(() => {
+    clearTimeout(timer);
+    timer = setTimeout(snap, 500);
+  });
+  obs.observe(doc, { childList: true, subtree: true, characterData: true, attributes: true });
+
+  function restaura(html) {
+    restaurando = true;
+    setHtml(html);
+    setTimeout(() => { restaurando = false; }, 80);   // ignora as mutações da restauração
+  }
+
+  const api = {
+    reset(html) { clearTimeout(timer); undo = [html != null ? html : getHtml()]; redo = []; },
+    desfazer() {
+      clearTimeout(timer); snap();
+      if (undo.length <= 1) return;
+      redo.push(undo.pop());
+      restaura(undo[undo.length - 1]);
+    },
+    refazer() {
+      if (!redo.length) return;
+      const h = redo.pop(); undo.push(h); restaura(h);
+    },
+  };
+
+  doc.addEventListener('keydown', (e) => {
+    const z = (e.key === 'z' || e.key === 'Z');
+    const y = (e.key === 'y' || e.key === 'Y');
+    if ((e.ctrlKey || e.metaKey) && z && !e.shiftKey) { e.preventDefault(); api.desfazer(); }
+    else if ((e.ctrlKey || e.metaKey) && (y || (z && e.shiftKey))) { e.preventDefault(); api.refazer(); }
+  });
+
+  return api;
+}
+
 function carregarDescritivo() {
   if (!eventoAtual) return;
   const CHAVE = 'desc-v1-' + eventoAtual.id;
@@ -29,6 +87,11 @@ function carregarDescritivo() {
   }
 
   _bindDescInput(doc, CHAVE);
+
+  if (!doc._hist) {
+    doc._hist = criarHistorico(doc, _htmlDescritivoLimpo, (h) => { doc.innerHTML = h; _salvarDescritivo(); });
+  }
+  doc._hist.reset(_htmlDescritivoLimpo());
 }
 
 function preencherDescritivo() {
