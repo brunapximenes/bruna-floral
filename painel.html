@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Painel — Bruna Floral</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/style.css?v=9">
+<link rel="stylesheet" href="/css/style.css?v=10">
 <style>
 /* ── LOGIN ──────────────────────────────────────────── */
 #tela-login {
@@ -414,6 +414,14 @@
           </div>
           <div class="campo"><label>Vencimentos</label><textarea id="ct-vencimentos" rows="2" placeholder="ex: 1.650 em 04/08/2026  ·  1.650 em 05/09/26  ·  3.000 em dez/26  ·  5.000 até 30/06/27" onchange="salvarPagamento()"></textarea></div>
         </div>
+        <div class="desc-format-bar">
+          <span class="desc-format-label">Formatar a linha:</span>
+          <button onmousedown="event.preventDefault()" onclick="aplicarEstiloContrato('sec')">Título de seção</button>
+          <button onmousedown="event.preventDefault()" onclick="aplicarEstiloContrato('sub')">Subtítulo</button>
+          <button onmousedown="event.preventDefault()" onclick="aplicarEstiloContrato('item')">• Item da lista</button>
+          <button onmousedown="event.preventDefault()" onclick="aplicarEstiloContrato('normal')">Texto normal</button>
+          <span class="desc-format-label" style="margin-left:auto">🖼 Clique numa imagem do anexo para arrastar/redimensionar</span>
+        </div>
         <div id="contrato-doc" contenteditable="true"></div>
       </div>
 
@@ -553,7 +561,7 @@
 <script src="/js/exportar-sheets.js"></script>
 <script src="/js/painel-descritivo.js?v=3"></script>
 <script src="/js/assinatura.js?v=1"></script>
-<script src="/js/painel-contrato.js?v=6"></script>
+<script src="/js/painel-contrato.js?v=7"></script>
 <script>verificarSessao();</script>
 </body>
 </html>

@@ -102,14 +102,89 @@ function _ctBind(doc, CHAVE) {
   _ctDoc = doc;
   _ctChave = CHAVE;
   doc.oninput = _ctSalvar;
+  ativarImagensArrastaveis(doc, _ctSalvar);   // imagens do anexo ficam móveis
+}
+
+/* HTML do contrato sem os controles temporários das imagens (alça e ×) */
+function _ctHtmlLimpo() {
+  const clone = _ctDoc.cloneNode(true);
+  clone.querySelectorAll('.ds-ui').forEach(el => el.remove());
+  clone.querySelectorAll('.ds-img-sel').forEach(el => el.classList.remove('ds-img-sel'));
+  return clone.innerHTML;
 }
 
 function _ctSalvar() {
   if (!_ctDoc) return;
-  const html = _ctDoc.innerHTML;
+  const html = _ctHtmlLimpo();
   _ctGuardarLocal(_ctChave, html);
   clearTimeout(_ctTimer);
   _ctTimer = setTimeout(() => salvarContratoNuvem(html), 1000);
+}
+
+/* ── Torna as imagens (.ds-img-wrap) móveis/redimensionáveis dentro de um doc,
+   salvando via callback. Funciona com mouse e toque. ── */
+function ativarImagensArrastaveis(doc, onSave) {
+  if (doc._imgArrastavelOn) return;
+  doc._imgArrastavelOn = true;
+  let sel = null, arr = null;
+
+  function desselecionar() {
+    if (!sel) return;
+    sel.classList.remove('ds-img-sel');
+    sel.querySelectorAll('.ds-ui').forEach(el => el.remove());
+    sel = null;
+  }
+  function selecionar(wrap) {
+    desselecionar();
+    sel = wrap;
+    wrap.classList.add('ds-img-sel');
+    const del = document.createElement('span'); del.className = 'ds-img-del ds-ui'; del.textContent = '×';
+    const alca = document.createElement('span'); alca.className = 'ds-img-handle ds-ui';
+    wrap.appendChild(del); wrap.appendChild(alca);
+  }
+
+  doc.addEventListener('click', (e) => {
+    if (e.target.classList && e.target.classList.contains('ds-img-del')) {
+      const w = e.target.closest('.ds-img-wrap');
+      if (w) { w.remove(); sel = null; onSave(); }
+      return;
+    }
+    const wrap = e.target.closest ? e.target.closest('.ds-img-wrap') : null;
+    if (wrap) selecionar(wrap); else desselecionar();
+  });
+
+  doc.addEventListener('pointerdown', (e) => {
+    const wrap = e.target.closest ? e.target.closest('.ds-img-wrap') : null;
+    if (!wrap) return;
+    if (e.target.classList.contains('ds-img-del')) return;
+    e.preventDefault();
+    selecionar(wrap);
+    const resize = e.target.classList.contains('ds-img-handle');
+    arr = {
+      tipo: resize ? 'resize' : 'mover', wrap,
+      x0: e.clientX, y0: e.clientY,
+      left0: parseFloat(wrap.style.left) || 0,
+      top0:  parseFloat(wrap.style.top)  || 0,
+      w0:    parseFloat(wrap.style.width) || wrap.offsetWidth,
+    };
+    const mover = (ev) => {
+      if (!arr) return;
+      const dx = ev.clientX - arr.x0, dy = ev.clientY - arr.y0;
+      if (arr.tipo === 'mover') {
+        arr.wrap.style.left = (arr.left0 + dx) + 'px';
+        arr.wrap.style.top  = (arr.top0 + dy) + 'px';
+      } else {
+        arr.wrap.style.width = Math.max(50, arr.w0 + dx) + 'px';
+      }
+    };
+    const soltar = () => {
+      document.removeEventListener('pointermove', mover);
+      document.removeEventListener('pointerup', soltar);
+      if (arr) { arr = null; onSave(); }
+    };
+    document.addEventListener('pointermove', mover);
+    document.addEventListener('pointerup', soltar);
+  });
 }
 
 function _ctGuardarLocal(chave, html) {
@@ -128,16 +203,16 @@ async function salvarContratoNuvem(html, silencioso) {
 }
 
 function imprimirContrato() {
-  const doc  = document.getElementById('contrato-doc');
   const nome = (eventoAtual && eventoAtual.nomes) ? eventoAtual.nomes : 'Contrato';
   const cssDesc = (typeof _dsCssImprimir === 'function') ? _dsCssImprimir() : '';
+  const conteudo = _ctHtmlLimpo();   // sem alças/× das imagens
   const win  = window.open('', '_blank');
   win.document.write(
     '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">' +
     '<title>Contrato — ' + nome + '</title>' +
     '<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">' +
     '<style>' + _ctCssImprimir() + cssDesc + '</style></head>' +
-    '<body>' + doc.innerHTML + '</body></html>'
+    '<body>' + conteudo + '</body></html>'
   );
   win.document.close();
   win.addEventListener('load', function () { win.focus(); win.print(); });
@@ -181,6 +256,49 @@ function _assinaturaImg() {
   return (typeof ASSINATURA_DATA_URL !== 'undefined')
     ? '<img class="ct-assinatura-img" src="' + ASSINATURA_DATA_URL + '" alt="Assinatura">'
     : '';
+}
+
+/* ── FORMATAR A LINHA no estilo do contrato (1 clique) ─────── */
+function aplicarEstiloContrato(tipo) {
+  const doc = document.getElementById('contrato-doc');
+  const sel = window.getSelection();
+  if (!sel || !sel.rangeCount) { toast('Clique na linha que quer formatar.', 'erro'); return; }
+
+  let node = sel.anchorNode;
+  if (node && node.nodeType === 3) node = node.parentNode;
+  let blk = node;
+  while (blk && blk !== doc && blk.parentNode && blk.parentNode !== doc) {
+    if (blk.tagName === 'LI') break;
+    blk = blk.parentNode;
+  }
+  if (!blk || blk === doc) { toast('Clique dentro de uma linha do contrato.', 'erro'); return; }
+
+  const texto = blk.textContent.trim();
+  if (!texto) { toast('A linha está vazia.', 'erro'); return; }
+
+  let novo;
+  if (tipo === 'sec') {
+    novo = document.createElement('div'); novo.className = 'ct-sec'; novo.textContent = texto;
+  } else if (tipo === 'sub') {
+    novo = document.createElement('div'); novo.className = 'ct-sub'; novo.textContent = texto;
+  } else if (tipo === 'item') {
+    novo = document.createElement('ul');
+    const li = document.createElement('li'); li.textContent = texto; novo.appendChild(li);
+  } else { // normal
+    novo = document.createElement('p'); novo.textContent = texto;
+  }
+
+  if (blk.tagName === 'LI' && tipo !== 'item') {
+    const ul = blk.closest('ul');
+    blk.remove();
+    if (ul) { ul.after(novo); if (!ul.querySelector('li')) ul.remove(); }
+    else doc.appendChild(novo);
+  } else {
+    blk.replaceWith(novo);
+  }
+
+  _ctSalvar();
+  toast('Formatação aplicada ✓');
 }
 
 /* ── TEMPLATE DO CONTRATO ────────────────────────────────────── */
