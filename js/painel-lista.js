@@ -46,6 +46,7 @@ async function carregarLista() {
 
   todosEventos = data || [];
   renderLista(todosEventos);
+  renderAgenda();
 }
 
 /* tira acentos e deixa minúsculo, para a busca ignorar acentuação */
@@ -127,7 +128,68 @@ async function mudarStatusLista(id, novo, el) {
   const ev = todosEventos.find(x => x.id === id);
   if (ev) ev.status = novo;
   el.className = 'badge-select ' + (STATUS_BADGE[novo] || 'badge-novo');
+  renderAgenda();   // atualiza o calendário se virou/deixou de ser "fechado"
   toast('Status atualizado ✓');
+}
+
+/* ── CALENDÁRIO ANUAL (agenda) — marca os pedidos fechados ──── */
+let _agendaAno = new Date().getFullYear();
+let _agendaFechados = {};
+
+function renderAgenda() {
+  const cont = document.getElementById('agenda-cal');
+  if (!cont) return;
+  const anoEl = document.getElementById('agenda-ano');
+  if (anoEl) anoEl.textContent = _agendaAno;
+
+  _agendaFechados = {};
+  (todosEventos || []).forEach(e => {
+    if (e.status === 'fechado' && e.data_evento) {
+      const p = e.data_evento.split('-').map(Number);
+      if (p[0] === _agendaAno) {
+        const k = p[1] + '-' + p[2];
+        (_agendaFechados[k] = _agendaFechados[k] || []).push({ id: e.id, nomes: e.nomes || 'Evento' });
+      }
+    }
+  });
+
+  const meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  let html = '';
+  for (let mes = 1; mes <= 12; mes++) {
+    const primeiro = new Date(_agendaAno, mes - 1, 1).getDay();
+    const nDias = new Date(_agendaAno, mes, 0).getDate();
+    let dias = '';
+    for (let i = 0; i < primeiro; i++) dias += '<span class="mini-dia"></span>';
+    for (let d = 1; d <= nDias; d++) {
+      const k = mes + '-' + d;
+      if (_agendaFechados[k]) {
+        const nomes = _agendaFechados[k].map(x => x.nomes).join(', ').replace(/"/g, "'");
+        dias += `<span class="mini-dia fechado" title="${nomes}" onclick="abrirDiaAgenda('${k}')">${d}</span>`;
+      } else {
+        dias += `<span class="mini-dia">${d}</span>`;
+      }
+    }
+    html += `<div class="mini-mes"><div class="mini-mes-tit">${meses[mes - 1]}</div><div class="mini-dias">${dias}</div></div>`;
+  }
+  cont.innerHTML = html;
+}
+
+function mudarAnoAgenda(delta) { _agendaAno += delta; renderAgenda(); }
+
+function abrirDiaAgenda(key) {
+  const lista = _agendaFechados[key] || [];
+  if (!lista.length) return;
+  const [m, d] = key.split('-');
+  document.getElementById('agenda-pop-tit').textContent = 'Pedidos em ' + d + '/' + m + '/' + _agendaAno;
+  document.getElementById('agenda-pop-lista').innerHTML = lista.map(ev =>
+    `<div class="agenda-pop-item"><span>${ev.nomes}</span>` +
+    `<button onclick="fecharAgendaPop();abrirEvento('${ev.id}')">Abrir</button></div>`).join('');
+  document.getElementById('agenda-pop').style.display = 'flex';
+}
+
+function fecharAgendaPop() {
+  const p = document.getElementById('agenda-pop');
+  if (p) p.style.display = 'none';
 }
 
 async function novoEvento() {
