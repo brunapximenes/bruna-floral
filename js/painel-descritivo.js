@@ -111,7 +111,8 @@ let _imgSel = [];        // imagens selecionadas (permite várias)
 let _arrasto = null;     // estado de arraste/redimensionamento
 let _multiSel = false;   // modo "selecionar várias" (útil no toque)
 let _guias = [];         // linhas-guia de alinhamento (estilo Canva)
-const _SNAP = 6;         // tolerância em px para alinhar/grudar
+const _SNAP = 6;         // tolerância em px para alinhar posição
+const _SNAPW = 12;       // tolerância em px para igualar tamanho
 
 /* Liga o salvamento automático + colar/arrastar/redimensionar imagens */
 function _bindDescInput(doc, CHAVE) {
@@ -353,14 +354,23 @@ function _desselecionarImagem() {
   _imgSel = [];
 }
 
-/* Alça de redimensionar e × só quando há exatamente 1 selecionada */
+/* Controles (×, trazer pra frente, alças de redimensionar dos 2 lados)
+   só quando há exatamente 1 imagem selecionada */
 function _atualizarHandles() {
   _imgSel.forEach(w => w.querySelectorAll('.ds-ui').forEach(el => el.remove()));
   if (_imgSel.length === 1) {
     const w = _imgSel[0];
-    const del = document.createElement('span'); del.className = 'ds-img-del ds-ui'; del.textContent = '×';
-    const alca = document.createElement('span'); alca.className = 'ds-img-handle ds-ui';
-    w.appendChild(del); w.appendChild(alca);
+    const mk = (cls, txt, tit) => {
+      const s = document.createElement('span');
+      s.className = cls + ' ds-ui';
+      if (txt) s.textContent = txt;
+      if (tit) s.title = tit;
+      w.appendChild(s);
+    };
+    mk('ds-img-del', '×', 'Remover');
+    mk('ds-img-front', '⬆', 'Trazer para frente');
+    mk('ds-img-handle', '', 'Redimensionar');          // canto direito
+    mk('ds-img-handle-esq', '', 'Redimensionar');       // canto esquerdo
   }
 }
 
@@ -384,33 +394,57 @@ function toggleMultiSel(btn) {
   toast(_multiSel ? 'Modo várias: toque nas imagens para somar à seleção.' : 'Modo várias desligado.');
 }
 
-/* ── CLIQUE: excluir (×) ou desmarcar ao clicar fora ───────── */
+/* ── CLIQUE: excluir (×), trazer pra frente (⬆) ou desmarcar ─ */
 function _descClick(e) {
-  if (e.target.classList && e.target.classList.contains('ds-img-del')) {
+  const cls = e.target.classList;
+  if (cls && cls.contains('ds-img-del')) {
     const w = e.target.closest('.ds-img-wrap');
     if (w) { const i = _imgSel.indexOf(w); if (i >= 0) _imgSel.splice(i, 1); w.remove(); _salvarDescritivo(); }
+    return;
+  }
+  if (cls && cls.contains('ds-img-front')) {
+    const w = e.target.closest('.ds-img-wrap');
+    if (w) { _trazerPraFrente(w); _salvarDescritivo(); toast('Imagem trazida para frente ✓'); }
     return;
   }
   const wrap = e.target.closest ? e.target.closest('.ds-img-wrap') : null;
   if (!wrap) _desselecionarImagem();
 }
 
+/* Coloca a imagem na frente das outras (maior z-index) */
+function _trazerPraFrente(wrap) {
+  let max = 5;
+  _descDoc.querySelectorAll('.ds-img-wrap').forEach(w => {
+    if (w === wrap) return;
+    const z = parseInt(w.style.zIndex) || 5;
+    if (z > max) max = z;
+  });
+  wrap.style.zIndex = max + 1;
+}
+
 /* ── ARRASTAR (grupo) e REDIMENSIONAR — mouse e toque ──────── */
 function _descPointerDown(e) {
   const wrap = e.target.closest ? e.target.closest('.ds-img-wrap') : null;
   if (!wrap) return;
-  if (e.target.classList.contains('ds-img-del')) return;
+  const cls = e.target.classList;
+  if (cls.contains('ds-img-del') || cls.contains('ds-img-front')) return;   // esses são clique
   e.preventDefault();
-  const resize = e.target.classList.contains('ds-img-handle');
+  const resizeDir = cls.contains('ds-img-handle');
+  const resizeEsq = cls.contains('ds-img-handle-esq');
   const adicionar = e.ctrlKey || e.metaKey || e.shiftKey || _multiSel;
 
-  if (adicionar && !resize) {           // só alterna a seleção, sem arrastar
+  if (adicionar && !resizeDir && !resizeEsq) {   // só alterna a seleção, sem arrastar
     _selecionarImagem(wrap, true);
     return;
   }
-  if (resize) {
+  if (resizeDir || resizeEsq) {
     _selecionarImagem(wrap, false);
-    _arrasto = { tipo: 'resize', wrap, x0: e.clientX, y0: e.clientY, w0: parseFloat(wrap.style.width) || wrap.offsetWidth };
+    _arrasto = {
+      tipo: 'resize', lado: resizeEsq ? 'esq' : 'dir', wrap,
+      x0: e.clientX, y0: e.clientY,
+      left0: parseFloat(wrap.style.left) || 0,
+      w0: parseFloat(wrap.style.width) || wrap.offsetWidth,
+    };
   } else {
     if (_imgSel.indexOf(wrap) < 0) _selecionarImagem(wrap, false);   // clicou numa não-selecionada
     const itens = _imgSel.map(w => ({ w, left0: parseFloat(w.style.left) || 0, top0: parseFloat(w.style.top) || 0 }));
@@ -438,16 +472,38 @@ function _descPointerMove(e) {
     if (s.guiaX != null) _guiaV(s.guiaX);
     if (s.guiaY != null) _guiaH(s.guiaY);
   } else {
-    let propW = Math.max(50, _arrasto.w0 + dx);
-    const left = parseFloat(_arrasto.wrap.style.left) || 0;
-    const dir = left + propW;
-    let melhor = null;
-    _linhasV(_arrasto.wrap).forEach(lv => {
-      const d = lv - dir;
-      if (Math.abs(d) <= _SNAP && (!melhor || Math.abs(d) < Math.abs(melhor.d))) melhor = { d, linha: lv };
-    });
-    if (melhor) { propW += melhor.d; _guiaV(melhor.linha); }
-    _arrasto.wrap.style.width = propW + 'px';
+    const outras = _outrasImgs([_arrasto.wrap]);
+    if (_arrasto.lado === 'esq') {
+      // redimensiona pela esquerda (borda direita fica fixa)
+      const right = _arrasto.left0 + _arrasto.w0;
+      let propLeft = _arrasto.left0 + dx;
+      let propW = Math.max(50, right - propLeft);
+      propLeft = right - propW;
+      let mW = null, mL = null;
+      outras.forEach(o => {
+        const dw = o.larg - propW;
+        if (Math.abs(dw) <= _SNAPW && (!mW || Math.abs(dw) < Math.abs(mW.dw))) mW = { dw, w: o.larg, el: o.el };
+        [o.left, o.cx, o.right].forEach(lv => { const d = lv - propLeft; if (Math.abs(d) <= _SNAP && (!mL || Math.abs(d) < Math.abs(mL.d))) mL = { d, linha: lv }; });
+      });
+      if (mW && (!mL || Math.abs(mW.dw) <= Math.abs(mL.d))) { propW = mW.w; propLeft = right - propW; mW.el.classList.add('ds-img-ref'); }
+      else if (mL) { propLeft += mL.d; propW = right - propLeft; _guiaV(mL.linha); }
+      _arrasto.wrap.style.left = propLeft + 'px';
+      _arrasto.wrap.style.width = propW + 'px';
+    } else {
+      // redimensiona pela direita (borda esquerda fica fixa)
+      let propW = Math.max(50, _arrasto.w0 + dx);
+      const left = _arrasto.left0;
+      const dir = left + propW;
+      let mW = null, mR = null;
+      outras.forEach(o => {
+        const dw = o.larg - propW;
+        if (Math.abs(dw) <= _SNAPW && (!mW || Math.abs(dw) < Math.abs(mW.dw))) mW = { dw, w: o.larg, el: o.el };
+        [o.left, o.cx, o.right].forEach(lv => { const d = lv - dir; if (Math.abs(d) <= _SNAP && (!mR || Math.abs(d) < Math.abs(mR.d))) mR = { d, linha: lv }; });
+      });
+      if (mW && (!mR || Math.abs(mW.dw) <= Math.abs(mR.d))) { propW = mW.w; mW.el.classList.add('ds-img-ref'); }
+      else if (mR) { propW += mR.d; _guiaV(mR.linha); }
+      _arrasto.wrap.style.width = propW + 'px';
+    }
   }
 }
 
@@ -465,7 +521,7 @@ function _outrasImgs(excluir) {
     if (excluir && excluir.indexOf(w) >= 0) return;
     const left = parseFloat(w.style.left) || 0, top = parseFloat(w.style.top) || 0;
     const ww = w.offsetWidth, hh = w.offsetHeight;
-    arr.push({ left, top, right: left + ww, cx: left + ww / 2, bottom: top + hh, cy: top + hh / 2 });
+    arr.push({ el: w, larg: ww, alt: hh, left, top, right: left + ww, cx: left + ww / 2, bottom: top + hh, cy: top + hh / 2 });
   });
   return arr;
 }
@@ -497,7 +553,10 @@ function _snapMover(prim, propLeft, propTop) {
     guiaY: mH ? mH.linha : null,
   };
 }
-function _limparGuias() { _guias.forEach(g => g.remove()); _guias = []; }
+function _limparGuias() {
+  _guias.forEach(g => g.remove()); _guias = [];
+  if (_descDoc) _descDoc.querySelectorAll('.ds-img-ref').forEach(el => el.classList.remove('ds-img-ref'));
+}
 function _guiaV(x) {
   const g = document.createElement('div');
   g.className = 'ds-guia ds-ui';
