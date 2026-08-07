@@ -57,8 +57,9 @@ async function abrirEvento(id) {
   const btnOrc = document.getElementById('btn-ver-orcamento');
   btnOrc.style.display = orcamentoDoEvento(data) ? '' : 'none';
 
-  // Carregar aba ativa (padrão = geral)
-  goAba('geral', document.querySelector('.aba[data-aba="geral"]'));
+  // Carregar aba ativa (padrão = descritivo)
+  goAba('descritivo', document.querySelector('.aba[data-aba="descritivo"]'));
+  carregarDescritivo();
 
   // Carregar financeiro em background
   await Promise.all([
