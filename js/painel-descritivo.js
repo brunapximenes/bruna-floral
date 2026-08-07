@@ -204,21 +204,27 @@ function _colarNoDescritivo(e) {
   const dt = e.clipboardData;
   if (!dt) return;
 
-  // 1) Imagem copiada como arquivo (print de tela, foto da galeria, arquivo)
+  // 1) Imagem copiada como arquivo (print, foto, arquivo) → envia pro armazenamento
   const itens = dt.items || [];
   for (let i = 0; i < itens.length; i++) {
     if (itens[i].type && itens[i].type.indexOf('image') === 0) {
       e.preventDefault();
       const file = itens[i].getAsFile();
-      _redimensionarImagem(file, 640, 0.55).then((dataUrl) => {
-        _inserirImagemNoDoc(dataUrl);
-        _salvarDescritivo();
+      _redimensionarBlob(file, 900, 0.72).then(async (blob) => {
+        try {
+          const url = await _uploadImagem(blob);
+          _inserirImagemNoDoc(url);
+          _salvarDescritivo();
+        } catch (err) {
+          console.error('upload imagem', err);
+          toast('Não foi possível enviar a imagem. Tente novamente.', 'erro');
+        }
       });
       return;
     }
   }
 
-  // 2) Imagem copiada de uma página da web (vem como HTML com <img src="...">)
+  // 2) Imagem copiada de uma página da web (HTML com <img src="...">)
   const html = dt.getData ? dt.getData('text/html') : '';
   if (html && /<img[^>]+src=/i.test(html)) {
     const m = html.match(/<img[^>]+src=["']([^"']+)["']/i);
@@ -231,26 +237,45 @@ function _colarNoDescritivo(e) {
   // caso contrário, deixa o colar normal de texto acontecer
 }
 
-/* Baixa a imagem de uma URL, comprime e insere como flutuante.
-   Se o site bloquear (CORS), usa a URL direta como último recurso. */
+/* Imagem vinda de URL. data: → envia pro armazenamento; http → usa o link direto (leve). */
 function _imagemDeUrl(url) {
-  const img = new Image();
-  img.crossOrigin = 'anonymous';
-  img.onload = () => {
-    try {
-      let w = img.width, h = img.height;
-      if (w > 640) { h = Math.round(h * 640 / w); w = 640; }
-      const c = document.createElement('canvas');
-      c.width = w; c.height = h;
-      c.getContext('2d').drawImage(img, 0, 0, w, h);
-      _inserirImagemNoDoc(c.toDataURL('image/jpeg', 0.55));
-    } catch (err) {
-      _inserirImagemNoDoc(url);   // CORS: mantém a URL original
-    }
+  if (url.indexOf('data:') === 0) {
+    fetch(url).then(r => r.blob()).then(async (blob) => {
+      try { const u = await _uploadImagem(blob); _inserirImagemNoDoc(u); }
+      catch (e) { _inserirImagemNoDoc(url); }
+      _salvarDescritivo();
+    }).catch(() => { _inserirImagemNoDoc(url); _salvarDescritivo(); });
+  } else {
+    _inserirImagemNoDoc(url);
     _salvarDescritivo();
-  };
-  img.onerror = () => { _inserirImagemNoDoc(url); _salvarDescritivo(); };
-  img.src = url;
+  }
+}
+
+/* Redimensiona o arquivo e devolve um Blob JPEG (para enviar ao armazenamento) */
+function _redimensionarBlob(file, maxLarg, qualidade) {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        let w = img.width, h = img.height;
+        if (w > maxLarg) { h = Math.round(h * maxLarg / w); w = maxLarg; }
+        const c = document.createElement('canvas'); c.width = w; c.height = h;
+        c.getContext('2d').drawImage(img, 0, 0, w, h);
+        c.toBlob((b) => resolve(b), 'image/jpeg', qualidade);
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+/* Envia o blob para o armazenamento (bucket "descritivos") e devolve a URL pública */
+async function _uploadImagem(blob) {
+  const nome = (eventoAtual ? eventoAtual.id : 'geral') + '/' + Date.now() + '-' + Math.random().toString(36).slice(2, 8) + '.jpg';
+  const { error } = await sb.storage.from('descritivos').upload(nome, blob, { contentType: 'image/jpeg', upsert: true });
+  if (error) throw error;
+  return sb.storage.from('descritivos').getPublicUrl(nome).data.publicUrl;
 }
 
 /* Reduz a imagem (max largura) e comprime, para não pesar no banco */
