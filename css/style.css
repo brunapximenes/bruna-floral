@@ -287,6 +287,17 @@ body {
 .ct-assinatura-img { display: block; max-height: 58px; margin: 0 auto -20px; position: relative; z-index: 2; }
 .ct-anexo { border-top: 1px dashed #d5cfc7; margin-top: 10px; padding-top: 12px; position: relative; }
 .ct-anexo-vazio { color: #aaa; font-style: italic; text-align: center; }
+.ct-cliente { background: #f0f7f2; border: 1px solid #cfe3d6; border-radius: 10px; padding: 14px 16px; margin-bottom: 14px; }
+.ct-cliente-vazio { font-size: 13px; color: #5f8069; line-height: 1.6; }
+.ct-cliente-tit { font-size: 13px; font-weight: 500; color: var(--verde); margin-bottom: 10px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.ct-cliente-obs { font-weight: 400; font-size: 11px; color: #7c9a84; }
+.ct-cli-atualizar { background: var(--verde); color: #fff; border: none; border-radius: 6px; padding: 4px 10px; font-size: 11px; cursor: pointer; font-family: 'Jost', sans-serif; }
+.ct-cli-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px 20px; }
+.ct-cli-item { display: flex; gap: 8px; font-size: 12.5px; padding: 3px 0; border-bottom: 1px dotted #d7e5db; }
+.ct-cli-rot { color: #7c9a84; min-width: 108px; }
+.ct-cli-val { color: #2c2c2c; font-weight: 500; }
+.ct-falta { color: #c0954a; font-style: italic; font-weight: 400; }
+@media (max-width: 640px) { .ct-cli-grid { grid-template-columns: 1fr; } }
 .ct-pagamento { background: var(--creme2); border: 1px solid var(--borda); border-radius: 10px; padding: 16px 18px; margin-bottom: 14px; }
 .ct-pag-tit { font-size: 13px; font-weight: 500; color: var(--verde); margin-bottom: 12px; }
 .ct-pag-obs { font-weight: 400; font-size: 11px; color: #999; }

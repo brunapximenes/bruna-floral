@@ -8,8 +8,10 @@ let _ctTimer = null;
 let _ctDoc = null;
 let _ctChave = null;
 
-function carregarContrato() {
+async function carregarContrato() {
   if (!eventoAtual) return;
+  await _buscarDadosCliente();     // pega os dados que o cliente pode ter enviado pelo link
+  renderDadosCliente();
   const CHAVE = 'contrato-v1-' + eventoAtual.id;
   const doc   = document.getElementById('contrato-doc');
 
@@ -34,6 +36,68 @@ function carregarContrato() {
     doc._hist = criarHistorico(doc, _ctHtmlLimpo, (h) => { doc.innerHTML = h; _ctSalvar(); });
   }
   if (doc._hist) doc._hist.reset(_ctHtmlLimpo());
+}
+
+/* Busca no banco os dados que o cliente enviou pelo link (mantém atualizado) */
+async function _buscarDadosCliente() {
+  if (!eventoAtual) return;
+  try {
+    const { data } = await sb.from('events').select('dados_contrato').eq('id', eventoAtual.id).single();
+    if (data) eventoAtual.dados_contrato = data.dados_contrato;
+  } catch (e) { /* mantém o que já tem */ }
+}
+
+/* Botão de atualizar (caso o cliente preencha com a aba já aberta) */
+async function atualizarDadosCliente() {
+  await _buscarDadosCliente();
+  renderDadosCliente();
+  toast('Dados do cliente atualizados ✓');
+}
+
+/* Mostra o que o cliente preencheu, para conferir antes de "Preencher do sistema" */
+function renderDadosCliente() {
+  const box = document.getElementById('ct-cliente-box');
+  if (!box) return;
+  const dc = (eventoAtual && eventoAtual.dados_contrato) || {};
+  const temAlgo = Object.values(dc).some(v => v && String(v).trim());
+
+  if (!temAlgo) {
+    box.innerHTML = '<div class="ct-cliente-vazio">👤 O cliente ainda não enviou os dados. Clique em <strong>"🔗 Copiar link de dados"</strong> e envie para ele preencher (CPF, endereço, fornecedores). Depois clique em <strong>↻ Atualizar</strong> aqui.' +
+      ' <button class="ct-cli-atualizar" onclick="atualizarDadosCliente()">↻ Atualizar</button></div>';
+    return;
+  }
+
+  const item = (rot, val) => {
+    const v = (val && String(val).trim()) ? _ctEsc(val) : '<span class="ct-falta">— não preenchido</span>';
+    return '<div class="ct-cli-item"><span class="ct-cli-rot">' + rot + '</span><span class="ct-cli-val">' + v + '</span></div>';
+  };
+
+  box.innerHTML =
+    '<div class="ct-cliente-tit">👤 Dados enviados pelo cliente ' +
+      '<button class="ct-cli-atualizar" onclick="atualizarDadosCliente()">↻ Atualizar</button>' +
+      '<span class="ct-cliente-obs">confira e depois clique em "↺ Preencher do sistema" para aplicar no contrato</span></div>' +
+    '<div class="ct-cli-grid">' +
+      item('Nome completo', dc.nome_completo) +
+      item('CPF', dc.cpf) +
+      item('Estado civil', dc.estado_civil) +
+      item('Nacionalidade', dc.nacionalidade) +
+      item('Endereço', dc.endereco) +
+      item('Celular', dc.celular) +
+      item('Instagram', dc.insta) +
+      item('E-mail', dc.email) +
+      item('Fotografia', dc.forn_fotografia) +
+      item('Filmagem', dc.forn_filmagem) +
+      item('Make/cabelo', dc.forn_make) +
+      item('Vestido', dc.forn_vestido) +
+      item('Buffet', dc.forn_buffet) +
+      item('Bolo', dc.forn_bolo) +
+      item('Doces', dc.forn_doces) +
+      item('Assessoria', dc.forn_assessoria) +
+    '</div>';
+}
+
+function _ctEsc(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
 /* Preenche os campos de forma de pagamento com o que está salvo no evento */
@@ -66,9 +130,11 @@ async function salvarPagamento() {
 }
 
 /* Regenera o contrato com os dados atuais do sistema (mantém o Anexo se já houver) */
-function preencherContrato() {
+async function preencherContrato() {
   if (!eventoAtual) { toast('Nenhum evento aberto.', 'erro'); return; }
   if (!confirm('Preencher novamente com os dados do sistema? O texto que você editou à mão neste contrato será substituído (o Anexo é mantido).')) return;
+  await _buscarDadosCliente();     // garante os dados mais recentes do cliente
+  renderDadosCliente();
   const CHAVE = 'contrato-v1-' + eventoAtual.id;
   const doc   = document.getElementById('contrato-doc');
 
