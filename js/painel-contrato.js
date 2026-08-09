@@ -524,7 +524,7 @@ function _ctCssImprimir() {
     'p{margin-bottom:7px;}' +
     'ul{margin:0 0 7px 20px;}li{margin-bottom:3px;}' +
     '.ct-fill{border-bottom:1px solid #999;min-width:80px;display:inline-block;padding:0 4px;}' +
-    '.ct-forn-linha{display:grid;grid-template-columns:auto 1fr auto 1fr;gap:6px 10px;margin-bottom:5px;align-items:end;}' +
+    '.ct-forn-linha{display:grid;grid-template-columns:92px 1fr 92px 1fr;gap:6px 10px;margin-bottom:5px;align-items:end;}' +
     '.ct-cidade{margin-top:26px;}' +
     '.ct-assinaturas{margin-top:30px;display:grid;grid-template-columns:1fr 1fr;gap:36px 40px;}' +
     '.ct-assina{font-size:11.5px;}' +
