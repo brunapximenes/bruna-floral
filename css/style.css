@@ -293,9 +293,12 @@ body {
 .ct-cliente-obs { font-weight: 400; font-size: 11px; color: #7c9a84; }
 .ct-cli-atualizar { background: var(--verde); color: #fff; border: none; border-radius: 6px; padding: 4px 10px; font-size: 11px; cursor: pointer; font-family: 'Jost', sans-serif; }
 .ct-cli-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px 20px; }
-.ct-cli-item { display: flex; gap: 8px; font-size: 12.5px; padding: 3px 0; border-bottom: 1px dotted #d7e5db; }
-.ct-cli-rot { color: #7c9a84; min-width: 108px; }
+.ct-cli-item { display: flex; align-items: center; gap: 8px; font-size: 12.5px; padding: 2px 0; border-bottom: 1px dotted #d7e5db; }
+.ct-cli-rot { color: #7c9a84; min-width: 108px; flex-shrink: 0; }
 .ct-cli-val { color: #2c2c2c; font-weight: 500; }
+.ct-cli-input { flex: 1; min-width: 0; border: 1px solid transparent; background: transparent; font-family: 'Jost', sans-serif; font-size: 12.5px; color: #2c2c2c; font-weight: 500; padding: 4px 6px; border-radius: 5px; }
+.ct-cli-input:hover { border-color: #cfe3d6; }
+.ct-cli-input:focus { border-color: var(--verde); background: #fff; outline: none; }
 .ct-falta { color: #c0954a; font-style: italic; font-weight: 400; }
 @media (max-width: 640px) { .ct-cli-grid { grid-template-columns: 1fr; } }
 .ct-pagamento { background: var(--creme2); border: 1px solid var(--borda); border-radius: 10px; padding: 16px 18px; margin-bottom: 14px; }

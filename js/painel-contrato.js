@@ -54,50 +54,51 @@ async function atualizarDadosCliente() {
   toast('Dados do cliente atualizados ✓');
 }
 
-/* Mostra o que o cliente preencheu, para conferir antes de "Preencher do sistema" */
+const _CT_CLI_CAMPOS = [
+  ['nome_completo', 'Nome completo'], ['cpf', 'CPF'], ['estado_civil', 'Estado civil'],
+  ['nacionalidade', 'Nacionalidade'], ['endereco', 'Endereço'], ['celular', 'Celular'],
+  ['insta', 'Instagram'], ['email', 'E-mail'],
+  ['forn_fotografia', 'Fotografia'], ['forn_filmagem', 'Filmagem'], ['forn_make', 'Make/cabelo'],
+  ['forn_vestido', 'Vestido'], ['forn_buffet', 'Buffet'], ['forn_bolo', 'Bolo'],
+  ['forn_doces', 'Doces'], ['forn_assessoria', 'Assessoria'],
+];
+
+/* Mostra os dados do cliente — EDITÁVEIS: o cliente preenche pelo link e você completa aqui */
 function renderDadosCliente() {
   const box = document.getElementById('ct-cliente-box');
   if (!box) return;
   const dc = (eventoAtual && eventoAtual.dados_contrato) || {};
-  const temAlgo = Object.values(dc).some(v => v && String(v).trim());
 
-  if (!temAlgo) {
-    box.innerHTML = '<div class="ct-cliente-vazio">👤 O cliente ainda não enviou os dados. Clique em <strong>"🔗 Copiar link de dados"</strong> e envie para ele preencher (CPF, endereço, fornecedores). Depois clique em <strong>↻ Atualizar</strong> aqui.' +
-      ' <button class="ct-cli-atualizar" onclick="atualizarDadosCliente()">↻ Atualizar</button></div>';
-    return;
-  }
-
-  const item = (rot, val) => {
-    const v = (val && String(val).trim()) ? _ctEsc(val) : '<span class="ct-falta">— não preenchido</span>';
-    return '<div class="ct-cli-item"><span class="ct-cli-rot">' + rot + '</span><span class="ct-cli-val">' + v + '</span></div>';
-  };
+  const linhas = _CT_CLI_CAMPOS.map(([k, rot]) =>
+    '<div class="ct-cli-item"><span class="ct-cli-rot">' + rot + '</span>' +
+    '<input class="ct-cli-input" data-k="' + k + '" value="' + _ctEscAttr(dc[k] || '') + '" ' +
+    'placeholder="—" onchange="salvarDadosClienteEdit()"></div>').join('');
 
   box.innerHTML =
-    '<div class="ct-cliente-tit">👤 Dados enviados pelo cliente ' +
-      '<button class="ct-cli-atualizar" onclick="atualizarDadosCliente()">↻ Atualizar</button>' +
-      '<span class="ct-cliente-obs">confira e depois clique em "↺ Preencher do sistema" para aplicar no contrato</span></div>' +
-    '<div class="ct-cli-grid">' +
-      item('Nome completo', dc.nome_completo) +
-      item('CPF', dc.cpf) +
-      item('Estado civil', dc.estado_civil) +
-      item('Nacionalidade', dc.nacionalidade) +
-      item('Endereço', dc.endereco) +
-      item('Celular', dc.celular) +
-      item('Instagram', dc.insta) +
-      item('E-mail', dc.email) +
-      item('Fotografia', dc.forn_fotografia) +
-      item('Filmagem', dc.forn_filmagem) +
-      item('Make/cabelo', dc.forn_make) +
-      item('Vestido', dc.forn_vestido) +
-      item('Buffet', dc.forn_buffet) +
-      item('Bolo', dc.forn_bolo) +
-      item('Doces', dc.forn_doces) +
-      item('Assessoria', dc.forn_assessoria) +
-    '</div>';
+    '<div class="ct-cliente-tit">👤 Dados do cliente ' +
+      '<button class="ct-cli-atualizar" onclick="atualizarDadosCliente()">↻ Buscar do link</button>' +
+      '<span class="ct-cliente-obs">o cliente preenche pelo link; você pode completar/editar aqui. Depois clique em "↺ Preencher do sistema"</span></div>' +
+    '<div class="ct-cli-grid">' + linhas + '</div>';
+}
+
+/* Salva as edições que você faz na caixa de dados do cliente */
+async function salvarDadosClienteEdit() {
+  if (!eventoAtual) return;
+  const dc = Object.assign({}, eventoAtual.dados_contrato || {});
+  document.querySelectorAll('#ct-cliente-box .ct-cli-input').forEach(inp => {
+    dc[inp.dataset.k] = inp.value.trim();
+  });
+  eventoAtual.dados_contrato = dc;
+  const { error } = await sb.from('events').update({ dados_contrato: dc }).eq('id', eventoAtual.id);
+  if (!error) toast('Dados do cliente salvos ✓');
+  else toast('Erro ao salvar os dados do cliente.', 'erro');
 }
 
 function _ctEsc(s) {
   return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+function _ctEscAttr(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
 }
 
 /* Preenche os campos de forma de pagamento com o que está salvo no evento */
