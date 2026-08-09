@@ -23,6 +23,7 @@ const _campos = {
   forn_bolo:       'd-bolo',
   forn_doces:      'd-doces',
   forn_assessoria: 'd-assessoria',
+  forn_iluminacao: 'd-iluminacao',
 };
 
 (async function init() {

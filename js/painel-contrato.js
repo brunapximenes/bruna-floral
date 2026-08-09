@@ -58,9 +58,11 @@ const _CT_CLI_CAMPOS = [
   ['nome_completo', 'Nome completo'], ['cpf', 'CPF'], ['estado_civil', 'Estado civil'],
   ['nacionalidade', 'Nacionalidade'], ['endereco', 'Endereço'], ['celular', 'Celular'],
   ['insta', 'Instagram'], ['email', 'E-mail'],
-  ['forn_fotografia', 'Fotografia'], ['forn_filmagem', 'Filmagem'], ['forn_make', 'Make/cabelo'],
-  ['forn_vestido', 'Vestido'], ['forn_buffet', 'Buffet'], ['forn_bolo', 'Bolo'],
-  ['forn_doces', 'Doces'], ['forn_assessoria', 'Assessoria'],
+  ['forn_fotografia', 'Fotografia'], ['forn_filmagem', 'Filmagem'],
+  ['forn_assessoria', 'Assessoria'],
+  ['forn_make', 'Make/cabelo'], ['forn_vestido', 'Vestido'],
+  ['forn_bolo', 'Bolo'], ['forn_doces', 'Doces'],
+  ['forn_buffet', 'Buffet'], ['forn_iluminacao', 'Iluminação'],
 ];
 
 /* Mostra os dados do cliente — EDITÁVEIS: o cliente preenche pelo link e você completa aqui */
@@ -411,11 +413,11 @@ function templateContrato(ev) {
   <div class="ct-sub">Fornecedores <span class="ct-obs">(preenchidos pelo cliente ou por você — pode deixar em branco)</span></div>
   <div class="ct-forn">
     ${_ctFornLinha('Fotografia', dc.forn_fotografia, 'Filmagem', dc.forn_filmagem)}
-    ${_ctFornLinha('Cerimonial', cerim, 'Decoração', 'Bruna Ximenes Decoração')}
+    ${_ctFornLinha('Assessoria', dc.forn_assessoria, 'Cerimonial', cerim)}
     ${_ctFornLinha('Make/cabelo', dc.forn_make, 'Vestido', dc.forn_vestido)}
-    ${_ctFornLinha('Buffet', dc.forn_buffet, 'Bolo', dc.forn_bolo)}
-    ${_ctFornLinha('doces', dc.forn_doces, 'Assessoria', dc.forn_assessoria)}
-    ${_ctFornLinha('Local', local, '', null)}
+    ${_ctFornLinha('Bolo', dc.forn_bolo, 'Doces', dc.forn_doces)}
+    ${_ctFornLinha('Local', local, 'Buffet', dc.forn_buffet)}
+    ${_ctFornLinha('Iluminação', dc.forn_iluminacao, '', null)}
   </div>
 
   <div class="ct-sec">Cláusula 1ª – Do objeto</div>
