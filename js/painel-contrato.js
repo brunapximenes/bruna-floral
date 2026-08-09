@@ -390,13 +390,13 @@ function templateContrato(ev) {
   const _ph = '<span class="ct-fill"></span>';   // campo em branco pra preencher à mão
 
   return `
-  <h1 class="ct-titulo">Contrato Design Floral</h1>
+  <h1 class="ct-titulo">Contrato de Prestação de Serviços de Decoração Floral</h1>
 
   <div class="ct-sec">Das partes</div>
 
   <div class="ct-sub">CONTRATADA</div>
-  <p>Canga Fulô, inscrita no CNPJ nº 23.667.854/0001-21. Neste ato, representada por Bruna Padilha Ximenes de Mendonça, inscrita sob CPF nº 097.176.324-05, residente e domiciliada na Rua Adalberto Camargo, 58, apto 701, Graças, Recife/PE.</p>
-  <p>Celular: (81) 98136-4921. &nbsp; Email: bruna@cangafulo.com.br</p>
+  <p>Bruna Ximenes Decoração, inscrita no CNPJ nº 23.667.854/0001-21, neste ato representada por Bruna Padilha Ximenes de Mendonça, inscrita no CPF nº 097.176.324-05, residente e domiciliada na Av. Rui Barbosa, 870, apto 602, Graças, Recife/PE.</p>
+  <p>Celular: (81) 99272-6432 &nbsp; · &nbsp; E-mail: bruna.p.ximenes@gmail.com</p>
 
   <div class="ct-sub">CONTRATANTE</div>
   <p>Nome: ${f(nome)}</p>
@@ -405,75 +405,93 @@ function templateContrato(ev) {
   <p>Nacionalidade: ${f(dc.nacionalidade)}</p>
   <p>Endereço: ${f(dc.endereco)}</p>
   <p>Celular: ${f(cel)}</p>
-  <p>Email: ${f(dc.email)}</p>
+  <p>E-mail: ${f(dc.email)}</p>
 
   <div class="ct-sub">Fornecedores <span class="ct-obs">(preenchidos pelo cliente ou por você — pode deixar em branco)</span></div>
   <div class="ct-forn">
     ${_ctFornLinha('Fotografia', dc.forn_fotografia, 'Filmagem', dc.forn_filmagem)}
-    ${_ctFornLinha('Cerimonial', cerim, 'Decoração', 'Canga Fulô')}
+    ${_ctFornLinha('Cerimonial', cerim, 'Decoração', 'Bruna Ximenes Decoração')}
     ${_ctFornLinha('Make/cabelo', dc.forn_make, 'Vestido', dc.forn_vestido)}
     ${_ctFornLinha('Buffet', dc.forn_buffet, 'Bolo', dc.forn_bolo)}
     ${_ctFornLinha('doces', dc.forn_doces, 'Assessoria', dc.forn_assessoria)}
     ${_ctFornLinha('Local', local, '', null)}
   </div>
 
-  <div class="ct-sec">Do objeto</div>
-  <p><strong>Cláusula 1º</strong> - O presente contrato tem por objeto o fornecimento de decoração de casamento com design floral.</p>
-  <p>Data: ${f(data)} &nbsp;&nbsp; Local: ${f(local)}</p>
-  <p>E-mails e mensagens trocados entre CONTRATADA e CONTRATANTE passam a fazer parte integrante deste ACORDO.</p>
-  <p><em>(DESCRIÇÃO DOS PRODUTOS EM ANEXO)</em></p>
+  <div class="ct-sec">Cláusula 1ª – Do objeto</div>
+  <p>O presente contrato tem por objeto a prestação de serviços de <strong>decoração floral</strong> para o evento do CONTRATANTE, a ser executada conforme o DESCRITIVO em anexo.</p>
+  <p>Data do evento: ${f(data)} &nbsp;&nbsp; Local: ${f(local)}</p>
+  <p><strong>§1º</strong> O DESCRITIVO anexo é <strong>parte integrante e inseparável</strong> deste contrato, e todos os serviços serão executados exatamente conforme nele especificado (itens, quantidades, estilo e áreas contempladas).</p>
+  <p><strong>§2º</strong> E-mails e mensagens trocados entre as partes passam a integrar este acordo.</p>
+  <p><strong>§3º</strong> Qualquer alteração no escopo após o fechamento só terá validade por escrito, mediante aditivo ou novo orçamento, podendo implicar ajuste de valor.</p>
 
-  <div class="ct-sec">Do preço e forma de pagamento</div>
-  <p><strong>Cláusula 2º</strong> - Pelo(s) produto(s) e/ou serviço(s) adquiridos pagará a CONTRATANTE à CONTRATADA o valor de <strong>${valor}</strong> ( ${extenso ? extenso : '<span class="ct-fill"></span>'} ).</p>
-  <p><strong>§1º</strong> Os valores e a forma de pagamento deverão ser pagos conforme combinado entre CONTRATANTE e CONTRATADA.</p>
-  <p><strong>Forma de pagamento</strong></p>
-  <p>Qt. parcelas: ${parcelas ? parcelas : _ph}</p>
+  <div class="ct-sec">Cláusula 2ª – Do preço e forma de pagamento</div>
+  <p>Pelo serviço, o CONTRATANTE pagará à CONTRATADA o valor de <strong>${valor}</strong> ( ${extenso ? extenso : '<span class="ct-fill"></span>'} ).</p>
+  <p><strong>Forma de pagamento</strong> — Qt. parcelas: ${parcelas ? parcelas : _ph}</p>
   <p>Vencimentos: ${vencs ? vencs.replace(/\n/g, '<br>') : _ph}</p>
-  <p><strong>§2º</strong> O valor devido será liquidado por meio de depósito bancário, DOC, TED ou PIX em conta da empresa CONTRATADA, no Banco Inter.</p>
-  <p>Banco Inter (077) &nbsp; Conta Corrente: 1916738-5 &nbsp; Agência: 0001<br>
-  Bruna Padilha Ximenes — CNPJ nº 23.667.854/0001-21 (PIX CNPJ)</p>
-  <p><strong>§3º</strong> O material ou decoração somente será entregue mediante pagamento antecipado do saldo devedor.</p>
+  <p>Pagamento por PIX, depósito, DOC ou TED — Banco Inter (077), Ag. 0001, C/C 1916738-5, titular Bruna Padilha Ximenes, PIX CNPJ 23.667.854/0001-21.</p>
+  <p><strong>§1º</strong> O atraso no pagamento de qualquer parcela implicará multa de 2% e juros de 1% ao mês, além de correção monetária.</p>
+  <p><strong>§2º</strong> A montagem da decoração fica condicionada à quitação do saldo devedor conforme cronograma; salvo acordo em contrário, a decoração só será executada mediante pagamento antecipado do saldo.</p>
 
-  <div class="ct-sec">Do pedido</div>
-  <p><strong>Cláusula 3º</strong> - O CONTRATANTE tem ciência de que após o fechamento do pedido não poderá mais efetuar nenhum tipo de alteração nas características dos produtos adquiridos, seja quanto a tamanho, cor, dimensões ou qualquer outra; salvo quando houver disponibilidade da CONTRATADA e mediante pagamento de valor adicional caso haja diferença.</p>
-  <p><strong>Cláusula 4º</strong> - O CONTRATANTE tem ciência de que o processo de produção das peças é artesanal e está ligado diretamente à natureza, podendo apresentar tonalidades, tamanhos e formas variadas. Estão assim sujeitos a pequenas diferenças entre a referência inicialmente apresentada e o produto final.</p>
-  <p><strong>Cláusula 5º</strong> - Como padrão, os produtos serão entregues ao CONTRATANTE em embalagens próprias. Caso o CONTRATANTE deseje que os produtos sejam colocados em embalagens especiais, como isopor, para melhor transportar em caso de viagens, será cobrado valor adicional.</p>
-  <p><em>Parágrafo único</em> - O formato da embalagem e a forma de envio não serão motivos para negativa de recebimento dos produtos tão pouco de seu pagamento integral.</p>
-  <p><strong>Cláusula 6º</strong> - Nos casos de Design Floral + Decoração ou Taxa de Montagem serão seguidos todos os detalhes descritos no anexo.</p>
+  <div class="ct-sec">Cláusula 3ª – Da produção e das características</div>
+  <p>Após o fechamento, o CONTRATANTE não poderá alterar as características do que foi contratado (tamanho, cor, dimensões), salvo havendo disponibilidade da CONTRATADA e mediante pagamento do valor adicional, se houver diferença.</p>
+  <p><em>Parágrafo único.</em> O processo é artesanal e ligado à natureza, podendo apresentar variações de tonalidade, tamanho e forma; ficam ressalvadas pequenas diferenças entre a referência apresentada e o resultado final.</p>
 
-  <div class="ct-sec">Da entrega</div>
-  <p><strong>Cláusula 7º</strong> - Por se tratarem de produtos feitos com flores naturais, os mesmos deverão ser entregues ao CONTRATANTE ou representante previamente autorizado no dia do evento; salvo em casos especiais, mediante acordo.</p>
-  <p><strong>Cláusula 8º</strong> - O CONTRATANTE será notificado exclusivamente via Whatsapp ou ligação quando houver qualquer alteração no horário da entrega causada por motivos exteriores; O CONTRATANTE poderá optar por retirar gratuitamente o pedido no Atelier ou solicitar a entrega mediante pagamento de taxa referente ao deslocamento para o seu destino, sob as seguintes condições:</p>
-  <p><strong>§1º RETIRADA GRATUITA NO ATELIER DA CONTRATADA:</strong> Caso o CONTRATANTE opte pela modalidade "SEM FRETE", deverá retirar gratuitamente seu pedido em nosso escritório. A retirada deverá ser agendada e cumprida conforme previamente combinado e atentando-se às condições descritas na Cláusula 6º. A retirada será feita à Rua Tenente Antônio João, 88, Graças, Recife/PE. A contratada não se responsabiliza pela providência da coleta tão pouco por danos causados no transporte da mercadoria até o seu destino.</p>
-  <p><strong>§2º FRETE POR CONTA DO CONTRATANTE:</strong> O CONTRATANTE poderá solicitar a entrega do(s) produto(s) comprometendo-se a efetuar o pagamento do transporte - previamente ou no ato do recebimento do pedido - no endereço, data e horário previamente combinado entre as partes. Fica a contratada responsável por quaisquer danos causados no transporte da mercadoria.</p>
-  <p><strong>Cláusula 9º</strong> - Em se tratando de decoração completa todos os valores referentes a fretes e deslocamentos já se encontram no bloco "operacional"; salvo custos referentes a solicitações posteriores a este contrato, que poderá acordar informalmente com a CONTRATADA ou através de aditivo contratual.</p>
-  <p><strong>Cláusula 10º</strong> - A CONTRATADA se responsabiliza pela finalização das principais áreas da festa de 1 (uma) a 2 (duas) horas antes do horário marcado para que a equipe de fotografia e/ou filmagem possa fazer os registros; Em alguns casos, como arranjos que fiquem fora da água ou em locais de muito sol, é possível que a equipe de decoração aguarde bem próximo ao horário, para posicionar tais arranjos, afim de preservar a qualidade do material.</p>
+  <div class="ct-sec">Cláusula 4ª – Da indisponibilidade de flores</div>
+  <p>Havendo indisponibilidade das flores escolhidas, a CONTRATADA fará a substituição preservando estilo, cores e qualidade previamente definidos.</p>
+  <p><strong>§1º</strong> Fica garantido o mesmo padrão de qualidade, independentemente de pequenas diferenças de tonalidade, forma e textura.</p>
+  <p><strong>§2º</strong> Em pedido com espécie específica determinada, havendo indisponibilidade, a CONTRATADA notificará o CONTRATANTE antes da compra; se o CONTRATANTE discordar da substituição, a CONTRATADA restituirá os valores pagos até então, sem multa; não sendo possível contato, a CONTRATADA prosseguirá com a substituição para não prejudicar o pedido.</p>
 
-  <div class="ct-sec">Da indisponibilidade</div>
-  <p><strong>Cláusula 11º</strong> - Em caso de indisponibilidade das flores escolhidas a CONTRATADA deverá prosseguir com a substituição para que não reste prejudicado o pedido, a fim de garantir a prestação do serviço, levando em consideração o estilo, cores e detalhes previamente escolhidos.</p>
-  <p><strong>§1º</strong> A CONTRATADA garante ao CONTRATANTE o mesmo padrão de qualidade nos materiais disponíveis, independente das pequenas diferenças de tonalidade, formatos e textura apresentadas nas flores que compõem o produto.</p>
-  <p><strong>§2º</strong> Em caso de pedido com espécie específica determinada, havendo indisponibilidade da mesma, a CONTRATADA deverá notificar o CONTRATANTE a respeito da alteração antes que seja efetivada a compra das flores. Caso o CONTRATANTE discorde da troca proposta, deverá a CONTRATADA ressarcir todo o valor pago até o presente momento, não cabendo multas ou indenizações; caso a CONTRATADA não consiga estabelecer contato deverá prosseguir com a substituição para que não reste prejudicado o pedido, a fim de garantir a prestação do serviço.</p>
+  <div class="ct-sec">Cláusula 5ª – Da montagem, finalização e desmontagem</div>
+  <p>Os serviços serão montados e finalizados no local do evento, no dia, pela equipe da CONTRATADA.</p>
+  <p><strong>§1º</strong> A CONTRATADA finalizará as principais áreas de 1 (uma) a 2 (duas) horas antes do horário do evento, para os registros de foto e vídeo. Arranjos sensíveis (fora da água ou expostos ao sol) podem ser posicionados mais próximo do horário, para preservar a qualidade.</p>
+  <p><strong>§2º</strong> A desmontagem ocorrerá após o término, em horário acordado com o CONTRATANTE ou o local.</p>
+  <p><strong>§3º</strong> Em decoração completa, os valores de fretes e deslocamentos já estão inclusos no bloco "operacional" do descritivo. Custos de solicitações posteriores serão tratados por aditivo.</p>
 
-  <div class="ct-sec">Locações e danos (quando houver decoração)</div>
-  <p><strong>Cláusula 12º</strong> - A CONTRATADA se responsabiliza pela contratação de todo material e equipe descritos no pedido em anexo.</p>
-  <p><strong>§1º</strong> Em caso de dano ao material locado, durante a montagem e desmontagem pela equipe, a CONTRATADA será responsabilizada e arcará com o reparo ou reposição diante da empresa dona do material.</p>
-  <p><strong>§2º</strong> Em caso de dano ao material locado, durante a festa ou em outro momento onde a equipe da CONTRATADA não esteja presente, a CONTRATANTE será responsabilizada e deverá arcar com reparo ou reposição diante da empresa dona do material.</p>
+  <div class="ct-sec">Cláusula 6ª – Do acesso e condições no local</div>
+  <p>O CONTRATANTE se responsabiliza por garantir que a CONTRATADA tenha acesso ao espaço no horário necessário para a montagem, com as condições adequadas (tempo hábil, energia e espaço).</p>
+  <p><em>Parágrafo único.</em> Atrasos ou impedimentos causados pelo local, por terceiros ou pelo próprio CONTRATANTE não são de responsabilidade da CONTRATADA, não ensejam abatimento de valores, e eventuais custos extras daí decorrentes correm por conta do CONTRATANTE.</p>
 
-  <div class="ct-sec">Hipóteses de rescisão e penalidades</div>
-  <p><strong>Cláusula 13º</strong> - O presente contrato poderá ser rescindido nas seguintes hipóteses:</p>
-  <p>a) Por mútuo acordo, caso em que não haverá prejuízo a qualquer das partes, retornando as mesmas ao status quo;</p>
-  <p>b) Em caso de inadimplência dos valores descritos na Cláusula 2º em até 10 (dez) dias antes do evento ou em qualquer momento posterior, inclusive de eventuais acréscimos extracontratuais, onde a CONTRATADA reserva-se ao direito de não entregar o material, perdendo o CONTRATANTE os valores que já houver pago;</p>
-  <p>c) Por culpa da CONTRATADA, quando esta rescindir o contrato até um mês antes da data do evento, caso em que deverá a mesma proceder à devolução de todos os valores que houver recebido do CONTRATANTE;</p>
-  <p>d) Por culpa ou desistência do CONTRATANTE faltando até 30 dias para o evento (não importando qual seja o motivo), este não terá direito à devolução integral dos valores pagos e se compromete a quitar seu saldo devedor (caso haja) para cobertura de custos administrativos e operacionais.</p>
-  <p><strong>§1º</strong> Na hipótese de culpa ou desistência do CONTRATANTE, quando restarem menos de 30 dias para o evento, além dos custos administrativos e operacionais será cobrada uma multa de 30% sobre o valor total do contrato com a justificativa de que a EMPRESA CONTRATADA ficou impossibilitada de fechar contrato com outros clientes durante todo o período de vigência deste mesmo contrato.</p>
-  <p><strong>§2º</strong> Na hipótese de culpa ou desistência da CONTRATADA, quando restarem menos de 30 dias para o evento, a mesma deverá proceder à devolução de todos os valores que houver recebido do CONTRATANTE e arcar com seus próprios custos administrativos e operacionais.</p>
+  <div class="ct-sec">Cláusula 7ª – Das locações e danos</div>
+  <p>A CONTRATADA se responsabiliza pela contratação de todo o material e equipe descritos no anexo.</p>
+  <p><strong>§1º</strong> Em caso de dano ao material locado durante a montagem ou desmontagem pela equipe da CONTRATADA, esta arcará com o reparo ou reposição perante a empresa proprietária.</p>
+  <p><strong>§2º</strong> Em caso de dano ao material locado durante a festa ou em momento no qual a equipe da CONTRATADA não esteja presente, o CONTRATANTE será responsável pelo reparo ou reposição.</p>
 
-  <div class="ct-sec">Dos direitos autorais</div>
-  <p><strong>Cláusula 14º</strong> - A CONTRATADA detém direitos autorais e intelectuais sobre os produtos, podendo inclusive, utilizar como portfólio em seu portal na internet, mídias sociais, flyers, mostruários, matérias e concursos de arte, desde que exclusivamente para fins de divulgação de seu trabalho.</p>
+  <div class="ct-sec">Cláusula 8ª – Da responsabilidade</div>
+  <p>A CONTRATADA não responde por atrasos, falhas ou prejuízos decorrentes de caso fortuito, força maior, atos de terceiros (outros fornecedores ou o local do evento) ou atos do próprio CONTRATANTE.</p>
 
-  <div class="ct-sec">Do foro</div>
-  <p><strong>Cláusula 15º</strong> - Fica eleito o Foro da Comarca de Recife - PE para dirimir quaisquer dúvidas oriundas do presente contrato, com exclusão de qualquer outro por mais privilegiado que seja.</p>
-  <p>E por estarem justos e contratados, concordam as partes com o presente instrumento Particular de Prestação de Serviços, o qual o CONTRATANTE tem ciência e concorda tendo sido devidamente orientado a ler este acordo quando da formalização de seu pedido.</p>
+  <div class="ct-sec">Cláusula 9ª – Da remarcação</div>
+  <p>Caso o CONTRATANTE precise remarcar a data, deverá comunicar a CONTRATADA com a maior antecedência possível.</p>
+  <p><strong>§1º</strong> A remarcação fica sujeita à disponibilidade de agenda da CONTRATADA.</p>
+  <p><strong>§2º</strong> Os valores já pagos serão aproveitados para a nova data, podendo haver reajuste em razão da sazonalidade das flores, mudança de local ou aumento de custos.</p>
+
+  <div class="ct-sec">Cláusula 10ª – Da força maior e caso fortuito</div>
+  <p>Nenhuma das partes responderá pelo descumprimento decorrente de caso fortuito ou força maior (fenômenos climáticos severos, determinações de autoridades, pandemias, interdição do local, greves e situações análogas).</p>
+  <p><em>Parágrafo único.</em> Nessas hipóteses, as partes buscarão a remarcação; não sendo possível, a CONTRATADA restituirá os valores ainda não comprometidos com custos já assumidos (flores, insumos e fornecedores), retendo apenas o necessário para cobrir tais custos, sem multa para nenhuma das partes.</p>
+
+  <div class="ct-sec">Cláusula 11ª – Da rescisão e penalidades</div>
+  <p>O contrato poderá ser rescindido: a) por mútuo acordo, sem prejuízo às partes; b) por inadimplência do CONTRATANTE, hipótese em que a CONTRATADA poderá deixar de executar o serviço.</p>
+  <p><strong>§1º – Cancelamento pelo CONTRATANTE</strong> (ressalvada a força maior). O CONTRATANTE arcará com dois valores distintos:</p>
+  <p>a) os CUSTOS já assumidos pela CONTRATADA até a data do cancelamento (flores, insumos, sinais e reservas a fornecedores e equipe, e elaboração do projeto); e</p>
+  <p>b) MULTA compensatória, separada dos custos acima, pela indisponibilidade da data reservada e pela perda de oportunidade de outros eventos, no valor de:</p>
+  <ul>
+    <li>10% do valor total do contrato, se o cancelamento ocorrer com mais de 30 (trinta) dias de antecedência; ou</li>
+    <li>20% do valor total do contrato, se ocorrer com 30 (trinta) dias ou menos de antecedência.</li>
+  </ul>
+  <p>Os valores já pagos serão usados primeiro para cobrir os custos (a) e depois a multa (b). Havendo saldo a favor do CONTRATANTE, será devolvido; sendo insuficiente, o CONTRATANTE pagará a diferença.</p>
+  <p><strong>§2º – Cancelamento pela CONTRATADA</strong> (ressalvada a força maior). A CONTRATADA:</p>
+  <p>a) restituirá integralmente todos os valores já pagos pelo CONTRATANTE; e</p>
+  <p>b) pagará multa de 10% do valor total apenas se cancelar com 30 (trinta) dias ou menos de antecedência. Cancelando com mais de 30 dias, não haverá multa, por haver tempo hábil para o CONTRATANTE contratar outra empresa.</p>
+
+  <div class="ct-sec">Cláusula 12ª – Da proteção de dados (LGPD) e da imagem</div>
+  <p>Os dados pessoais fornecidos serão utilizados exclusivamente para a execução deste contrato, observada a Lei nº 13.709/2018 (LGPD).</p>
+  <p><em>Parágrafo único.</em> A CONTRATADA detém os direitos sobre o trabalho floral e a decoração produzida, podendo registrá-los e utilizar suas imagens em portfólio, redes sociais, materiais de divulgação, matérias e concursos, para fins de divulgação do seu trabalho. Imagens que contenham pessoas dependem do consentimento destas.</p>
+
+  <div class="ct-sec">Cláusula 13ª – Da assinatura e validade</div>
+  <p>As partes reconhecem a validade da aceitação e assinatura por meios eletrônicos ou digitais (inclusive confirmação por WhatsApp, e-mail ou assinatura eletrônica), que produzem os mesmos efeitos da assinatura física.</p>
+
+  <div class="ct-sec">Cláusula 14ª – Do foro</div>
+  <p>Fica eleito o Foro da Comarca de Recife/PE, ressalvado ao CONTRATANTE, na condição de consumidor, o direito de demandar no foro de seu domicílio, nos termos do Código de Defesa do Consumidor.</p>
+  <p>E por estarem justas e contratadas, as partes assinam o presente instrumento.</p>
 
   <p class="ct-cidade">${assin}</p>
 
@@ -484,7 +502,7 @@ function templateContrato(ev) {
     <div class="ct-assina"><div class="ct-linha-assina"></div>Testemunha 2:</div>
   </div>
 
-  <div class="ct-sec">Anexo</div>
+  <div class="ct-sec">Anexo — Descritivo <span class="ct-obs">(parte integrante do contrato)</span></div>
   <div class="ct-anexo" id="ct-anexo">
     <p class="ct-anexo-vazio">Clique em <strong>"Anexar descritivo"</strong> na barra acima para incluir o descritivo deste evento aqui.</p>
   </div>
@@ -501,6 +519,7 @@ function _ctCssImprimir() {
     '.ct-sub{font-weight:600;margin:10px 0 4px;}' +
     '.ct-obs{font-weight:400;font-size:10.5px;color:#999;text-transform:none;letter-spacing:0;}' +
     'p{margin-bottom:7px;}' +
+    'ul{margin:0 0 7px 20px;}li{margin-bottom:3px;}' +
     '.ct-fill{border-bottom:1px solid #999;min-width:80px;display:inline-block;padding:0 4px;}' +
     '.ct-forn-linha{display:grid;grid-template-columns:auto 1fr auto 1fr;gap:6px 10px;margin-bottom:5px;align-items:end;}' +
     '.ct-cidade{margin-top:26px;}' +
