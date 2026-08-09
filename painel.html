@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Painel — Bruna Floral</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/style.css?v=17">
+<link rel="stylesheet" href="/css/style.css?v=18">
 <style>
 /* ── LOGIN ──────────────────────────────────────────── */
 #tela-login {
@@ -527,6 +527,32 @@
           <button class="btn-rosa" onclick="gerarPDF()">📄 Gerar PDF do orçamento</button>
           <button class="btn-outline-verde" onclick="exportarSheets()">📊 Exportar para Google Sheets</button>
         </div>
+
+        <!-- Calculadora (lateral direita) -->
+        <div class="calc" id="calc" tabindex="0" onclick="ativarCalc()">
+          <div class="calc-tit">🧮 Calculadora <span class="calc-obs">clique e use o teclado</span></div>
+          <input class="calc-visor" id="calc-visor" value="0" readonly>
+          <div class="calc-teclas">
+            <button class="calc-op" onclick="calcTecla('C')">C</button>
+            <button class="calc-op" onclick="calcTecla('←')">←</button>
+            <button class="calc-op" onclick="calcTecla('/')">÷</button>
+            <button class="calc-op" onclick="calcTecla('*')">×</button>
+            <button onclick="calcTecla('7')">7</button>
+            <button onclick="calcTecla('8')">8</button>
+            <button onclick="calcTecla('9')">9</button>
+            <button class="calc-op" onclick="calcTecla('-')">−</button>
+            <button onclick="calcTecla('4')">4</button>
+            <button onclick="calcTecla('5')">5</button>
+            <button onclick="calcTecla('6')">6</button>
+            <button class="calc-op" onclick="calcTecla('+')">+</button>
+            <button onclick="calcTecla('1')">1</button>
+            <button onclick="calcTecla('2')">2</button>
+            <button onclick="calcTecla('3')">3</button>
+            <button class="calc-igual" onclick="calcTecla('=')">=</button>
+            <button class="calc-zero" onclick="calcTecla('0')">0</button>
+            <button onclick="calcTecla('.')">.</button>
+          </div>
+        </div>
       </div>
 
       <!-- CONTROLE INTERNO -->
@@ -600,7 +626,7 @@
 <script src="/js/painel-auth.js"></script>
 <script src="/js/painel-lista.js?v=5"></script>
 <script src="/js/painel-evento.js?v=3"></script>
-<script src="/js/painel-orcamento.js?v=6"></script>
+<script src="/js/painel-orcamento.js?v=7"></script>
 <script src="/js/painel-interno.js?v=3"></script>
 <script src="/js/gerar-pdf.js?v=6"></script>
 <script src="/js/exportar-sheets.js"></script>

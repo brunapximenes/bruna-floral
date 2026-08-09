@@ -182,6 +182,20 @@ body {
 .badge-contrato  { background: #f0f9ff; color: #0369a1; }
 .badge-fechado   { background: #f0fdf4; color: var(--status-fechado); }
 .badge-cancelado { background: #f9fafb; color: var(--status-cancelado); }
+/* ── Calculadora da aba Orçamento ── */
+.calc { position: fixed; right: 20px; top: 150px; width: 224px; background: #fff; border: 1px solid var(--borda); border-radius: 12px; padding: 12px; box-shadow: 0 6px 20px rgba(0,0,0,.12); z-index: 40; outline: none; }
+.calc:focus { border-color: var(--verde); box-shadow: 0 6px 22px rgba(61,90,71,.28); }
+.calc-tit { font-size: 12px; color: var(--verde); font-weight: 500; margin-bottom: 8px; }
+.calc-obs { font-weight: 400; color: #999; font-size: 10.5px; }
+.calc-visor { width: 100%; text-align: right; font-size: 20px; font-family: 'Jost', sans-serif; border: 1px solid var(--borda); border-radius: 8px; padding: 8px 10px; margin-bottom: 8px; background: var(--creme2); color: #2c2c2c; }
+.calc-teclas { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.calc-teclas button { padding: 11px 0; font-size: 15px; border: 1px solid var(--borda); background: #fff; border-radius: 8px; cursor: pointer; font-family: 'Jost', sans-serif; color: #2c2c2c; }
+.calc-teclas button:hover { background: var(--creme2); }
+.calc-teclas .calc-op { background: var(--creme2); color: var(--verde); font-weight: 500; }
+.calc-teclas .calc-igual { background: var(--verde); color: #fff; grid-row: span 2; }
+.calc-teclas .calc-zero { grid-column: span 2; }
+@media (max-width: 1200px) { .calc { position: static; width: 100%; max-width: 260px; margin: 16px 0 0; box-shadow: none; } }
+
 .badge-select {
   border: none; border-radius: 20px; padding: 5px 12px; font-size: 11px;
   font-weight: 500; letter-spacing: .04em; text-transform: uppercase; cursor: pointer;

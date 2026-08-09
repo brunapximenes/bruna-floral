@@ -31,7 +31,55 @@ function renderOrcamento() {
   _ORC_SECS.forEach(sec => renderSecao(sec));
   aplicarOrdemBlocos();
   initOrcSortable();
+  initCalc();
   updateTotais();
+}
+
+/* ── CALCULADORA (aba Orçamento) ────────────────────────────── */
+let _calcExpr = '';
+function _calcRender() {
+  const v = document.getElementById('calc-visor');
+  if (v) v.value = (_calcExpr || '0').replace(/\*/g, '×').replace(/\//g, '÷');
+}
+function calcTecla(k) {
+  if (k === 'C') { _calcExpr = ''; _calcRender(); return; }
+  if (k === '←') { _calcExpr = _calcExpr.slice(0, -1); _calcRender(); return; }
+  if (k === '=') {
+    try {
+      const expr = _calcExpr.replace(/×/g, '*').replace(/÷/g, '/');
+      if (!expr || !/^[-0-9+*/.() ]+$/.test(expr)) throw 0;
+      let r = Function('"use strict";return (' + expr + ')')();
+      if (!isFinite(r)) throw 0;
+      r = Math.round((r + Number.EPSILON) * 100) / 100;
+      _calcExpr = String(r);
+      const v = document.getElementById('calc-visor');
+      if (v) v.value = r.toLocaleString('pt-BR');
+    } catch (e) {
+      const v = document.getElementById('calc-visor');
+      if (v) v.value = 'Erro';
+      _calcExpr = '';
+    }
+    return;
+  }
+  _calcExpr += k;
+  _calcRender();
+}
+function ativarCalc() {
+  const c = document.getElementById('calc');
+  if (c) c.focus();
+}
+function initCalc() {
+  const c = document.getElementById('calc');
+  if (!c || c._on) return;
+  c._on = true;
+  c.addEventListener('keydown', (e) => {
+    const k = e.key;
+    if (/^[0-9.]$/.test(k)) { calcTecla(k); e.preventDefault(); }
+    else if (k === '+' || k === '-' || k === '*' || k === '/') { calcTecla(k); e.preventDefault(); }
+    else if (k === 'Enter' || k === '=') { calcTecla('='); e.preventDefault(); }
+    else if (k === 'Backspace') { calcTecla('←'); e.preventDefault(); }
+    else if (k === 'Escape') { calcTecla('C'); e.preventDefault(); }
+  });
 }
 
 function renderSecao(sec) {
