@@ -87,11 +87,39 @@ function carregarDescritivo() {
   }
 
   _bindDescInput(doc, CHAVE);
+  _initNudge();
 
   if (!doc._hist) {
     doc._hist = criarHistorico(doc, _htmlDescritivoLimpo, (h) => { doc.innerHTML = h; _salvarDescritivo(); });
   }
   doc._hist.reset(_htmlDescritivoLimpo());
+}
+
+/* Ajuste fino da posição das imagens com as setas do teclado
+   (1px por seta, 10px com Shift). Move todas as selecionadas. */
+function _initNudge() {
+  if (document._descNudgeOn) return;
+  document._descNudgeOn = true;
+  document.addEventListener('keydown', (e) => {
+    if (!_imgSel || !_imgSel.length) return;
+    const pag = document.getElementById('pag-descritivo');
+    if (!pag || !pag.classList.contains('active')) return;
+    const tag = (document.activeElement && document.activeElement.tagName) || '';
+    if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+    let dx = 0, dy = 0;
+    if (e.key === 'ArrowLeft') dx = -1;
+    else if (e.key === 'ArrowRight') dx = 1;
+    else if (e.key === 'ArrowUp') dy = -1;
+    else if (e.key === 'ArrowDown') dy = 1;
+    else return;
+    e.preventDefault();
+    const passo = e.shiftKey ? 10 : 1;
+    _imgSel.forEach(w => {
+      w.style.left = ((parseFloat(w.style.left) || 0) + dx * passo) + 'px';
+      w.style.top  = ((parseFloat(w.style.top) || 0) + dy * passo) + 'px';
+    });
+    _salvarDescritivo();
+  });
 }
 
 function preencherDescritivo() {
