@@ -255,6 +255,15 @@ body {
   font-family: 'Jost', sans-serif;
 }
 
+/* ── Pagamentos aos fornecedores (Controle interno) ── */
+.forn-pgtos { margin: 0 0 12px 14px; padding-left: 10px; border-left: 2px solid var(--creme2); }
+.forn-pgtos-tit { font-size: 11px; color: #999; margin-bottom: 4px; }
+.pgto-linha { display: grid; grid-template-columns: 1fr 120px 24px; gap: 6px; margin-bottom: 4px; align-items: center; }
+.pgto-linha input { padding: 5px 8px; font-size: 12px; border: 1px solid var(--borda); border-radius: 6px; font-family: 'Jost', sans-serif; width: 100%; }
+.add-pgto { font-size: 11.5px; color: var(--verde-claro); background: none; border: none; cursor: pointer; padding: 2px 0; font-family: 'Jost', sans-serif; }
+.add-pgto:hover { text-decoration: underline; }
+#metrics-int-topo { margin-bottom: 16px; }
+
 /* ── ABA DESCRITIVO ──────────────────────────────────── */
 .desc-toolbar {
   display: flex; gap: 10px; margin-bottom: 16px; justify-content: flex-end;

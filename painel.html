@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Painel — Bruna Floral</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/style.css?v=20">
+<link rel="stylesheet" href="/css/style.css?v=21">
 <style>
 /* ── LOGIN ──────────────────────────────────────────── */
 #tela-login {
@@ -285,6 +285,7 @@
       <button class="aba"        data-aba="contrato"    onclick="goAba('contrato',this);carregarContrato()">Contrato</button>
       <button class="aba"        data-aba="orcamento"   onclick="goAba('orcamento',this)">Orçamento</button>
       <button class="aba"        data-aba="interno"     onclick="goAba('interno',this)">Controle interno</button>
+      <button class="aba"        data-aba="pagamento"   onclick="goAba('pagamento',this);carregarPagamentos()">Pagamento</button>
     </div>
 
     <div class="evento-content">
@@ -559,6 +560,7 @@
 
       <!-- CONTROLE INTERNO -->
       <div class="pag" id="pag-interno">
+        <div class="metrics" id="metrics-int-topo"></div>
         <div class="card">
           <div class="card-title">Fornecedores de flores</div>
           <div class="col-heads" style="grid-template-columns:1fr 70px 100px 90px 28px"><div class="col-head">Fornecedor</div><div class="col-head">Qtd</div><div class="col-head">Valor R$</div><div class="col-head">Total</div><div></div></div>
@@ -580,6 +582,19 @@
         <div class="metrics" id="metrics-int"></div>
         <div class="acoes-wrap">
           <button class="btn-outline-verde" onclick="exportarSheets()">📊 Exportar para Google Sheets</button>
+        </div>
+      </div>
+
+      <!-- PAGAMENTO (recebimentos do cliente) -->
+      <div class="pag" id="pag-pagamento">
+        <div class="metrics" id="metrics-pag"></div>
+        <div class="card">
+          <div class="card-title">Pagamentos recebidos do cliente</div>
+          <div class="col-heads" style="grid-template-columns:1fr 150px 28px">
+            <div class="col-head">Data do recebimento</div><div class="col-head">Valor R$</div><div></div>
+          </div>
+          <div id="items-pagrec"></div>
+          <button class="add-btn" onclick="addPagamentoRecebido()">+ Adicionar recebimento</button>
         </div>
       </div>
 
@@ -629,7 +644,8 @@
 <script src="/js/painel-lista.js?v=5"></script>
 <script src="/js/painel-evento.js?v=3"></script>
 <script src="/js/painel-orcamento.js?v=7"></script>
-<script src="/js/painel-interno.js?v=3"></script>
+<script src="/js/painel-interno.js?v=4"></script>
+<script src="/js/painel-pagamento.js?v=1"></script>
 <script src="/js/gerar-pdf.js?v=6"></script>
 <script src="/js/exportar-sheets.js"></script>
 <script src="/js/painel-descritivo.js?v=9"></script>
