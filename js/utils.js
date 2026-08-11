@@ -50,20 +50,22 @@ function toast(msg, tipo = 'ok') {
 
 /** Labels e cores dos status */
 const STATUS_LABELS = {
-  novo:              'Novo',
-  em_analise:        'Em análise',
-  orcamento_enviado: 'Orçamento enviado',
-  contrato_enviado:  'Contrato enviado',
-  fechado:           'Fechado',
-  cancelado:         'Cancelado'
+  novo:                    'Novo',
+  em_analise:              'Em análise',
+  aguardando_referencias:  'Aguardando referências',
+  orcamento_enviado:       'Orçamento enviado',
+  contrato_enviado:        'Contrato enviado',
+  fechado:                 'Fechado',
+  cancelado:               'Cancelado'
 };
 const STATUS_BADGE = {
-  novo:              'badge-novo',
-  em_analise:        'badge-analise',
-  orcamento_enviado: 'badge-orc',
-  contrato_enviado:  'badge-contrato',
-  fechado:           'badge-fechado',
-  cancelado:         'badge-cancelado'
+  novo:                    'badge-novo',
+  em_analise:              'badge-analise',
+  aguardando_referencias:  'badge-aguardando',
+  orcamento_enviado:       'badge-orc',
+  contrato_enviado:        'badge-contrato',
+  fechado:                 'badge-fechado',
+  cancelado:               'badge-cancelado'
 };
 
 /** Labels de tipo de evento */
