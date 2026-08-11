@@ -112,7 +112,7 @@ let _arrasto = null;     // estado de arraste/redimensionamento
 let _multiSel = false;   // modo "selecionar várias" (útil no toque)
 let _guias = [];         // linhas-guia de alinhamento (estilo Canva)
 const _SNAP = 6;         // tolerância em px para alinhar posição
-const _SNAPW = 12;       // tolerância em px para igualar tamanho
+const _SNAPW = 22;       // tolerância em px para igualar tamanho (imã forte)
 
 /* Liga o salvamento automático + colar/arrastar/redimensionar imagens */
 function _bindDescInput(doc, CHAVE) {
@@ -371,6 +371,14 @@ function _atualizarHandles() {
     mk('ds-img-front', '⬆', 'Trazer para frente');
     mk('ds-img-handle', '', 'Redimensionar');          // canto direito
     mk('ds-img-handle-esq', '', 'Redimensionar');       // canto esquerdo
+  } else if (_imgSel.length > 1) {
+    // várias selecionadas: alça em cada uma para redimensionar todas juntas
+    _imgSel.forEach(w => {
+      const alca = document.createElement('span');
+      alca.className = 'ds-img-handle ds-ui';
+      alca.title = 'Redimensionar todas juntas';
+      w.appendChild(alca);
+    });
   }
 }
 
@@ -438,12 +446,14 @@ function _descPointerDown(e) {
     return;
   }
   if (resizeDir || resizeEsq) {
-    _selecionarImagem(wrap, false);
+    const emGrupo = _imgSel.length > 1 && _imgSel.indexOf(wrap) >= 0;
+    if (!emGrupo) _selecionarImagem(wrap, false);
     _arrasto = {
       tipo: 'resize', lado: resizeEsq ? 'esq' : 'dir', wrap,
       x0: e.clientX, y0: e.clientY,
       left0: parseFloat(wrap.style.left) || 0,
-      w0: parseFloat(wrap.style.width) || wrap.offsetWidth,
+      w0: wrap.offsetWidth,                     // largura REAL em px (corrige o bug de %)
+      grupo: emGrupo ? _imgSel.slice() : null,
     };
   } else {
     if (_imgSel.indexOf(wrap) < 0) _selecionarImagem(wrap, false);   // clicou numa não-selecionada
@@ -472,37 +482,41 @@ function _descPointerMove(e) {
     if (s.guiaX != null) _guiaV(s.guiaX);
     if (s.guiaY != null) _guiaH(s.guiaY);
   } else {
-    const outras = _outrasImgs([_arrasto.wrap]);
-    if (_arrasto.lado === 'esq') {
-      // redimensiona pela esquerda (borda direita fica fixa)
-      const right = _arrasto.left0 + _arrasto.w0;
-      let propLeft = _arrasto.left0 + dx;
-      let propW = Math.max(50, right - propLeft);
-      propLeft = right - propW;
-      let mW = null, mL = null;
-      outras.forEach(o => {
-        const dw = o.larg - propW;
-        if (Math.abs(dw) <= _SNAPW && (!mW || Math.abs(dw) < Math.abs(mW.dw))) mW = { dw, w: o.larg, el: o.el };
-        [o.left, o.cx, o.right].forEach(lv => { const d = lv - propLeft; if (Math.abs(d) <= _SNAP && (!mL || Math.abs(d) < Math.abs(mL.d))) mL = { d, linha: lv }; });
-      });
-      if (mW && (!mL || Math.abs(mW.dw) <= Math.abs(mL.d))) { propW = mW.w; propLeft = right - propW; mW.el.classList.add('ds-img-ref'); }
-      else if (mL) { propLeft += mL.d; propW = right - propLeft; _guiaV(mL.linha); }
-      _arrasto.wrap.style.left = propLeft + 'px';
-      _arrasto.wrap.style.width = propW + 'px';
+    const excluir = _arrasto.grupo ? _arrasto.grupo.slice() : [_arrasto.wrap];
+    const outras = _outrasImgs(excluir);
+    const esq = _arrasto.lado === 'esq';
+    let propW = Math.max(50, esq ? (_arrasto.w0 - dx) : (_arrasto.w0 + dx));
+
+    // imã: igualar a largura de uma imagem vizinha
+    let mW = null;
+    outras.forEach(o => {
+      const d = o.larg - propW;
+      if (Math.abs(d) <= _SNAPW && (!mW || Math.abs(d) < Math.abs(mW.d))) mW = { d, w: o.larg, el: o.el };
+    });
+
+    if (_arrasto.grupo) {
+      // várias selecionadas → todas ficam com a MESMA largura
+      if (mW) { propW = mW.w; mW.el.classList.add('ds-img-ref'); }
+      _arrasto.grupo.forEach(w => { w.style.width = propW + 'px'; });
     } else {
-      // redimensiona pela direita (borda esquerda fica fixa)
-      let propW = Math.max(50, _arrasto.w0 + dx);
-      const left = _arrasto.left0;
-      const dir = left + propW;
-      let mW = null, mR = null;
-      outras.forEach(o => {
-        const dw = o.larg - propW;
-        if (Math.abs(dw) <= _SNAPW && (!mW || Math.abs(dw) < Math.abs(mW.dw))) mW = { dw, w: o.larg, el: o.el };
-        [o.left, o.cx, o.right].forEach(lv => { const d = lv - dir; if (Math.abs(d) <= _SNAP && (!mR || Math.abs(d) < Math.abs(mR.d))) mR = { d, linha: lv }; });
-      });
-      if (mW && (!mR || Math.abs(mW.dw) <= Math.abs(mR.d))) { propW = mW.w; mW.el.classList.add('ds-img-ref'); }
-      else if (mR) { propW += mR.d; _guiaV(mR.linha); }
-      _arrasto.wrap.style.width = propW + 'px';
+      const wrap = _arrasto.wrap;
+      if (esq) {
+        const right = _arrasto.left0 + _arrasto.w0;
+        let propLeft = right - propW;
+        let mL = null;
+        outras.forEach(o => { [o.left, o.cx, o.right].forEach(lv => { const d = lv - propLeft; if (Math.abs(d) <= _SNAP && (!mL || Math.abs(d) < Math.abs(mL.d))) mL = { d, linha: lv }; }); });
+        if (mW && (!mL || Math.abs(mW.d) <= Math.abs(mL.d))) { propW = mW.w; propLeft = right - propW; mW.el.classList.add('ds-img-ref'); }
+        else if (mL) { propLeft += mL.d; propW = right - propLeft; _guiaV(mL.linha); }
+        wrap.style.left = propLeft + 'px';
+        wrap.style.width = propW + 'px';
+      } else {
+        const dir = _arrasto.left0 + propW;
+        let mR = null;
+        outras.forEach(o => { [o.left, o.cx, o.right].forEach(lv => { const d = lv - dir; if (Math.abs(d) <= _SNAP && (!mR || Math.abs(d) < Math.abs(mR.d))) mR = { d, linha: lv }; }); });
+        if (mW && (!mR || Math.abs(mW.d) <= Math.abs(mR.d))) { propW = mW.w; mW.el.classList.add('ds-img-ref'); }
+        else if (mR) { propW += mR.d; _guiaV(mR.linha); }
+        wrap.style.width = propW + 'px';
+      }
     }
   }
 }
