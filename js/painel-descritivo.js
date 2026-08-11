@@ -112,7 +112,7 @@ let _arrasto = null;     // estado de arraste/redimensionamento
 let _multiSel = false;   // modo "selecionar várias" (útil no toque)
 let _guias = [];         // linhas-guia de alinhamento (estilo Canva)
 const _SNAP = 6;         // tolerância em px para alinhar posição
-const _SNAPW = 22;       // tolerância em px para igualar tamanho (imã forte)
+const _SNAPH = 24;       // tolerância em px para igualar a ALTURA da foto vizinha
 
 /* Liga o salvamento automático + colar/arrastar/redimensionar imagens */
 function _bindDescInput(doc, CHAVE) {
@@ -453,7 +453,8 @@ function _descPointerDown(e) {
       x0: e.clientX, y0: e.clientY,
       left0: parseFloat(wrap.style.left) || 0,
       w0: wrap.offsetWidth,                     // largura REAL em px (corrige o bug de %)
-      grupo: emGrupo ? _imgSel.slice() : null,
+      h0: wrap.offsetHeight,                    // altura REAL, para trabalhar por altura
+      grupo: emGrupo ? _imgSel.map(w => ({ w, aspect: w.offsetWidth / (w.offsetHeight || 1) })) : null,
     };
   } else {
     if (_imgSel.indexOf(wrap) < 0) _selecionarImagem(wrap, false);   // clicou numa não-selecionada
@@ -482,41 +483,33 @@ function _descPointerMove(e) {
     if (s.guiaX != null) _guiaV(s.guiaX);
     if (s.guiaY != null) _guiaH(s.guiaY);
   } else {
-    const excluir = _arrasto.grupo ? _arrasto.grupo.slice() : [_arrasto.wrap];
-    const outras = _outrasImgs(excluir);
     const esq = _arrasto.lado === 'esq';
-    let propW = Math.max(50, esq ? (_arrasto.w0 - dx) : (_arrasto.w0 + dx));
+    const aspect = _arrasto.w0 / (_arrasto.h0 || 1);       // largura ÷ altura (constante)
+    let propW = Math.max(40, esq ? (_arrasto.w0 - dx) : (_arrasto.w0 + dx));
+    let propH = propW / aspect;                            // altura correspondente
 
-    // imã: igualar a largura de uma imagem vizinha
-    let mW = null;
-    outras.forEach(o => {
-      const d = o.larg - propW;
-      if (Math.abs(d) <= _SNAPW && (!mW || Math.abs(d) < Math.abs(mW.d))) mW = { d, w: o.larg, el: o.el };
+    // imã: igualar a ALTURA de uma foto vizinha
+    const excluir = _arrasto.grupo ? _arrasto.grupo.map(g => g.w) : [_arrasto.wrap];
+    let mH = null;
+    _outrasImgs(excluir).forEach(o => {
+      const d = o.alt - propH;
+      if (Math.abs(d) <= _SNAPH && (!mH || Math.abs(d) < Math.abs(mH.d))) mH = { d, h: o.alt, el: o.el };
     });
+    if (mH) { propH = mH.h; propW = propH * aspect; mH.el.classList.add('ds-img-ref'); }
 
     if (_arrasto.grupo) {
-      // várias selecionadas → todas ficam com a MESMA largura
-      if (mW) { propW = mW.w; mW.el.classList.add('ds-img-ref'); }
-      _arrasto.grupo.forEach(w => { w.style.width = propW + 'px'; });
+      // várias → todas ficam com a MESMA ALTURA (cada uma acha sua largura pelo próprio aspecto)
+      _arrasto.grupo.forEach(g => {
+        g.w.style.width = (propH * g.aspect) + 'px';
+        if (mH) g.w.classList.add('ds-img-ref');
+      });
+      _labelResize(_arrasto.wrap, propH, !!mH);
     } else {
       const wrap = _arrasto.wrap;
-      if (esq) {
-        const right = _arrasto.left0 + _arrasto.w0;
-        let propLeft = right - propW;
-        let mL = null;
-        outras.forEach(o => { [o.left, o.cx, o.right].forEach(lv => { const d = lv - propLeft; if (Math.abs(d) <= _SNAP && (!mL || Math.abs(d) < Math.abs(mL.d))) mL = { d, linha: lv }; }); });
-        if (mW && (!mL || Math.abs(mW.d) <= Math.abs(mL.d))) { propW = mW.w; propLeft = right - propW; mW.el.classList.add('ds-img-ref'); }
-        else if (mL) { propLeft += mL.d; propW = right - propLeft; _guiaV(mL.linha); }
-        wrap.style.left = propLeft + 'px';
-        wrap.style.width = propW + 'px';
-      } else {
-        const dir = _arrasto.left0 + propW;
-        let mR = null;
-        outras.forEach(o => { [o.left, o.cx, o.right].forEach(lv => { const d = lv - dir; if (Math.abs(d) <= _SNAP && (!mR || Math.abs(d) < Math.abs(mR.d))) mR = { d, linha: lv }; }); });
-        if (mW && (!mR || Math.abs(mW.d) <= Math.abs(mR.d))) { propW = mW.w; mW.el.classList.add('ds-img-ref'); }
-        else if (mR) { propW += mR.d; _guiaV(mR.linha); }
-        wrap.style.width = propW + 'px';
-      }
+      if (esq) wrap.style.left = (_arrasto.left0 + _arrasto.w0 - propW) + 'px';   // fixa a borda direita
+      wrap.style.width = propW + 'px';
+      if (mH) wrap.classList.add('ds-img-ref');
+      _labelResize(wrap, propH, !!mH);
     }
   }
 }
@@ -582,6 +575,20 @@ function _guiaH(y) {
   g.className = 'ds-guia ds-ui';
   g.style.cssText = 'position:absolute;top:' + y + 'px;left:0;width:' + _descDoc.scrollWidth + 'px;border-top:1px dashed #c9847a;z-index:20;pointer-events:none;';
   _descDoc.appendChild(g); _guias.push(g);
+}
+
+/* Rótulo com a altura enquanto redimensiona (ajuda a igualar a foto vizinha) */
+function _labelResize(wrap, altura, casou) {
+  const g = document.createElement('div');
+  g.className = 'ds-guia ds-ui';
+  const left = parseFloat(wrap.style.left) || 0;
+  const top = parseFloat(wrap.style.top) || 0;
+  g.style.cssText = 'position:absolute;left:' + left + 'px;top:' + Math.max(0, top - 24) + 'px;' +
+    'background:' + (casou ? '#3d5a47' : '#c9847a') + ';color:#fff;font-size:11px;padding:2px 8px;' +
+    'border-radius:6px;z-index:25;pointer-events:none;white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,.25);';
+  g.textContent = 'altura ' + Math.round(altura) + 'px' + (casou ? ' · igual à vizinha ✓' : '');
+  _descDoc.appendChild(g);
+  _guias.push(g);
 }
 
 /* Salva o descritivo na nuvem (banco) — assim aparece em qualquer aparelho */
