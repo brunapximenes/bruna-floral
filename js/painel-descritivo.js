@@ -400,12 +400,16 @@ function _atualizarHandles() {
     mk('ds-img-handle', '', 'Redimensionar');          // canto direito
     mk('ds-img-handle-esq', '', 'Redimensionar');       // canto esquerdo
   } else if (_imgSel.length > 1) {
-    // várias selecionadas: alça em cada uma para redimensionar todas juntas
+    // várias selecionadas: alças dos dois lados em cada uma, para redimensionar todas juntas
     _imgSel.forEach(w => {
-      const alca = document.createElement('span');
-      alca.className = 'ds-img-handle ds-ui';
-      alca.title = 'Redimensionar todas juntas';
-      w.appendChild(alca);
+      const alcaD = document.createElement('span');
+      alcaD.className = 'ds-img-handle ds-ui';
+      alcaD.title = 'Redimensionar todas juntas';
+      const alcaE = document.createElement('span');
+      alcaE.className = 'ds-img-handle-esq ds-ui';
+      alcaE.title = 'Redimensionar todas juntas';
+      w.appendChild(alcaD);
+      w.appendChild(alcaE);
     });
   }
 }
