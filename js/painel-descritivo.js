@@ -132,20 +132,45 @@ function _carregarNotasDesc() {
   const ta = document.getElementById('desc-notas-txt');
   if (!ta || !eventoAtual) return;
   ta.value = eventoAtual.descritivo_notas || '';
+  _padNotas(ta);
   if (ta._notasOn) return;
   ta._notasOn = true;
   ta.addEventListener('input', () => {
+    _padNotas(ta);
     clearTimeout(_notasDescTimer);
     _notasDescTimer = setTimeout(_salvarNotasDesc, 800);
   });
   ta.addEventListener('keydown', _notasCalcKeydown);
+  // clicar em qualquer linha (mesmo em branco) precisa das linhas já existirem:
+  // preenche a altura ANTES de o clique posicionar o cursor
+  ta.addEventListener('pointerdown', () => _padNotas(ta));
+  if (window.ResizeObserver) new ResizeObserver(() => _padNotas(ta)).observe(ta);
+}
+
+/* Preenche o fim do bloco com linhas em branco até ocupar toda a altura visível,
+   para dar pra clicar e escrever em qualquer linha ao lado do descritivo.
+   As linhas em branco no MEIO (antes de um texto) são preservadas ao salvar. */
+function _padNotas(ta) {
+  const cs = getComputedStyle(ta);
+  const lh = parseFloat(cs.lineHeight) || 20;
+  const padV = (parseFloat(cs.paddingTop) || 0) + (parseFloat(cs.paddingBottom) || 0);
+  const visiveis = Math.max(1, Math.floor((ta.clientHeight - padV) / lh));
+  const base = ta.value.replace(/\n+$/, '');           // sem linhas em branco no fim
+  const faltam = visiveis - base.split('\n').length;
+  const novo = base + (faltam > 0 ? '\n'.repeat(faltam) : '');
+  if (novo !== ta.value) {
+    const sel = ta.selectionStart;
+    ta.value = novo;
+    ta.selectionStart = ta.selectionEnd = Math.min(sel, novo.length);
+  }
 }
 
 async function _salvarNotasDesc() {
   const ta = document.getElementById('desc-notas-txt');
   if (!ta || !eventoAtual) return;
-  eventoAtual.descritivo_notas = ta.value;
-  await sb.from('events').update({ descritivo_notas: ta.value }).eq('id', eventoAtual.id);
+  const limpo = ta.value.replace(/[ \t\n]+$/, '');     // guarda sem as linhas em branco do fim
+  eventoAtual.descritivo_notas = limpo;
+  await sb.from('events').update({ descritivo_notas: limpo }).eq('id', eventoAtual.id);
 }
 
 /* Ao dar Espaço (ou Enter) logo depois de um "=", calcula a conta anterior */

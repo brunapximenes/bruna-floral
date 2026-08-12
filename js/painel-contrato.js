@@ -167,7 +167,9 @@ function anexarDescritivo() {
     || (typeof templateDescritivo === 'function' ? templateDescritivo(eventoAtual) : '');
   if (!html) { toast('Nenhum descritivo encontrado para anexar.', 'erro'); return; }
 
-  anexo.innerHTML = html;
+  // envolve numa caixa com a MESMA geometria do descritivo (largura útil, padding e
+  // position:relative), para as fotos flutuantes caírem exatamente no mesmo lugar
+  anexo.innerHTML = '<div class="ds-anexo-doc">' + html + '</div>';
   _ctSalvar();
   toast('Descritivo anexado ✓');
 }
@@ -553,5 +555,9 @@ function _ctCssImprimir() {
     '.ct-linha-assina{border-top:1px solid #333;margin-bottom:4px;height:28px;}' +
     '.ct-assinatura-img{display:block;max-height:58px;margin:0 auto -20px;position:relative;z-index:2;}' +
     '.ct-anexo{position:relative;}' +
-    '.ct-anexo-vazio{color:#aaa;font-style:italic;}';
+    '.ct-anexo-vazio{color:#aaa;font-style:italic;}' +
+    '.ds-anexo-doc{position:relative;margin:4px -48px 0;padding:36px 44px;font-size:12.5px;line-height:1.65;text-align:left;}' +
+    '.ds-img-wrap{position:absolute;display:inline-block;}' +
+    '.ds-img-wrap .ds-img{width:100%;height:auto;display:block;border-radius:2px;}' +
+    '.ds-ui,.ds-img-handle,.ds-img-handle-esq,.ds-img-del,.ds-img-front{display:none!important;}';
 }

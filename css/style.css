@@ -332,6 +332,9 @@ body {
 .ct-assinatura-img { display: block; max-height: 58px; margin: 0 auto -20px; position: relative; z-index: 2; }
 .ct-anexo { border-top: 1px dashed #d5cfc7; margin-top: 10px; padding-top: 12px; position: relative; }
 .ct-anexo-vazio { color: #aaa; font-style: italic; text-align: center; }
+/* Caixa do descritivo anexado: reproduz a geometria do #descritivo-doc
+   (cancela o padding lateral do contrato) para as fotos ficarem no lugar certo */
+.ds-anexo-doc { position: relative; margin: 4px -48px 0; padding: 36px 44px; font-size: 12.5px; line-height: 1.65; text-align: left; }
 .ct-cliente { background: #f0f7f2; border: 1px solid #cfe3d6; border-radius: 10px; padding: 14px 16px; margin-bottom: 14px; }
 .ct-cliente-vazio { font-size: 13px; color: #5f8069; line-height: 1.6; }
 .ct-cliente-tit { font-size: 13px; font-weight: 500; color: var(--verde); margin-bottom: 10px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
