@@ -88,6 +88,7 @@ function carregarDescritivo() {
 
   _bindDescInput(doc, CHAVE);
   _initNudge();
+  _carregarNotasDesc();
 
   if (!doc._hist) {
     doc._hist = criarHistorico(doc, _htmlDescritivoLimpo, (h) => { doc.innerHTML = h; _salvarDescritivo(); });
@@ -120,6 +121,65 @@ function _initNudge() {
     });
     _salvarDescritivo();
   });
+}
+
+/* ── BLOCO DE ANOTAÇÕES PARTICULARES (ao lado do descritivo) ──────
+   Salvo em events.descritivo_notas — NÃO entra no descritivo do cliente.
+   Calcula estilo OneNote: "2+2=" + espaço → insere o resultado. ── */
+let _notasDescTimer = null;
+
+function _carregarNotasDesc() {
+  const ta = document.getElementById('desc-notas-txt');
+  if (!ta || !eventoAtual) return;
+  ta.value = eventoAtual.descritivo_notas || '';
+  if (ta._notasOn) return;
+  ta._notasOn = true;
+  ta.addEventListener('input', () => {
+    clearTimeout(_notasDescTimer);
+    _notasDescTimer = setTimeout(_salvarNotasDesc, 800);
+  });
+  ta.addEventListener('keydown', _notasCalcKeydown);
+}
+
+async function _salvarNotasDesc() {
+  const ta = document.getElementById('desc-notas-txt');
+  if (!ta || !eventoAtual) return;
+  eventoAtual.descritivo_notas = ta.value;
+  await sb.from('events').update({ descritivo_notas: ta.value }).eq('id', eventoAtual.id);
+}
+
+/* Ao dar Espaço (ou Enter) logo depois de um "=", calcula a conta anterior */
+function _notasCalcKeydown(e) {
+  if (e.key !== ' ' && e.key !== 'Enter') return;
+  const ta = e.target;
+  if (ta.selectionStart !== ta.selectionEnd) return;   // há texto selecionado
+  const pos = ta.selectionStart;
+  const val = ta.value;
+  if (val[pos - 1] !== '=') return;                     // só age imediatamente após o "="
+
+  // pega a expressão (a sequência de caracteres de conta) antes do "="
+  const m = val.slice(0, pos - 1).match(/[-+*/×÷^().,%\d\s]*$/);
+  if (!m) return;
+  const expr = m[0].trim();
+  if (!expr || !/\d/.test(expr)) return;
+
+  const conv = expr
+    .replace(/,/g, '.').replace(/×/g, '*').replace(/÷/g, '/')
+    .replace(/\^/g, '**').replace(/%/g, '/100');
+  if (!/^[\d+\-*/.()\s]+$/.test(conv)) return;          // segurança: só matemática
+
+  let r;
+  try { r = Function('"use strict";return (' + conv + ')')(); } catch (_) { return; }
+  if (typeof r !== 'number' || !isFinite(r)) return;
+  r = Math.round((r + Number.EPSILON) * 1e6) / 1e6;
+  const out = r.toLocaleString('pt-BR', { maximumFractionDigits: 6 });
+
+  e.preventDefault();
+  const ins = out + (e.key === 'Enter' ? '\n' : ' ');
+  ta.value = val.slice(0, pos) + ins + val.slice(pos);
+  ta.selectionStart = ta.selectionEnd = pos + ins.length;
+  clearTimeout(_notasDescTimer);
+  _notasDescTimer = setTimeout(_salvarNotasDesc, 600);
 }
 
 function preencherDescritivo() {

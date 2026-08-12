@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Painel — Bruna Floral</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/style.css?v=21">
+<link rel="stylesheet" href="/css/style.css?v=22">
 <style>
 /* ── LOGIN ──────────────────────────────────────────── */
 #tela-login {
@@ -170,6 +170,7 @@
 }
 .aba.active { color: var(--verde); border-bottom-color: var(--verde); font-weight: 500; }
 .aba:hover  { color: var(--verde); }
+.abas-break { flex-basis: 100%; height: 0; }   /* força as 4 abas financeiras para a linha de baixo */
 
 .evento-content { max-width: 960px; margin: 0 auto; padding: 24px 24px 60px; }
 .pag { display: none; }
@@ -282,6 +283,7 @@
       <button class="aba"        data-aba="bolo"        onclick="goAba('bolo',this)">Bolo e doces</button>
       <button class="aba"        data-aba="buffet"      onclick="goAba('buffet',this)">Buffet</button>
       <button class="aba"        data-aba="demais"      onclick="goAba('demais',this)">Demais áreas</button>
+      <div class="abas-break"></div>
       <button class="aba"        data-aba="orcamento"   onclick="goAba('orcamento',this)">Orçamento</button>
       <button class="aba"        data-aba="contrato"    onclick="goAba('contrato',this);carregarContrato()">Contrato</button>
       <button class="aba"        data-aba="interno"     onclick="goAba('interno',this)">Controle interno</button>
@@ -431,7 +433,15 @@
           <button onmousedown="event.preventDefault()" onclick="aplicarEstiloDesc('item')">• Item da lista</button>
           <button onmousedown="event.preventDefault()" onclick="aplicarEstiloDesc('normal')">Texto normal</button>
         </div>
-        <div id="descritivo-doc" contenteditable="true"></div>
+        <div class="desc-layout">
+          <div id="descritivo-doc" contenteditable="true"></div>
+          <aside class="desc-notas">
+            <div class="desc-notas-tit">📝 Anotações particulares
+              <span>Só para você — <strong>não</strong> vão no descritivo do cliente nem na impressão. Dica: digite <code>2+2=</code> e dê espaço que ele calcula sozinho.</span>
+            </div>
+            <textarea id="desc-notas-txt" placeholder="Anotações, observações e contas (ex.: 120*3= )..."></textarea>
+          </aside>
+        </div>
       </div>
 
       <!-- CONTRATO -->
@@ -649,7 +659,7 @@
 <script src="/js/painel-pagamento.js?v=1"></script>
 <script src="/js/gerar-pdf.js?v=6"></script>
 <script src="/js/exportar-sheets.js"></script>
-<script src="/js/painel-descritivo.js?v=13"></script>
+<script src="/js/painel-descritivo.js?v=14"></script>
 <script src="/js/assinatura.js?v=1"></script>
 <script src="/js/painel-contrato.js?v=14"></script>
 <script>verificarSessao();</script>
