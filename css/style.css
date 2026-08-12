@@ -289,15 +289,15 @@ body {
 }
 
 /* ── Descritivo lado a lado com o bloco de anotações particulares ── */
-#pag-descritivo { width: min(1240px, 94vw); margin-left: 50%; transform: translateX(-50%); }
+#pag-descritivo { width: min(1140px, 94vw); margin-left: 50%; transform: translateX(-50%); }
 .desc-layout { display: flex; gap: 20px; align-items: stretch; flex-wrap: wrap; }
-.desc-layout #descritivo-doc { flex: 1 1 560px; }
-.desc-notas { flex: 1 1 320px; min-width: 280px; display: flex; flex-direction: column; }
+.desc-layout #descritivo-doc { flex: 0 1 820px; }   /* mantém a largura original */
+.desc-notas { flex: 0 1 240px; min-width: 200px; max-width: 280px; display: flex; flex-direction: column; }
 .desc-notas-tit { font-size: 12.5px; color: var(--verde); font-weight: 500; line-height: 1.4; margin-bottom: 6px; }
 .desc-notas-tit span { display: block; font-weight: 400; color: #8a8a8a; font-size: 11px; margin-top: 3px; }
 .desc-notas-tit code { background: var(--creme2); padding: 1px 5px; border-radius: 4px; color: var(--verde); font-family: 'Courier New', monospace; }
 .desc-notas textarea {
-  flex: 1 1 auto; width: 100%; min-height: 480px; resize: vertical;
+  flex: 1 1 auto; width: 100%; min-height: 320px; resize: vertical;
   background: #fffdf7; border: 1px solid var(--borda); border-radius: 10px;
   padding: 16px 18px; font-family: 'Jost', sans-serif; font-size: 13px; line-height: 1.7;
   color: #2c2c2c; outline: none;
