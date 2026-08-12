@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Painel — Bruna Floral</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/style.css?v=25">
+<link rel="stylesheet" href="/css/style.css?v=26">
 <style>
 /* ── LOGIN ──────────────────────────────────────────── */
 #tela-login {
@@ -432,6 +432,27 @@
           <button onmousedown="event.preventDefault()" onclick="aplicarEstiloDesc('sub')">Subtítulo</button>
           <button onmousedown="event.preventDefault()" onclick="aplicarEstiloDesc('item')">• Item da lista</button>
           <button onmousedown="event.preventDefault()" onclick="aplicarEstiloDesc('normal')">Texto normal</button>
+          <span class="fmt-sep"></span>
+          <button class="fmt-ic" title="Negrito" onmousedown="event.preventDefault()" onclick="fmtDesc('bold')"><b>N</b></button>
+          <button class="fmt-ic" title="Itálico" onmousedown="event.preventDefault()" onclick="fmtDesc('italic')"><i>I</i></button>
+          <button class="fmt-ic" title="Sublinhado" onmousedown="event.preventDefault()" onclick="fmtDesc('underline')"><u>S</u></button>
+          <button class="fmt-ic" title="Tachado" onmousedown="event.preventDefault()" onclick="fmtDesc('strikeThrough')"><s>T</s></button>
+          <span class="fmt-sep"></span>
+          <span class="desc-format-label">Cor:</span>
+          <button class="fmt-cor" style="background:#2c2c2c" title="Preto" onmousedown="event.preventDefault()" onclick="fmtDesc('foreColor','#2c2c2c')"></button>
+          <button class="fmt-cor" style="background:#c0392b" title="Vermelho" onmousedown="event.preventDefault()" onclick="fmtDesc('foreColor','#c0392b')"></button>
+          <button class="fmt-cor" style="background:#3d5a47" title="Verde" onmousedown="event.preventDefault()" onclick="fmtDesc('foreColor','#3d5a47')"></button>
+          <button class="fmt-cor" style="background:#2f6db0" title="Azul" onmousedown="event.preventDefault()" onclick="fmtDesc('foreColor','#2f6db0')"></button>
+          <button class="fmt-cor" style="background:#c9847a" title="Rosa" onmousedown="event.preventDefault()" onclick="fmtDesc('foreColor','#c9847a')"></button>
+          <button class="fmt-cor" style="background:#8e44ad" title="Roxo" onmousedown="event.preventDefault()" onclick="fmtDesc('foreColor','#8e44ad')"></button>
+          <span class="fmt-sep"></span>
+          <span class="desc-format-label">Grifar:</span>
+          <button class="fmt-grifo" style="background:#fff28a" title="Amarelo" onmousedown="event.preventDefault()" onclick="grifarDesc('#fff28a')"></button>
+          <button class="fmt-grifo" style="background:#bfe8c2" title="Verde" onmousedown="event.preventDefault()" onclick="grifarDesc('#bfe8c2')"></button>
+          <button class="fmt-grifo" style="background:#f9c9d3" title="Rosa" onmousedown="event.preventDefault()" onclick="grifarDesc('#f9c9d3')"></button>
+          <button class="fmt-grifo" style="background:#cfe3ff" title="Azul" onmousedown="event.preventDefault()" onclick="grifarDesc('#cfe3ff')"></button>
+          <button class="fmt-grifo" style="background:#ffd9a8" title="Laranja" onmousedown="event.preventDefault()" onclick="grifarDesc('#ffd9a8')"></button>
+          <button class="fmt-ic" title="Limpar formatação" onmousedown="event.preventDefault()" onclick="limparFormatoDesc()">⌫</button>
         </div>
         <div class="desc-layout">
           <div id="descritivo-doc" contenteditable="true"></div>
@@ -439,7 +460,7 @@
             <div class="desc-notas-tit">📝 Anotações particulares
               <span>Só para você — <strong>não</strong> vão no descritivo do cliente nem na impressão. Dica: digite <code>2+2=</code> e dê espaço que ele calcula sozinho.</span>
             </div>
-            <textarea id="desc-notas-txt" placeholder="Anotações, observações e contas (ex.: 120*3= )..."></textarea>
+            <div id="desc-notas-txt" class="desc-notas-area" contenteditable="true" data-ph="Anotações, observações e contas (ex.: 120*3= )..."></div>
           </aside>
         </div>
       </div>
@@ -659,7 +680,7 @@
 <script src="/js/painel-pagamento.js?v=1"></script>
 <script src="/js/gerar-pdf.js?v=6"></script>
 <script src="/js/exportar-sheets.js"></script>
-<script src="/js/painel-descritivo.js?v=15"></script>
+<script src="/js/painel-descritivo.js?v=16"></script>
 <script src="/js/assinatura.js?v=1"></script>
 <script src="/js/painel-contrato.js?v=15"></script>
 <script>verificarSessao();</script>

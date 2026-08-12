@@ -105,8 +105,10 @@ function _initNudge() {
     if (!_imgSel || !_imgSel.length) return;
     const pag = document.getElementById('pag-descritivo');
     if (!pag || !pag.classList.contains('active')) return;
-    const tag = (document.activeElement && document.activeElement.tagName) || '';
+    const ae = document.activeElement;
+    const tag = (ae && ae.tagName) || '';
     if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+    if (ae && ae.id === 'desc-notas-txt') return;   // digitando nas anotações
     let dx = 0, dy = 0;
     if (e.key === 'ArrowLeft') dx = -1;
     else if (e.key === 'ArrowRight') dx = 1;
@@ -124,66 +126,90 @@ function _initNudge() {
 }
 
 /* ── BLOCO DE ANOTAÇÕES PARTICULARES (ao lado do descritivo) ──────
+   Campo rico (contenteditable): aceita negrito, cor, grifo etc.
    Salvo em events.descritivo_notas — NÃO entra no descritivo do cliente.
    Calcula estilo OneNote: "2+2=" + espaço → insere o resultado. ── */
 let _notasDescTimer = null;
 
 function _carregarNotasDesc() {
-  const ta = document.getElementById('desc-notas-txt');
-  if (!ta || !eventoAtual) return;
-  ta.value = eventoAtual.descritivo_notas || '';
-  _padNotas(ta);
-  if (ta._notasOn) return;
-  ta._notasOn = true;
-  ta.addEventListener('input', () => {
-    _padNotas(ta);
+  const el = document.getElementById('desc-notas-txt');
+  if (!el || !eventoAtual) return;
+  const val = eventoAtual.descritivo_notas || '';
+  el.innerHTML = _pareceHtml(val) ? val : _textoParaHtml(val);
+  _padNotasCE(el);
+  if (el._notasOn) return;
+  el._notasOn = true;
+  el.addEventListener('input', () => {
+    _padNotasCE(el);
     clearTimeout(_notasDescTimer);
     _notasDescTimer = setTimeout(_salvarNotasDesc, 800);
   });
-  ta.addEventListener('keydown', _notasCalcKeydown);
+  el.addEventListener('keydown', _notasCalcKeydownCE);
   // clicar em qualquer linha (mesmo em branco) precisa das linhas já existirem:
   // preenche a altura ANTES de o clique posicionar o cursor
-  ta.addEventListener('pointerdown', () => _padNotas(ta));
-  if (window.ResizeObserver) new ResizeObserver(() => _padNotas(ta)).observe(ta);
+  el.addEventListener('pointerdown', () => _padNotasCE(el));
+  if (window.ResizeObserver) new ResizeObserver(() => _padNotasCE(el)).observe(el);
 }
 
-/* Preenche o fim do bloco com linhas em branco até ocupar toda a altura visível,
-   para dar pra clicar e escrever em qualquer linha ao lado do descritivo.
-   As linhas em branco no MEIO (antes de um texto) são preservadas ao salvar. */
-function _padNotas(ta) {
-  const cs = getComputedStyle(ta);
-  const lh = parseFloat(cs.lineHeight) || 20;
-  const padV = (parseFloat(cs.paddingTop) || 0) + (parseFloat(cs.paddingBottom) || 0);
-  const visiveis = Math.max(1, Math.floor((ta.clientHeight - padV) / lh));
-  const base = ta.value.replace(/\n+$/, '');           // sem linhas em branco no fim
-  const faltam = visiveis - base.split('\n').length;
-  const novo = base + (faltam > 0 ? '\n'.repeat(faltam) : '');
-  if (novo !== ta.value) {
-    const sel = ta.selectionStart;
-    ta.value = novo;
-    ta.selectionStart = ta.selectionEnd = Math.min(sel, novo.length);
+const _pareceHtml = (v) => /<[a-z][\s\S]*>/i.test(v);
+const _escHtml = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+const _textoParaHtml = (v) =>
+  (v || '').split('\n').map(l => '<div>' + (l ? _escHtml(l) : '<br>') + '</div>').join('') || '<div><br></div>';
+const _linhaVazia = () => { const d = document.createElement('div'); d.appendChild(document.createElement('br')); return d; };
+
+/* Preenche o fim do bloco com linhas em branco até encher a altura visível,
+   para dar pra clicar e escrever em qualquer linha ao lado do descritivo. */
+function _padNotasCE(el) {
+  let guarda = 0;
+  while (el.scrollHeight < el.clientHeight && guarda++ < 400) {
+    el.appendChild(_linhaVazia());
   }
 }
 
+/* HTML sem as linhas em branco do FIM (as do meio, antes de um texto, ficam) */
+function _notasHtmlLimpo(el) {
+  const c = el.cloneNode(true);
+  let last;
+  while ((last = c.lastChild)) {
+    const vazio = ((last.textContent || '').replace(/ /g, '').trim() === '');
+    if (vazio) c.removeChild(last); else break;
+  }
+  return c.innerHTML;
+}
+
 async function _salvarNotasDesc() {
-  const ta = document.getElementById('desc-notas-txt');
-  if (!ta || !eventoAtual) return;
-  const limpo = ta.value.replace(/[ \t\n]+$/, '');     // guarda sem as linhas em branco do fim
+  const el = document.getElementById('desc-notas-txt');
+  if (!el || !eventoAtual) return;
+  const limpo = _notasHtmlLimpo(el);
   eventoAtual.descritivo_notas = limpo;
   await sb.from('events').update({ descritivo_notas: limpo }).eq('id', eventoAtual.id);
 }
 
-/* Ao dar Espaço (ou Enter) logo depois de um "=", calcula a conta anterior */
-function _notasCalcKeydown(e) {
-  if (e.key !== ' ' && e.key !== 'Enter') return;
-  const ta = e.target;
-  if (ta.selectionStart !== ta.selectionEnd) return;   // há texto selecionado
-  const pos = ta.selectionStart;
-  const val = ta.value;
-  if (val[pos - 1] !== '=') return;                     // só age imediatamente após o "="
+/* Texto da linha atual até o cursor (não cruza para outras linhas) */
+function _textoLinhaAteCursor(range, root) {
+  let bloco = range.startContainer;
+  if (bloco.nodeType === 3) bloco = bloco.parentElement;
+  while (bloco && bloco !== root && getComputedStyle(bloco).display !== 'block') bloco = bloco.parentElement;
+  if (!bloco || bloco === root) {
+    return (range.startContainer.textContent || '').slice(0, range.startOffset);
+  }
+  const rr = document.createRange();
+  rr.selectNodeContents(bloco);
+  rr.setEnd(range.startContainer, range.startOffset);
+  return rr.toString();
+}
 
-  // pega a expressão (a sequência de caracteres de conta) antes do "="
-  const m = val.slice(0, pos - 1).match(/[-+*/×÷^().,%\d\s]*$/);
+/* Ao dar Espaço (ou Enter) logo depois de um "=", calcula a conta daquela linha */
+function _notasCalcKeydownCE(e) {
+  if (e.key !== ' ' && e.key !== 'Enter') return;
+  const sel = window.getSelection();
+  if (!sel || !sel.rangeCount || !sel.isCollapsed) return;
+  const range = sel.getRangeAt(0);
+  const antes = _textoLinhaAteCursor(range, e.currentTarget);
+  if (antes.slice(-1) !== '=') return;                  // só age logo após o "="
+
+  // pega a expressão SÓ na linha atual (não cruza linhas → não junta números de cima)
+  const m = antes.slice(0, -1).match(/[-+*/×÷^().,%\d \t]*$/);
   if (!m) return;
   const expr = m[0].trim();
   if (!expr || !/\d/.test(expr)) return;
@@ -200,11 +226,48 @@ function _notasCalcKeydown(e) {
   const out = r.toLocaleString('pt-BR', { maximumFractionDigits: 6 });
 
   e.preventDefault();
-  const ins = out + (e.key === 'Enter' ? '\n' : ' ');
-  ta.value = val.slice(0, pos) + ins + val.slice(pos);
-  ta.selectionStart = ta.selectionEnd = pos + ins.length;
+  document.execCommand('insertText', false, out + (e.key === ' ' ? ' ' : ''));
+  if (e.key === 'Enter') document.execCommand('insertParagraph');
   clearTimeout(_notasDescTimer);
   _notasDescTimer = setTimeout(_salvarNotasDesc, 600);
+}
+
+/* ── FORMATAÇÃO DE TEXTO (vale para o descritivo E para as anotações) ──
+   Age sobre o campo editável que está com a seleção/foco. ── */
+function _editavelAtivo() {
+  const a = document.activeElement;
+  if (a && (a.id === 'descritivo-doc' || a.id === 'desc-notas-txt')) return a;
+  const sel = window.getSelection();
+  if (sel && sel.rangeCount) {
+    let n = sel.anchorNode;
+    if (n && n.nodeType === 3) n = n.parentElement;
+    const doc = n && n.closest ? n.closest('#descritivo-doc,#desc-notas-txt') : null;
+    if (doc) return doc;
+  }
+  return document.getElementById('descritivo-doc');
+}
+function _salvarEditavel(el) {
+  if (el && el.id === 'desc-notas-txt') { _padNotasCE(el); _salvarNotasDesc(); }
+  else if (typeof _salvarDescritivo === 'function') _salvarDescritivo();
+}
+function fmtDesc(cmd, val) {
+  const alvo = _editavelAtivo();
+  try { document.execCommand('styleWithCSS', false, true); } catch (e) {}
+  document.execCommand(cmd, false, val || null);
+  _salvarEditavel(alvo);
+}
+function grifarDesc(cor) {
+  const alvo = _editavelAtivo();
+  try { document.execCommand('styleWithCSS', false, true); } catch (e) {}
+  if (!document.execCommand('hiliteColor', false, cor)) document.execCommand('backColor', false, cor);
+  _salvarEditavel(alvo);
+}
+function limparFormatoDesc() {
+  const alvo = _editavelAtivo();
+  try { document.execCommand('styleWithCSS', false, true); } catch (e) {}
+  document.execCommand('removeFormat', false, null);
+  document.execCommand('hiliteColor', false, 'transparent');
+  _salvarEditavel(alvo);
 }
 
 function preencherDescritivo() {
