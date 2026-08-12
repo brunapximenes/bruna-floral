@@ -413,6 +413,12 @@ body {
 .desc-format-bar button.fmt-cor:hover, .desc-format-bar button.fmt-grifo:hover {
   color: inherit; filter: brightness(.9); box-shadow: 0 0 0 2px rgba(61,90,71,.25);
 }
+/* botão "tirar grifo": quadradinho branco com um risco vermelho */
+.desc-format-bar button.fmt-nogrifo { background: #fff; position: relative; }
+.desc-format-bar button.fmt-nogrifo::after {
+  content: ""; position: absolute; left: 2px; right: 2px; top: 50%;
+  height: 2px; background: #c0392b; transform: translateY(-50%) rotate(-45deg);
+}
 .ds-cabecalho { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid var(--verde); padding-bottom: 16px; margin-bottom: 20px; }
 .ds-nomes { font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 600; color: var(--verde); letter-spacing: .03em; }
 .ds-tipo-data { font-size: 11.5px; color: #888; margin-top: 3px; font-style: italic; }
