@@ -196,57 +196,79 @@ function _ctSalvar() {
 }
 
 /* ── Torna as imagens (.ds-img-wrap) móveis/redimensionáveis dentro de um doc,
-   salvando via callback. Funciona com mouse e toque. ── */
+   salvando via callback. Suporta seleção de VÁRIAS (Ctrl/Shift+clique) e
+   arrastar todas juntas. Funciona com mouse e toque. ── */
 function ativarImagensArrastaveis(doc, onSave) {
   if (doc._imgArrastavelOn) return;
   doc._imgArrastavelOn = true;
-  let sel = null, arr = null;
+  let sels = [];       // imagens selecionadas (.ds-img-wrap)
+  let arr = null;
 
-  function desselecionar() {
-    if (!sel) return;
-    sel.classList.remove('ds-img-sel');
-    sel.querySelectorAll('.ds-ui').forEach(el => el.remove());
-    sel = null;
+  const limparUI = (w) => w.querySelectorAll('.ds-ui').forEach(el => el.remove());
+
+  function desselecionarTodos() {
+    sels.forEach(w => { w.classList.remove('ds-img-sel'); limparUI(w); });
+    sels = [];
   }
-  function selecionar(wrap) {
-    desselecionar();
-    sel = wrap;
-    wrap.classList.add('ds-img-sel');
-    const del = document.createElement('span'); del.className = 'ds-img-del ds-ui'; del.textContent = '×';
-    const alca = document.createElement('span'); alca.className = 'ds-img-handle ds-ui';
-    wrap.appendChild(del); wrap.appendChild(alca);
+  function montarUI() {
+    sels.forEach(limparUI);
+    if (sels.length === 1) {
+      const w = sels[0];
+      const del = document.createElement('span'); del.className = 'ds-img-del ds-ui'; del.textContent = '×';
+      const alca = document.createElement('span'); alca.className = 'ds-img-handle ds-ui'; alca.title = 'Redimensionar';
+      w.appendChild(del); w.appendChild(alca);
+    }
+    // com várias selecionadas fica só o contorno — arrasta todas juntas
+  }
+  function selecionarUnico(w) {
+    desselecionarTodos();
+    sels = [w]; w.classList.add('ds-img-sel'); montarUI();
+  }
+  function alternar(w) {
+    const i = sels.indexOf(w);
+    if (i >= 0) { sels.splice(i, 1); w.classList.remove('ds-img-sel'); limparUI(w); }
+    else { sels.push(w); w.classList.add('ds-img-sel'); }
+    montarUI();
   }
 
   doc.addEventListener('click', (e) => {
     if (e.target.classList && e.target.classList.contains('ds-img-del')) {
       const w = e.target.closest('.ds-img-wrap');
-      if (w) { w.remove(); sel = null; onSave(); }
+      if (w) { const i = sels.indexOf(w); if (i >= 0) sels.splice(i, 1); w.remove(); onSave(); }
       return;
     }
     const wrap = e.target.closest ? e.target.closest('.ds-img-wrap') : null;
-    if (wrap) selecionar(wrap); else desselecionar();
+    if (!wrap) desselecionarTodos();
   });
 
   doc.addEventListener('pointerdown', (e) => {
     const wrap = e.target.closest ? e.target.closest('.ds-img-wrap') : null;
     if (!wrap) return;
-    if (e.target.classList.contains('ds-img-del')) return;
+    const cls = e.target.classList;
+    if (cls.contains('ds-img-del')) return;   // × é tratado no clique
     e.preventDefault();
-    selecionar(wrap);
-    const resize = e.target.classList.contains('ds-img-handle');
-    arr = {
-      tipo: resize ? 'resize' : 'mover', wrap,
-      x0: e.clientX, y0: e.clientY,
-      left0: parseFloat(wrap.style.left) || 0,
-      top0:  parseFloat(wrap.style.top)  || 0,
-      w0:    parseFloat(wrap.style.width) || wrap.offsetWidth,
-    };
+    const resize = cls.contains('ds-img-handle');
+    const adicionar = e.ctrlKey || e.metaKey || e.shiftKey;
+
+    if (adicionar && !resize) { alternar(wrap); return; }   // só soma/tira da seleção
+
+    if (resize) {
+      if (sels.indexOf(wrap) < 0) selecionarUnico(wrap);
+      arr = { tipo: 'resize', wrap, x0: e.clientX, w0: parseFloat(wrap.style.width) || wrap.offsetWidth };
+    } else {
+      if (sels.indexOf(wrap) < 0) selecionarUnico(wrap);    // clicou numa fora da seleção
+      const itens = sels.map(w => ({ w, left0: parseFloat(w.style.left) || 0, top0: parseFloat(w.style.top) || 0 }));
+      arr = { tipo: 'mover', x0: e.clientX, y0: e.clientY, itens };
+    }
+
     const mover = (ev) => {
       if (!arr) return;
       const dx = ev.clientX - arr.x0, dy = ev.clientY - arr.y0;
       if (arr.tipo === 'mover') {
-        arr.wrap.style.left = (arr.left0 + dx) + 'px';
-        arr.wrap.style.top  = (arr.top0 + dy) + 'px';
+        arr.itens.forEach(it => {
+          it.w.style.left = (it.left0 + dx) + 'px';
+          it.w.style.top  = (it.top0 + dy) + 'px';
+        });
       } else {
         arr.wrap.style.width = Math.max(50, arr.w0 + dx) + 'px';
       }
