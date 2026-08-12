@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Painel — Bruna Floral</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/style.css?v=28">
+<link rel="stylesheet" href="/css/style.css?v=29">
 <style>
 /* ── LOGIN ──────────────────────────────────────────── */
 #tela-login {
@@ -439,11 +439,21 @@
           <button class="fmt-ic" title="Tachado" onmousedown="event.preventDefault()" onclick="fmtDesc('strikeThrough')"><s>T</s></button>
           <span class="fmt-sep"></span>
           <span class="desc-format-label">Fonte:</span>
-          <button class="fmt-ic" style="font-size:8px" title="Mínima" onmousedown="event.preventDefault()" onclick="fmtDesc('fontSize','1')">A</button>
-          <button class="fmt-ic" style="font-size:10px" title="Pequena" onmousedown="event.preventDefault()" onclick="fmtDesc('fontSize','2')">A</button>
-          <button class="fmt-ic" style="font-size:13px" title="Normal" onmousedown="event.preventDefault()" onclick="fmtDesc('fontSize','3')">A</button>
-          <button class="fmt-ic" style="font-size:17px" title="Grande" onmousedown="event.preventDefault()" onclick="fmtDesc('fontSize','5')">A</button>
-          <button class="fmt-ic" style="font-size:21px" title="Enorme" onmousedown="event.preventDefault()" onclick="fmtDesc('fontSize','6')">A</button>
+          <select class="fmt-tam" title="Tamanho da fonte (px)" onchange="fmtTamanhoPx(this.value); this.selectedIndex=0">
+            <option value="">Tamanho</option>
+            <option value="10px">10</option>
+            <option value="11px">11 (contato)</option>
+            <option value="11.5px">11,5</option>
+            <option value="12px">12 (listas)</option>
+            <option value="12.5px">12,5 (padrão)</option>
+            <option value="13px">13</option>
+            <option value="14px">14</option>
+            <option value="15px">15 (logo)</option>
+            <option value="17px">17 (título)</option>
+            <option value="20px">20</option>
+            <option value="24px">24</option>
+            <option value="26px">26 (nomes)</option>
+          </select>
           <div class="fmt-break"></div>
           <span class="desc-format-label">Cor:</span>
           <button class="fmt-cor" style="background:#2c2c2c" title="Preto" onmousedown="event.preventDefault()" onclick="fmtDesc('foreColor','#2c2c2c')"></button>
@@ -690,7 +700,7 @@
 <script src="/js/painel-pagamento.js?v=1"></script>
 <script src="/js/gerar-pdf.js?v=6"></script>
 <script src="/js/exportar-sheets.js"></script>
-<script src="/js/painel-descritivo.js?v=16"></script>
+<script src="/js/painel-descritivo.js?v=17"></script>
 <script src="/js/assinatura.js?v=1"></script>
 <script src="/js/painel-contrato.js?v=15"></script>
 <script>verificarSessao();</script>

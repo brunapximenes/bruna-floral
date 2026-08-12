@@ -270,6 +270,43 @@ function limparFormatoDesc() {
   _salvarEditavel(alvo);
 }
 
+/* Guarda a última seleção feita dentro do descritivo/anotações, porque abrir o
+   seletor de tamanho tira o foco do campo e apagaria a seleção. */
+let _selRange = null, _selDoc = null;
+document.addEventListener('selectionchange', () => {
+  const s = window.getSelection();
+  if (!s || !s.rangeCount) return;
+  let n = s.anchorNode;
+  if (n && n.nodeType === 3) n = n.parentElement;
+  const doc = n && n.closest ? n.closest('#descritivo-doc,#desc-notas-txt') : null;
+  if (doc) { _selRange = s.getRangeAt(0).cloneRange(); _selDoc = doc; }
+});
+
+/* Aplica um tamanho de fonte EXATO em px ao texto selecionado.
+   Usa o truque font size=7 → span com o px desejado (px de verdade, não a escala 1–7). */
+function fmtTamanhoPx(px) {
+  if (!px) return;
+  const alvo = _selDoc || _editavelAtivo();
+  if (!alvo) return;
+  alvo.focus();
+  if (_selRange) {
+    const s = window.getSelection();
+    s.removeAllRanges();
+    s.addRange(_selRange);
+  }
+  const sel = window.getSelection();
+  if (!sel || !sel.rangeCount || sel.isCollapsed) { toast('Selecione o texto primeiro.', 'erro'); return; }
+  document.execCommand('styleWithCSS', false, false);
+  document.execCommand('fontSize', false, '7');
+  alvo.querySelectorAll('font[size="7"]').forEach(f => {
+    const span = document.createElement('span');
+    span.style.fontSize = px;
+    while (f.firstChild) span.appendChild(f.firstChild);
+    f.replaceWith(span);
+  });
+  _salvarEditavel(alvo);
+}
+
 function preencherDescritivo() {
   if (!eventoAtual) { toast('Nenhum evento aberto.', 'erro'); return; }
   if (!confirm('Substituir o descritivo atual pelos dados do formulário?')) return;
