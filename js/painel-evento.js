@@ -119,6 +119,12 @@ function goAba(id, btn) {
   document.querySelectorAll('.aba').forEach(a => a.classList.remove('active'));
   document.getElementById('pag-' + id).classList.add('active');
   if (btn) btn.classList.add('active');
+  const calc = document.getElementById('calc');
+  if (calc) {
+    const mostrar = ['orcamento', 'interno', 'pagamento'].includes(id);
+    calc.style.display = mostrar ? '' : 'none';
+    if (mostrar && typeof initCalc === 'function') initCalc();
+  }
 }
 
 /* ── PREENCHER CAMPOS ───────────────────────────────────────── */
