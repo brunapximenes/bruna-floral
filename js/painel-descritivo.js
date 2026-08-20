@@ -88,6 +88,7 @@ function carregarDescritivo() {
 
   _bindDescInput(doc, CHAVE);
   _initNudge();
+  _initAtalhosImg();
   _carregarNotasDesc();
 
   if (!doc._hist) {
@@ -484,12 +485,128 @@ function _redimensionarBlob(file, maxLarg, qualidade) {
   });
 }
 
-/* Envia o blob para o armazenamento (bucket "descritivos") e devolve a URL pública */
+/* Envia o blob para o armazenamento (bucket "descritivos") e devolve a URL pública.
+   Preserva PNG (fundo transparente); os demais vão como JPEG. */
 async function _uploadImagem(blob) {
-  const nome = (eventoAtual ? eventoAtual.id : 'geral') + '/' + Date.now() + '-' + Math.random().toString(36).slice(2, 8) + '.jpg';
-  const { error } = await sb.storage.from('descritivos').upload(nome, blob, { contentType: 'image/jpeg', upsert: true });
+  const png = blob && blob.type === 'image/png';
+  const ext = png ? '.png' : '.jpg';
+  const nome = (eventoAtual ? eventoAtual.id : 'geral') + '/' + Date.now() + '-' + Math.random().toString(36).slice(2, 8) + ext;
+  const { error } = await sb.storage.from('descritivos').upload(nome, blob, { contentType: png ? 'image/png' : 'image/jpeg', upsert: true });
   if (error) throw error;
   return sb.storage.from('descritivos').getPublicUrl(nome).data.publicUrl;
+}
+
+/* ── REMOVER FUNDO DAS IMAGENS (roda no navegador, grátis) ──────────
+   Usa a biblioteca @imgly/background-removal carregada sob demanda de um CDN.
+   Na 1ª vez baixa um modelo (alguns MB) e guarda em cache no navegador. ── */
+let _bgRemModulo = null;
+async function _carregarRemovedorFundo() {
+  if (_bgRemModulo) return _bgRemModulo;
+  const mod = await import('https://cdn.jsdelivr.net/npm/@imgly/background-removal/+esm');
+  _bgRemModulo = mod.removeBackground ? mod : (mod.default || mod);
+  return _bgRemModulo;
+}
+
+async function removerFundoSelecionadas() {
+  if (!_imgSel || !_imgSel.length) { toast('Selecione uma imagem primeiro (clique nela).', 'erro'); return; }
+  const wraps = _imgSel.slice();
+  let removeBackground;
+  toast('Preparando… na 1ª vez baixa um modelo, pode levar um tempinho.');
+  try {
+    const mod = await _carregarRemovedorFundo();
+    removeBackground = mod.removeBackground;
+    if (!removeBackground) throw new Error('sem removeBackground');
+  } catch (e) {
+    console.error('bg-removal load', e);
+    toast('Não consegui carregar o removedor de fundo. Verifique a internet e tente de novo.', 'erro');
+    return;
+  }
+
+  for (let i = 0; i < wraps.length; i++) {
+    const img = wraps[i].querySelector('img.ds-img');
+    if (!img) continue;
+    try {
+      toast('Removendo fundo ' + (i + 1) + '/' + wraps.length + '… (aguarde)');
+      const origem = await fetch(img.src).then(r => r.blob());
+      const semFundo = await removeBackground(origem);   // Blob PNG transparente
+      const url = await _uploadImagem(semFundo);
+      if (url) img.src = url;
+    } catch (e) {
+      console.error('bg-removal', e);
+      toast('Falha ao remover o fundo de uma imagem.', 'erro');
+    }
+  }
+  _salvarDescritivo();
+  toast('Fundo removido ✓');
+}
+
+/* ── DUPLICAR (cópia exata, no mesmo descritivo, deslocada um pouco) ── */
+function duplicarSelecionadas() {
+  if (!_imgSel || !_imgSel.length) { toast('Selecione uma imagem primeiro.', 'erro'); return; }
+  if (!_descDoc) return;
+  const novos = [];
+  _imgSel.forEach(w => {
+    const c = w.cloneNode(true);
+    c.querySelectorAll('.ds-ui').forEach(el => el.remove());
+    c.classList.remove('ds-img-sel', 'ds-img-ref');
+    c.style.left = ((parseFloat(w.style.left) || 0) + 24) + 'px';
+    c.style.top = ((parseFloat(w.style.top) || 0) + 24) + 'px';
+    _descDoc.appendChild(c);
+    novos.push(c);
+  });
+  _desselecionarImagem();
+  _imgSel = novos;
+  novos.forEach(n => n.classList.add('ds-img-sel'));
+  _atualizarHandles();
+  _salvarDescritivo();
+  toast('Imagem duplicada ✓ — arraste para o lugar');
+}
+
+/* ── COPIAR a imagem selecionada para a área de transferência do sistema
+   (para colar aqui com Ctrl+V ou em outro aplicativo) ── */
+async function _copiarImagemSelecionada() {
+  if (!_imgSel || !_imgSel.length) return;
+  const img = _imgSel[0].querySelector('img.ds-img');
+  if (!img) return;
+  try {
+    if (!navigator.clipboard || !window.ClipboardItem) throw new Error('sem clipboard');
+    const blob = await _imgParaPngBlob(img);
+    await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+    toast('Imagem copiada ✓ — Ctrl+V para colar aqui ou em outro app');
+  } catch (e) {
+    console.error('copiar imagem', e);
+    toast('Não consegui copiar. Use o botão "Duplicar" para repetir a imagem.', 'erro');
+  }
+}
+function _imgParaPngBlob(img) {
+  return new Promise((resolve, reject) => {
+    const im = new Image();
+    im.crossOrigin = 'anonymous';
+    im.onload = () => {
+      const c = document.createElement('canvas');
+      c.width = im.naturalWidth; c.height = im.naturalHeight;
+      c.getContext('2d').drawImage(im, 0, 0);
+      c.toBlob(b => b ? resolve(b) : reject(new Error('toBlob')), 'image/png');
+    };
+    im.onerror = reject;
+    im.src = img.src + (img.src.indexOf('?') < 0 ? '?cb=1' : '&cb=1');
+  });
+}
+
+/* Atalhos de teclado das imagens: Ctrl+C copia, Ctrl+D duplica */
+function _initAtalhosImg() {
+  if (document._descImgKeys) return;
+  document._descImgKeys = true;
+  document.addEventListener('keydown', (e) => {
+    const pag = document.getElementById('pag-descritivo');
+    if (!pag || !pag.classList.contains('active')) return;
+    const ae = document.activeElement;
+    if (ae && ae.id === 'desc-notas-txt') return;
+    if (!(e.ctrlKey || e.metaKey) || !_imgSel || !_imgSel.length) return;
+    const k = (e.key || '').toLowerCase();
+    if (k === 'c') { e.preventDefault(); _copiarImagemSelecionada(); }
+    else if (k === 'd') { e.preventDefault(); duplicarSelecionadas(); }
+  });
 }
 
 /* Reduz a imagem (max largura) e comprime, para não pesar no banco */

@@ -420,8 +420,10 @@
       <!-- DESCRITIVO -->
       <div class="pag" id="pag-descritivo">
         <div class="desc-toolbar">
-          <span class="desc-dica">💡 Cole imagens com Ctrl+V. Arraste para posicionar. Selecione e use as <strong>setas do teclado</strong> para ajuste fino (Shift = 10px). Ctrl/Shift+clique seleciona várias.</span>
+          <span class="desc-dica">💡 Cole imagens com Ctrl+V. Arraste para posicionar. <strong>Setas</strong> = ajuste fino (Shift = 10px). Ctrl/Shift+clique seleciona várias. Selecione e use <strong>Ctrl+C</strong> para copiar ou <strong>Duplicar</strong>.</span>
           <button class="desc-btn-fill" id="btn-multi-sel" onclick="toggleMultiSel(this)">☑ Selecionar várias</button>
+          <button class="desc-btn-fill" onclick="removerFundoSelecionadas()">✂ Remover fundo</button>
+          <button class="desc-btn-fill" onclick="duplicarSelecionadas()">⎘ Duplicar</button>
           <button class="desc-btn-fill" onclick="compactarImagensDescritivo()">🗜 Compactar imagens</button>
           <button class="desc-btn-fill" onclick="preencherDescritivo()">↺ Preencher do formulário</button>
           <button class="desc-btn-print" onclick="imprimirDescritivo()">🖨 Imprimir / PDF</button>
@@ -700,7 +702,7 @@
 <script src="/js/painel-pagamento.js?v=1"></script>
 <script src="/js/gerar-pdf.js?v=6"></script>
 <script src="/js/exportar-sheets.js"></script>
-<script src="/js/painel-descritivo.js?v=17"></script>
+<script src="/js/painel-descritivo.js?v=18"></script>
 <script src="/js/assinatura.js?v=1"></script>
 <script src="/js/painel-contrato.js?v=15"></script>
 <script>verificarSessao();</script>
