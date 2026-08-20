@@ -527,10 +527,11 @@ async function removerFundoSelecionadas() {
     if (!img) continue;
     try {
       toast('Removendo fundo ' + (i + 1) + '/' + wraps.length + '… (aguarde)');
+      const original = img.src;
       const origem = await fetch(img.src).then(r => r.blob());
       const semFundo = await removeBackground(origem);   // Blob PNG transparente
       const url = await _uploadImagem(semFundo);
-      if (url) img.src = url;
+      if (url) { img.dataset.origBg = original; img.src = url; }   // guarda o original p/ desfazer
     } catch (e) {
       console.error('bg-removal', e);
       toast('Falha ao remover o fundo de uma imagem.', 'erro');
@@ -538,6 +539,18 @@ async function removerFundoSelecionadas() {
   }
   _salvarDescritivo();
   toast('Fundo removido ✓');
+}
+
+/* Desfaz a remoção de fundo: volta a imagem original guardada em data-orig-bg */
+function restaurarFundoSelecionadas() {
+  if (!_imgSel || !_imgSel.length) { toast('Selecione a imagem primeiro (clique nela).', 'erro'); return; }
+  let n = 0;
+  _imgSel.forEach(w => {
+    const img = w.querySelector('img.ds-img');
+    if (img && img.dataset.origBg) { img.src = img.dataset.origBg; delete img.dataset.origBg; n++; }
+  });
+  if (n) { _salvarDescritivo(); toast('Fundo restaurado ✓'); }
+  else toast('Essa imagem não teve o fundo removido por aqui.', 'erro');
 }
 
 /* ── DUPLICAR (cópia exata, no mesmo descritivo, deslocada um pouco) ── */
