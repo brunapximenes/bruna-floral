@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Painel — Bruna Floral</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/style.css?v=29">
+<link rel="stylesheet" href="/css/style.css?v=30">
 <style>
 /* ── LOGIN ──────────────────────────────────────────── */
 #tela-login {
@@ -419,15 +419,6 @@
 
       <!-- DESCRITIVO -->
       <div class="pag" id="pag-descritivo">
-        <div class="desc-toolbar">
-          <span class="desc-dica">💡 Cole imagens com Ctrl+V. Arraste para posicionar. <strong>Setas</strong> = ajuste fino (Shift = 10px). Ctrl/Shift+clique seleciona várias. Selecione e use <strong>Ctrl+C</strong> para copiar ou <strong>Duplicar</strong>.</span>
-          <button class="desc-btn-fill" id="btn-multi-sel" onclick="toggleMultiSel(this)">☑ Selecionar várias</button>
-          <button class="desc-btn-fill" onclick="removerFundoSelecionadas()">✂ Remover fundo</button>
-          <button class="desc-btn-fill" onclick="duplicarSelecionadas()">⎘ Duplicar</button>
-          <button class="desc-btn-fill" onclick="compactarImagensDescritivo()">🗜 Compactar imagens</button>
-          <button class="desc-btn-fill" onclick="preencherDescritivo()">↺ Preencher do formulário</button>
-          <button class="desc-btn-print" onclick="imprimirDescritivo()">🖨 Imprimir / PDF</button>
-        </div>
         <div class="desc-format-bar">
           <span class="desc-format-label">Formatar a linha:</span>
           <button onmousedown="event.preventDefault()" onclick="aplicarEstiloDesc('secao')">Título de seção</button>
@@ -475,6 +466,15 @@
           <button class="fmt-grifo fmt-nogrifo" title="Tirar o grifo" onmousedown="event.preventDefault()" onclick="grifarDesc('transparent')"></button>
           <span class="fmt-sep"></span>
           <button class="fmt-ic" title="Limpar toda a formatação" onmousedown="event.preventDefault()" onclick="limparFormatoDesc()">⌫</button>
+          <div class="fmt-break"></div>
+          <button class="fmt-acao" id="btn-multi-sel" onclick="toggleMultiSel(this)">☑ Selecionar várias</button>
+          <button class="fmt-acao" onclick="removerFundoSelecionadas()">✂ Remover fundo</button>
+          <button class="fmt-acao" onclick="duplicarSelecionadas()">⎘ Duplicar</button>
+          <button class="fmt-acao" onclick="compactarImagensDescritivo()">🗜 Compactar</button>
+          <button class="fmt-acao" onclick="preencherDescritivo()">↺ Preencher</button>
+          <button class="fmt-acao" onclick="imprimirDescritivo()">🖨 Imprimir / PDF</button>
+          <div class="fmt-break"></div>
+          <span class="desc-dica-mini">💡 Ctrl+V cola imagem · arraste para posicionar · setas = ajuste fino (Shift = 10px) · Ctrl/Shift+clique seleciona várias · Ctrl+C copia</span>
         </div>
         <div class="desc-layout">
           <div id="descritivo-doc" contenteditable="true"></div>

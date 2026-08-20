@@ -407,6 +407,9 @@ body {
 /* Botões de formatação de texto (negrito, cor, grifo…) */
 .fmt-sep { width: 1px; align-self: stretch; background: var(--borda); margin: 2px 3px; }
 .fmt-break { flex-basis: 100%; height: 0; }   /* quebra a barra: cor/grifo na linha de baixo */
+.desc-format-bar button.fmt-acao { background: var(--creme); }
+.desc-format-bar button.fmt-acao:hover { background: var(--verde); color: #fff; }
+.desc-dica-mini { font-size: 11px; color: #999; width: 100%; }
 .desc-format-bar button.fmt-ic { min-width: 30px; padding: 6px 8px; text-align: center; }
 .desc-format-bar .fmt-tam {
   padding: 6px 8px; border-radius: 6px; border: 1px solid var(--borda);
