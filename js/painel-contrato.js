@@ -103,6 +103,8 @@ function _ctEscAttr(s) {
   return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
 }
 
+let _parcelas = [];   // lista estruturada de parcelas: { obs, data (ISO), valor }
+
 /* Preenche os campos de forma de pagamento com o que está salvo no evento */
 function preencherCamposPagamento() {
   if (!eventoAtual) return;
@@ -110,11 +112,57 @@ function preencherCamposPagamento() {
   setv('ct-valor', eventoAtual.contrato_valor);
   setv('ct-extenso', eventoAtual.contrato_valor_extenso);
   setv('ct-parcelas', eventoAtual.contrato_parcelas);
-  setv('ct-vencimentos', eventoAtual.contrato_vencimentos);
+  _parcelas = Array.isArray(eventoAtual.pagamentos_previstos) ? eventoAtual.pagamentos_previstos : [];
+  renderParcelas();
   const vEl = document.getElementById('ct-valor');
   if (vEl && typeof calcVenda === 'function' && calcVenda() > 0) {
     vEl.placeholder = 'Orçamento: ' + fmt(calcVenda());
   }
+}
+
+function renderParcelas() {
+  const cont = document.getElementById('ct-parcelas-lista');
+  if (!cont) return;
+  cont.innerHTML = '';
+  _parcelas.forEach((p, i) => {
+    const row = document.createElement('div');
+    row.className = 'item-row';
+    row.style.gridTemplateColumns = '1fr 150px 130px 28px';
+    row.innerHTML =
+      '<input type="text" placeholder="Entrada / 1ª parcela…" value="' + (p.obs || '') + '" ' +
+        'oninput="_parcelas[' + i + '].obs=this.value" onchange="salvarPagamento()">' +
+      '<input type="date" value="' + (p.data || '') + '" ' +
+        'oninput="_parcelas[' + i + '].data=this.value" onchange="salvarPagamento()">' +
+      '<input type="number" placeholder="0,00" value="' + (p.valor != null ? p.valor : '') + '" ' +
+        'oninput="_parcelas[' + i + '].valor=this.value" onchange="salvarPagamento()">' +
+      '<button class="rm-btn" onclick="removerParcelaContrato(' + i + ')">×</button>';
+    cont.appendChild(row);
+  });
+}
+
+function addParcelaContrato() {
+  _parcelas.push({ obs: '', data: '', valor: '' });
+  renderParcelas();
+  salvarPagamento();
+}
+function removerParcelaContrato(i) {
+  _parcelas.splice(i, 1);
+  renderParcelas();
+  salvarPagamento();
+}
+
+/* Monta o texto de "Vencimentos" (para a cláusula do contrato) a partir das parcelas */
+function _vencsTexto(lista) {
+  return (lista || [])
+    .filter(p => p && (p.valor !== '' && p.valor != null || p.data))
+    .map(p => {
+      const lbl = p.obs ? p.obs + ': ' : '';
+      const val = (p.valor !== '' && p.valor != null) ? fmt(parseFloat(p.valor) || 0) : '';
+      const dt  = p.data ? _ctData(p.data) : '';
+      return (lbl + val + (dt ? ' em ' + dt : '')).trim();
+    })
+    .filter(Boolean)
+    .join(' · ');
 }
 
 /* Salva a forma de pagamento no evento (não regenera o contrato — isso é no "Preencher do sistema") */
@@ -122,10 +170,11 @@ async function salvarPagamento() {
   if (!eventoAtual) return;
   const g = (id) => { const e = document.getElementById(id); return e ? e.value.trim() : ''; };
   const upd = {
-    contrato_valor:         g('ct-valor')       || null,
-    contrato_valor_extenso: g('ct-extenso')     || null,
-    contrato_parcelas:      g('ct-parcelas')    || null,
-    contrato_vencimentos:   g('ct-vencimentos') || null,
+    contrato_valor:         g('ct-valor')    || null,
+    contrato_valor_extenso: g('ct-extenso')  || null,
+    contrato_parcelas:      g('ct-parcelas') || null,
+    pagamentos_previstos:   _parcelas,
+    contrato_vencimentos:   _vencsTexto(_parcelas) || null,   // texto derivado, p/ a cláusula do contrato
   };
   const { error } = await sb.from('events').update(upd).eq('id', eventoAtual.id);
   if (!error) { Object.assign(eventoAtual, upd); toast('Forma de pagamento salva ✓'); }

@@ -23,14 +23,33 @@ function renderProximos() {
   if (resumoEl) {
     const partes = [];
     if (eventoAtual.contrato_valor)    partes.push('Valor do contrato: <strong>' + eventoAtual.contrato_valor + '</strong>');
-    if (eventoAtual.contrato_parcelas) partes.push(eventoAtual.contrato_parcelas);
+    if (eventoAtual.contrato_parcelas) {
+      const pc = String(eventoAtual.contrato_parcelas);
+      partes.push(/^\d+$/.test(pc) ? pc + (pc === '1' ? ' parcela' : ' parcelas') : pc);
+    }
     resumoEl.innerHTML = partes.join(' · ');
   }
 
+  // 1) Fonte principal: lista estruturada de parcelas (Forma de pagamento do contrato)
+  const lista = Array.isArray(eventoAtual.pagamentos_previstos) ? eventoAtual.pagamentos_previstos : [];
+  const validas = lista.filter(p => p && ((p.valor !== '' && p.valor != null) || p.data || p.obs));
+  if (validas.length) {
+    cont.innerHTML = validas.map(p => {
+      const quando = [p.obs, p.data ? _dataBR(p.data) : ''].filter(Boolean).join(' — ') || '—';
+      const val = (p.valor !== '' && p.valor != null) ? fmt(parseFloat(p.valor) || 0) : '';
+      return '<div class="item-row" style="grid-template-columns:1fr 150px">' +
+        '<div>' + quando + '</div>' +
+        '<div style="text-align:right;color:var(--verde);font-weight:500">' + val + '</div>' +
+        '</div>';
+    }).join('');
+    return;
+  }
+
+  // 2) Fallback (contratos antigos): texto livre de "Vencimentos"
   const venc = (eventoAtual.contrato_vencimentos || '').trim();
   const itens = venc.split(/[·•\n;]+/).map(s => s.trim()).filter(Boolean);
   if (!itens.length) {
-    cont.innerHTML = '<div class="pag-vazio">Preencha os <strong>Vencimentos</strong> na aba Contrato (Forma de pagamento) para os próximos pagamentos aparecerem aqui.</div>';
+    cont.innerHTML = '<div class="pag-vazio">Preencha as <strong>Parcelas</strong> na aba Contrato (Forma de pagamento) para os próximos pagamentos aparecerem aqui.</div>';
     return;
   }
   cont.innerHTML = itens.map(p => {
@@ -42,6 +61,12 @@ function renderProximos() {
       '<div style="text-align:right;color:var(--verde);font-weight:500">' + (valor ? 'R$ ' + valor : p) + '</div>' +
       '</div>';
   }).join('');
+}
+
+function _dataBR(iso) {
+  if (!iso) return '';
+  const d = new Date(iso + 'T12:00:00');
+  return isNaN(d) ? iso : d.toLocaleDateString('pt-BR');
 }
 
 function renderPagamentos() {

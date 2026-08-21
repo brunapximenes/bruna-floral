@@ -506,9 +506,14 @@
           <div class="ct-pag-grid">
             <div class="campo"><label>Valor do contrato</label><input id="ct-valor" type="text" placeholder="R$ 0,00" onchange="salvarPagamento()"></div>
             <div class="campo"><label>Valor por extenso</label><input id="ct-extenso" type="text" placeholder="ex: onze mil reais" onchange="salvarPagamento()"></div>
-            <div class="campo"><label>Qt. parcelas</label><input id="ct-parcelas" type="text" placeholder="ex: 4 parcelas" onchange="salvarPagamento()"></div>
+            <div class="campo"><label>Qt. parcelas</label><input id="ct-parcelas" type="number" min="1" placeholder="ex: 7" onchange="salvarPagamento()"></div>
           </div>
-          <div class="campo"><label>Vencimentos</label><textarea id="ct-vencimentos" rows="2" placeholder="ex: 1.650 em 04/08/2026  ·  1.650 em 05/09/26  ·  3.000 em dez/26  ·  5.000 até 30/06/27" onchange="salvarPagamento()"></textarea></div>
+          <div class="ct-parcelas-box">
+            <label style="font-size:12px;color:var(--texto2)">Parcelas (cada uma com sua data)</label>
+            <div class="col-heads" style="grid-template-columns:1fr 150px 130px 28px"><div class="col-head">Descrição (ex.: Entrada)</div><div class="col-head">Data</div><div class="col-head">Valor R$</div><div></div></div>
+            <div id="ct-parcelas-lista"></div>
+            <button class="add-btn" onclick="addParcelaContrato()">+ Adicionar parcela</button>
+          </div>
         </div>
         <div class="desc-format-bar">
           <span class="desc-format-label">Formatar a linha:</span>
@@ -711,12 +716,12 @@
 <script src="/js/painel-evento.js?v=4"></script>
 <script src="/js/painel-orcamento.js?v=7"></script>
 <script src="/js/painel-interno.js?v=4"></script>
-<script src="/js/painel-pagamento.js?v=2"></script>
+<script src="/js/painel-pagamento.js?v=3"></script>
 <script src="/js/gerar-pdf.js?v=6"></script>
 <script src="/js/exportar-sheets.js"></script>
 <script src="/js/painel-descritivo.js?v=20"></script>
 <script src="/js/assinatura.js?v=1"></script>
-<script src="/js/painel-contrato.js?v=15"></script>
+<script src="/js/painel-contrato.js?v=16"></script>
 <script>verificarSessao();</script>
 </body>
 </html>
