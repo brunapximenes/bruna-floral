@@ -71,6 +71,7 @@ const STATUS_BADGE = {
 /** Labels de tipo de evento */
 const TIPO_LABELS = {
   casamento:   'Casamento',
+  noivado:     'Noivado',
   aniversario: 'Aniversário',
   batizado:    'Batizado',
   corporativo: 'Corporativo'
@@ -79,6 +80,7 @@ const TIPO_LABELS = {
 /** Configuração de campos por tipo de evento */
 const CFG_TIPO = {
   casamento:   { nomes:'Nome do casal',             origem:true,  cerimonial:true,  altar:true,  welcome:true, lembranca:'Bem casado / palha italiana / lembrancinha?', buque:true,  banda:true,  familia:true,  cerimonia:true  },
+  noivado:     { nomes:'Nome do casal',             origem:true,  cerimonial:true,  altar:false, welcome:true, lembranca:'Bem casado / palha italiana / lembrancinha?', buque:true,  banda:true,  familia:true,  cerimonia:false },
   aniversario: { nomes:'Nome do aniversariante',     origem:true,  cerimonial:true,  altar:false, welcome:true, lembranca:'Bem casado / palha italiana / lembrancinha?', buque:false, banda:true,  familia:false, cerimonia:false },
   batizado:    { nomes:'Nome do bebê / criança',     origem:true,  cerimonial:true,  altar:true,  welcome:true, lembranca:'Bem batizado / lembrancinha?',                buque:false, banda:false, familia:true,  cerimonia:true  },
   corporativo: { nomes:'Nome da empresa / evento',   origem:false, cerimonial:false, altar:false, welcome:true, lembranca:'Presenteáveis?',                              buque:false, banda:true,  familia:false, cerimonia:false }

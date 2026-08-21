@@ -19,6 +19,7 @@ function renderTipoBtns() {
   const row = document.getElementById('tipo-row');
   const tipos = [
     { id: 'casamento',   label: 'Casamento'   },
+    { id: 'noivado',     label: 'Noivado'     },
     { id: 'aniversario', label: 'Aniversário' },
     { id: 'batizado',    label: 'Batizado'    },
     { id: 'corporativo', label: 'Corporativo' }
