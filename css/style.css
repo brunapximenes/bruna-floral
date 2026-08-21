@@ -389,6 +389,15 @@ body {
   box-shadow: 0 1px 3px rgba(0,0,0,.25);
 }
 .ds-img-ref { outline: 2px dashed var(--verde); outline-offset: 2px; }
+/* Em telas de toque (tablet), alças maiores para ficarem fáceis de pegar */
+@media (pointer: coarse) {
+  .ds-img-handle, .ds-img-handle-esq { width: 30px; height: 30px; }
+  .ds-img-handle { right: -15px; bottom: -15px; }
+  .ds-img-handle-esq { left: -15px; bottom: -15px; }
+  .ds-img-del, .ds-img-front { width: 30px; height: 30px; line-height: 26px; font-size: 17px; }
+  .ds-img-del { right: -15px; top: -15px; }
+  .ds-img-front { left: -15px; top: -15px; }
+}
 .desc-dica { font-size: 12px; color: var(--texto2); margin-right: auto; align-self: center; }
 .desc-format-bar {
   display: flex; flex-wrap: wrap; align-items: center; gap: 8px;

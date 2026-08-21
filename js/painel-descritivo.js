@@ -439,6 +439,19 @@ function _colarNoDescritivo(e) {
     }
   }
 
+  // 1b) Alguns tablets trazem a imagem em dt.files (e não em dt.items)
+  const arqs = dt.files || [];
+  for (let i = 0; i < arqs.length; i++) {
+    if (arqs[i].type && arqs[i].type.indexOf('image') === 0) {
+      e.preventDefault();
+      _redimensionarBlob(arqs[i], 900, 0.72).then(async (blob) => {
+        try { const url = await _uploadImagem(blob); _inserirImagemNoDoc(url); _salvarDescritivo(); }
+        catch (err) { toast('Não foi possível enviar a imagem. Tente novamente.', 'erro'); }
+      });
+      return;
+    }
+  }
+
   // 2) Imagem copiada de uma página da web (HTML com <img src="...">)
   const html = dt.getData ? dt.getData('text/html') : '';
   if (html && /<img[^>]+src=/i.test(html)) {
@@ -449,7 +462,55 @@ function _colarNoDescritivo(e) {
       return;
     }
   }
-  // caso contrário, deixa o colar normal de texto acontecer
+  // Rede de segurança (tablet): se o navegador colar uma <img> crua (gigante, sem alças),
+  // conserta logo depois transformando no formato certo (260px + alças).
+  setTimeout(_normalizarImagensColadas, 60);
+}
+
+/* Converte qualquer <img> "crua" (colada pelo navegador, fora do wrap) no formato
+   padrão: envia pro armazenamento e embrulha em .ds-img-wrap de 260px com alças. */
+async function _normalizarImagensColadas() {
+  if (!_descDoc) return;
+  const soltas = Array.from(_descDoc.querySelectorAll('img')).filter(im => !im.classList.contains('ds-img'));
+  if (!soltas.length) return;
+  let ultimo = null;
+  for (const im of soltas) {
+    const src = im.currentSrc || im.src || '';
+    try {
+      let url = src;
+      if (src.indexOf('data:') === 0 || src.indexOf('blob:') === 0) {
+        const blob = await fetch(src).then(r => r.blob());
+        const menor = await _redimensionarBlob(blob, 900, 0.72);
+        url = await _uploadImagem(menor);
+      }
+      const wrap = document.createElement('span');
+      wrap.className = 'ds-img-wrap';
+      wrap.setAttribute('contenteditable', 'false');
+      wrap.style.left = '32px'; wrap.style.top = '32px'; wrap.style.width = '260px';
+      const novo = document.createElement('img');
+      novo.className = 'ds-img'; novo.src = url;
+      wrap.appendChild(novo);
+      im.replaceWith(wrap);
+      ultimo = wrap;
+    } catch (e) { im.remove(); }
+  }
+  if (ultimo) _selecionarImagem(ultimo);   // já mostra as alças
+  _salvarDescritivo();
+}
+
+/* Botão "Adicionar imagem" (ideal no tablet: abre galeria/câmera) */
+function _abrirSeletorImagem() {
+  const inp = document.getElementById('desc-file-input');
+  if (inp) inp.click();
+}
+function _adicionarImagemArquivo(input) {
+  const file = input.files && input.files[0];
+  if (!file) return;
+  _redimensionarBlob(file, 900, 0.72).then(async (blob) => {
+    try { const url = await _uploadImagem(blob); _inserirImagemNoDoc(url); _salvarDescritivo(); }
+    catch (e) { toast('Não foi possível adicionar a imagem.', 'erro'); }
+  });
+  input.value = '';
 }
 
 /* Imagem vinda de URL. data: → envia pro armazenamento; http → usa o link direto (leve). */

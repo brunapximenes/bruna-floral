@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Painel — Bruna Floral</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/style.css?v=30">
+<link rel="stylesheet" href="/css/style.css?v=31">
 <style>
 /* ── LOGIN ──────────────────────────────────────────── */
 #tela-login {
@@ -467,6 +467,8 @@
           <span class="fmt-sep"></span>
           <button class="fmt-ic" title="Limpar toda a formatação" onmousedown="event.preventDefault()" onclick="limparFormatoDesc()">⌫</button>
           <div class="fmt-break"></div>
+          <input type="file" id="desc-file-input" accept="image/*" style="display:none" onchange="_adicionarImagemArquivo(this)">
+          <button class="fmt-acao" onclick="_abrirSeletorImagem()">🖼 Adicionar imagem</button>
           <button class="fmt-acao" id="btn-multi-sel" onclick="toggleMultiSel(this)">☑ Selecionar várias</button>
           <button class="fmt-acao" onclick="removerFundoSelecionadas()">✂ Remover fundo</button>
           <button class="fmt-acao" onclick="restaurarFundoSelecionadas()">↶ Voltar fundo</button>
@@ -703,7 +705,7 @@
 <script src="/js/painel-pagamento.js?v=1"></script>
 <script src="/js/gerar-pdf.js?v=6"></script>
 <script src="/js/exportar-sheets.js"></script>
-<script src="/js/painel-descritivo.js?v=19"></script>
+<script src="/js/painel-descritivo.js?v=20"></script>
 <script src="/js/assinatura.js?v=1"></script>
 <script src="/js/painel-contrato.js?v=15"></script>
 <script>verificarSessao();</script>
