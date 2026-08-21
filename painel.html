@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Painel — Bruna Floral</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/style.css?v=31">
+<link rel="stylesheet" href="/css/style.css?v=32">
 <style>
 /* ── LOGIN ──────────────────────────────────────────── */
 #tela-login {
@@ -628,6 +628,14 @@
           <div id="items-pagrec"></div>
           <button class="add-btn" onclick="addPagamentoRecebido()">+ Adicionar recebimento</button>
         </div>
+
+        <div class="card">
+          <div class="card-title">Próximos pagamentos</div>
+          <div id="prox-resumo" class="pag-obs"></div>
+          <div class="col-heads" style="grid-template-columns:1fr 150px"><div class="col-head">Quando</div><div class="col-head" style="text-align:right">Valor</div></div>
+          <div id="items-prox"></div>
+          <div class="pag-obs">📄 Puxado da <strong>Forma de pagamento → Vencimentos</strong> do Contrato. Para alterar, edite lá e clique em salvar.</div>
+        </div>
       </div>
 
       <!-- Calculadora flutuante (Orçamento, Controle interno e Pagamento) -->
@@ -703,7 +711,7 @@
 <script src="/js/painel-evento.js?v=4"></script>
 <script src="/js/painel-orcamento.js?v=7"></script>
 <script src="/js/painel-interno.js?v=4"></script>
-<script src="/js/painel-pagamento.js?v=1"></script>
+<script src="/js/painel-pagamento.js?v=2"></script>
 <script src="/js/gerar-pdf.js?v=6"></script>
 <script src="/js/exportar-sheets.js"></script>
 <script src="/js/painel-descritivo.js?v=20"></script>

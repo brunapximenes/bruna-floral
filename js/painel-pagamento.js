@@ -10,6 +10,38 @@ function carregarPagamentos() {
   if (!Array.isArray(eventoAtual.pagamentos_recebidos)) eventoAtual.pagamentos_recebidos = [];
   pagamentosRecebidos = eventoAtual.pagamentos_recebidos;
   renderPagamentos();
+  renderProximos();
+}
+
+/* Próximos pagamentos: lê SEMPRE do sistema (Forma de pagamento do Contrato),
+   assim acompanha qualquer alteração feita no contrato. */
+function renderProximos() {
+  const cont = document.getElementById('items-prox');
+  if (!cont) return;
+
+  const resumoEl = document.getElementById('prox-resumo');
+  if (resumoEl) {
+    const partes = [];
+    if (eventoAtual.contrato_valor)    partes.push('Valor do contrato: <strong>' + eventoAtual.contrato_valor + '</strong>');
+    if (eventoAtual.contrato_parcelas) partes.push(eventoAtual.contrato_parcelas);
+    resumoEl.innerHTML = partes.join(' · ');
+  }
+
+  const venc = (eventoAtual.contrato_vencimentos || '').trim();
+  const itens = venc.split(/[·•\n;]+/).map(s => s.trim()).filter(Boolean);
+  if (!itens.length) {
+    cont.innerHTML = '<div class="pag-vazio">Preencha os <strong>Vencimentos</strong> na aba Contrato (Forma de pagamento) para os próximos pagamentos aparecerem aqui.</div>';
+    return;
+  }
+  cont.innerHTML = itens.map(p => {
+    const m = p.match(/^\s*(R?\$?\s*[\d][\d.,]*)\s*(.*)$/);
+    const valor  = m ? m[1].replace(/^R?\$?\s*/, '') : '';
+    const quando = m ? (m[2] || '—') : p;
+    return '<div class="item-row" style="grid-template-columns:1fr 150px">' +
+      '<div>' + quando + '</div>' +
+      '<div style="text-align:right;color:var(--verde);font-weight:500">' + (valor ? 'R$ ' + valor : p) + '</div>' +
+      '</div>';
+  }).join('');
 }
 
 function renderPagamentos() {
