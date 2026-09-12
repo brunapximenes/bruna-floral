@@ -30,7 +30,11 @@ async function entrar() {
   btn.textContent = 'Entrar';
 
   if (error) {
-    erro.textContent = 'E-mail ou senha incorretos. Tente novamente.';
+    const msg = (error.message || '').toLowerCase();
+    const credenciais = error.status === 400 || msg.includes('invalid login') || msg.includes('credential');
+    erro.textContent = credenciais
+      ? 'E-mail ou senha incorretos. Tente novamente.'
+      : 'Não foi possível conectar ao sistema agora (o servidor pode estar reativando). Aguarde 1–2 min e tente de novo.';
     return;
   }
 

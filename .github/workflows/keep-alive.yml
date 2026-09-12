@@ -2,7 +2,7 @@ name: Supabase Keep-Alive
 
 on:
   schedule:
-    - cron: '0 9 */3 * *'  # a cada 3 dias às 9h UTC (6h no Brasil)
+    - cron: '0 9 * * *'   # todo dia às 9h UTC (6h no Brasil) — margem grande contra a pausa de 7 dias
   workflow_dispatch:        # permite disparar manualmente pelo GitHub
 
 jobs:
