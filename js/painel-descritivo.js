@@ -337,6 +337,64 @@ function _bindDescInput(doc, CHAVE) {
   doc.onpaste       = _colarNoDescritivo;
   doc.onpointerdown = _descPointerDown;
   doc.onclick       = _descClick;
+  doc.onkeydown     = _descTecla;
+}
+
+/* Enter dentro de listas: trata a saída da lista sem "puxar" o que vem depois
+   (o navegador tende a absorver o subtítulo seguinte como item da lista). */
+function _descTecla(e) {
+  if (e.key !== 'Enter' || e.shiftKey) return;
+  const sel = window.getSelection();
+  if (!sel || !sel.rangeCount) return;
+  let n = sel.anchorNode;
+  if (n && n.nodeType === 3) n = n.parentNode;
+  const li = n && n.closest ? n.closest('li') : null;
+  if (!li) return;                       // fora de lista → Enter normal
+  const ul = li.closest('ul');
+  if (!ul) return;
+
+  e.preventDefault();
+  if (!sel.isCollapsed) sel.deleteFromDocument();   // se havia texto selecionado, limpa
+
+  if (!li.textContent.trim()) {
+    // Linha vazia → SAI da lista: cria uma linha em branco (sem tracinho) no lugar,
+    // e o que vinha depois continua como lista logo abaixo. Não mexe no subtítulo seguinte.
+    const depois = [];
+    let s = li.nextElementSibling;
+    while (s) { depois.push(s); s = s.nextElementSibling; }
+    li.remove();
+    const div = document.createElement('div');
+    div.appendChild(document.createElement('br'));
+    ul.after(div);
+    if (depois.length) {
+      const ul2 = document.createElement('ul');
+      depois.forEach(x => ul2.appendChild(x));
+      div.after(ul2);
+    }
+    if (!ul.querySelector('li')) ul.remove();
+    _cursorNoInicio(div);
+  } else {
+    // Linha com texto → continua a lista: quebra no cursor, criando um novo item
+    const r = sel.getRangeAt(0);
+    const resto = r.cloneRange();
+    resto.setEnd(li, li.childNodes.length);
+    const frag = resto.extractContents();
+    const novo = document.createElement('li');
+    if (frag.textContent.trim()) novo.appendChild(frag);
+    else novo.appendChild(document.createElement('br'));
+    li.after(novo);
+    _cursorNoInicio(novo);
+  }
+  _salvarDescritivo();
+}
+
+function _cursorNoInicio(el) {
+  const sel = window.getSelection();
+  const r = document.createRange();
+  r.setStart(el, 0);
+  r.collapse(true);
+  sel.removeAllRanges();
+  sel.addRange(r);
 }
 
 /* ── FORMATAR A LINHA no estilo do documento (1 clique) ─────── */
