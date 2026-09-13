@@ -591,19 +591,98 @@ function _colarNoDescritivo(e) {
     }
   }
 
-  // 2) Imagem copiada de uma página da web (HTML com <img src="...">)
+  // 2) Conteúdo com HTML (texto formatado, listas, subtítulos, ou imagem da web)
   const html = dt.getData ? dt.getData('text/html') : '';
-  if (html && /<img[^>]+src=/i.test(html)) {
-    const m = html.match(/<img[^>]+src=["']([^"']+)["']/i);
-    if (m && m[1]) {
-      e.preventDefault();
-      _imagemDeUrl(m[1]);
-      return;
+  if (html) {
+    const temImg   = /<img[^>]+src=/i.test(html);
+    const temBloco = /<(ul|ol|li|div|p|h[1-4])/i.test(html);
+    if (temImg && !temBloco) {                 // imagem copiada de uma página → trata como imagem
+      const m = html.match(/<img[^>]+src=["']([^"']+)["']/i);
+      if (m && m[1]) { e.preventDefault(); _imagemDeUrl(m[1]); return; }
     }
+    e.preventDefault();
+    _colarBlocos(html);                        // cola preservando a formatação original (sem negrito extra)
+    return;
   }
   // Rede de segurança (tablet): se o navegador colar uma <img> crua (gigante, sem alças),
   // conserta logo depois transformando no formato certo (260px + alças).
   setTimeout(_normalizarImagensColadas, 60);
+}
+
+/* Cola HTML preservando a formatação ORIGINAL de cada linha.
+   Desembrulha os envelopes de estilo (ex.: <b> que o navegador põe em volta de tudo,
+   deixando o texto colado todo em negrito) e insere os blocos no nível de bloco. */
+function _colarBlocos(html) {
+  if (!_descDoc) return;
+  const tmp = document.createElement('div');
+  tmp.innerHTML = html;
+  tmp.querySelectorAll('meta, style, title, .ds-ui').forEach(el => el.remove());
+
+  // desembrulha wrappers de estilo (b/strong/span/font/div-sem-classe) que envolvem BLOCOS
+  let g = 0;
+  while (tmp.children.length === 1 && g++ < 6) {
+    const only = tmp.children[0];
+    const tag = (only.tagName || '').toLowerCase();
+    const ehWrapper = ['b', 'strong', 'span', 'font', 'i', 'u', 'em'].indexOf(tag) >= 0 ||
+                      (tag === 'div' && !only.getAttribute('class'));
+    if (ehWrapper && only.querySelector('ul, ol, li, p, .ds-sub-titulo, .ds-secao-titulo')) {
+      while (only.firstChild) tmp.insertBefore(only.firstChild, only);
+      only.remove();
+    } else break;
+  }
+
+  const nos = Array.from(tmp.childNodes);
+  const temBloco = nos.some(n => n.nodeType === 1 && /^(UL|OL|LI|DIV|P|H1|H2|H3|H4)$/.test(n.tagName));
+
+  const sel = window.getSelection();
+  if (!sel || !sel.rangeCount) {
+    nos.forEach(n => _descDoc.appendChild(n));
+    _salvarDescritivo();
+    return;
+  }
+  const range = sel.getRangeAt(0);
+  if (!range.collapsed) range.deleteContents();
+
+  // conteúdo só de texto/inline → insere no cursor, mantendo a formatação da seleção
+  if (!temBloco) {
+    const frag = document.createDocumentFragment();
+    nos.forEach(n => frag.appendChild(n));
+    range.insertNode(frag);
+    range.collapse(false);
+    sel.removeAllRanges(); sel.addRange(range);
+    _salvarDescritivo();
+    return;
+  }
+
+  // conteúdo em blocos → insere no nível de bloco, dividindo a linha atual no cursor
+  let bloco = _bloco(range.startContainer);
+  if (!bloco || bloco === _descDoc) {
+    const frag = document.createDocumentFragment();
+    nos.forEach(n => frag.appendChild(n));
+    range.insertNode(frag);
+    _salvarDescritivo();
+    return;
+  }
+  const pai = bloco.parentNode;
+  const ref = bloco.nextSibling;
+  const after = range.cloneRange();
+  after.setEnd(bloco, bloco.childNodes.length);
+  const restoFrag = after.extractContents();
+
+  nos.forEach(n => pai.insertBefore(n, ref));
+
+  const temResto = (restoFrag.textContent || '').trim() ||
+                   (restoFrag.querySelector && restoFrag.querySelector('img, ul, ol'));
+  let restoBloco = null;
+  if (temResto) {
+    restoBloco = bloco.cloneNode(false);   // mesma tag e classe da linha (mantém subtítulo/etc.)
+    restoBloco.appendChild(restoFrag);
+    pai.insertBefore(restoBloco, ref);
+  }
+  if (!(bloco.textContent || '').trim() && !bloco.querySelector('img, ul, ol')) bloco.remove();
+
+  if (restoBloco) { try { _cursorNoInicio(restoBloco); } catch (e) {} }
+  _salvarDescritivo();
 }
 
 /* Converte qualquer <img> "crua" (colada pelo navegador, fora do wrap) no formato
