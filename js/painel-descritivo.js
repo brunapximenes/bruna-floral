@@ -338,6 +338,37 @@ function _bindDescInput(doc, CHAVE) {
   doc.onpointerdown = _descPointerDown;
   doc.onclick       = _descClick;
   doc.onkeydown     = _descTecla;
+  doc.onbeforeinput = _descBeforeInput;
+}
+
+/* Digitar (espaço/letra) com uma seleção que ATRAVESSA blocos diferentes: o padrão do
+   navegador funde os blocos (puxa o subtítulo pra dentro da lista). Aqui apagamos a
+   seleção mantendo os blocos separados e inserimos o caractere só na linha inicial. */
+function _bloco(node) {
+  let x = node && node.nodeType === 3 ? node.parentNode : node;
+  return x && x.closest ? x.closest('li, p, div, h1, h2, h3, h4') : null;
+}
+function _descBeforeInput(e) {
+  const t = e.inputType || '';
+  if (t !== 'insertText' && t !== 'insertReplacementText' && t !== 'insertLineBreak') return;
+  const sel = window.getSelection();
+  if (!sel || !sel.rangeCount || sel.isCollapsed) return;
+  const r = sel.getRangeAt(0);
+  const b1 = _bloco(r.startContainer), b2 = _bloco(r.endContainer);
+  if (!b1 || !b2 || b1 === b2) return;                 // mesma linha → comportamento normal
+  if (!_descDoc || !_descDoc.contains(b1) || !_descDoc.contains(b2)) return;
+
+  e.preventDefault();
+  r.deleteContents();                                  // apaga SEM fundir os blocos
+  const cur = sel.rangeCount ? sel.getRangeAt(0) : r;
+  if (t === 'insertText' && e.data) {
+    const tn = document.createTextNode(e.data);
+    cur.insertNode(tn);
+    cur.setStartAfter(tn); cur.collapse(true);
+    sel.removeAllRanges(); sel.addRange(cur);
+  }
+  _descDoc.querySelectorAll('ul').forEach(u => { if (!u.querySelector('li')) u.remove(); });
+  _salvarDescritivo();
 }
 
 /* Enter dentro de listas: trata a saída da lista sem "puxar" o que vem depois
