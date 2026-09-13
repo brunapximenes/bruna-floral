@@ -374,6 +374,7 @@ function _descBeforeInput(e) {
 /* Enter dentro de listas: trata a saída da lista sem "puxar" o que vem depois
    (o navegador tende a absorver o subtítulo seguinte como item da lista). */
 function _descTecla(e) {
+  if (e.key === 'Tab') { _descTab(e); return; }
   if (e.key !== 'Enter' || e.shiftKey) return;
   const sel = window.getSelection();
   if (!sel || !sel.rangeCount) return;
@@ -426,6 +427,42 @@ function _cursorNoInicio(el) {
   r.collapse(true);
   sel.removeAllRanges();
   sel.addRange(r);
+}
+
+/* TAB dentro de lista: vira subitem (bolinha, indentado sob o texto do item de cima).
+   Shift+TAB: volta um nível. */
+function _descTab(e) {
+  const sel = window.getSelection();
+  if (!sel || !sel.rangeCount) return;
+  let n = sel.anchorNode;
+  if (n && n.nodeType === 3) n = n.parentNode;
+  const li = n && n.closest ? n.closest('li') : null;
+  if (!li) return;                       // fora de lista → deixa o Tab normal
+  const ul = li.closest('ul');
+  if (!ul) return;
+  e.preventDefault();
+  const saved = sel.getRangeAt(0).cloneRange();   // os nós se movem junto, então o cursor se mantém
+
+  if (e.shiftKey) {
+    // volta um nível: só funciona se este item estiver dentro de um subnível
+    const paiLi = ul.parentElement && ul.parentElement.tagName === 'LI' ? ul.parentElement : null;
+    if (paiLi) {
+      paiLi.after(li);
+      if (!ul.querySelector('li')) ul.remove();
+    }
+  } else {
+    // vira subitem do item imediatamente acima
+    const prev = li.previousElementSibling;
+    if (prev && prev.tagName === 'LI') {
+      let sub = prev.querySelector(':scope > ul');
+      if (!sub) { sub = document.createElement('ul'); prev.appendChild(sub); }
+      sub.appendChild(li);
+    }
+  }
+
+  sel.removeAllRanges();
+  sel.addRange(saved);
+  _salvarDescritivo();
 }
 
 /* ── FORMATAR A LINHA no estilo do documento (1 clique) ─────── */
@@ -1367,6 +1404,7 @@ function _dsCssImprimir() {
     'ul{list-style:none;padding-left:0;}' +
     'ul li{padding-left:14px;position:relative;margin-bottom:1px;font-size:12px;}' +
     'ul li::before{content:"\\2013";position:absolute;left:0;color:var(--rosa);}' +
+    'ul ul{padding-left:0;margin:1px 0;}ul ul li::before{content:"\\2022";font-size:10px;top:1px;}' +
     '.ds-nota{font-style:italic;color:#888;font-size:11.5px;margin-top:4px;padding-left:14px;}' +
     '.ds-bloco-total{margin-top:20px;border-top:2px solid var(--verde);padding-top:12px;}' +
     '.ds-total-linha{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}' +
