@@ -1483,7 +1483,7 @@ function _dsCssImprimir() {
     'ul{list-style:none;padding-left:0;}' +
     'ul li{padding-left:14px;position:relative;margin-bottom:1px;font-size:12px;}' +
     'ul li::before{content:"\\2013";position:absolute;left:0;color:var(--rosa);}' +
-    'ul ul{padding-left:0;margin:1px 0;}ul ul li::before{content:"\\2022";font-size:10px;top:1px;}' +
+    'ul ul{padding-left:0;margin:1px 0;}ul ul li::before{content:"\\2022";font-size:16px;line-height:1;top:0;color:var(--verde);}' +
     '.ds-nota{font-style:italic;color:#888;font-size:11.5px;margin-top:4px;padding-left:14px;}' +
     '.ds-bloco-total{margin-top:20px;border-top:2px solid var(--verde);padding-top:12px;}' +
     '.ds-total-linha{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}' +

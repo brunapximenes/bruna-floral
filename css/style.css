@@ -320,7 +320,7 @@ body {
 #contrato-doc ul li { padding-left: 14px; position: relative; margin-bottom: 2px; }
 #contrato-doc ul li::before { content: "–"; position: absolute; left: 0; color: var(--rosa); }
 #contrato-doc ul ul { padding-left: 0; margin: 1px 0; }
-#contrato-doc ul ul li::before { content: "•"; font-size: 10px; top: 1px; }
+#contrato-doc ul ul li::before { content: "•"; font-size: 16px; line-height: 1; top: 0; color: var(--verde); }
 .ct-titulo { font-family: 'Cormorant Garamond', serif; font-size: 24px; font-weight: 700; color: var(--verde); text-align: center; margin-bottom: 20px; }
 .ct-sec { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: var(--verde); border-bottom: 1px solid #d5cfc7; padding-bottom: 3px; margin: 20px 0 8px; }
 .ct-sub { font-weight: 600; margin: 10px 0 4px; }
@@ -460,7 +460,7 @@ body {
 #descritivo-doc ul li::before { content: "–"; position: absolute; left: 0; color: var(--rosa); }
 /* Subitem (lista dentro de lista): bolinha, alinhada sob o texto do item de cima */
 #descritivo-doc ul ul { padding-left: 0; margin: 1px 0; }
-#descritivo-doc ul ul li::before { content: "•"; font-size: 10px; top: 1px; }
+#descritivo-doc ul ul li::before { content: "•"; font-size: 16px; line-height: 1; top: 0; color: var(--verde); }
 .ds-nota { font-style: italic; color: #888; font-size: 11.5px; margin-top: 4px; padding-left: 14px; }
 .ds-bloco-total { margin-top: 20px; border-top: 2px solid var(--verde); padding-top: 12px; }
 .ds-total-linha { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
