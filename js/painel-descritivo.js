@@ -377,9 +377,22 @@ function aplicarEstiloDesc(tipo) {
   // Substitui a linha antiga pela nova, tratando o caso de item de lista
   if (blk.tagName === 'LI' && tipo !== 'item') {
     const ul = blk.closest('ul');
-    blk.remove();
-    if (ul) { ul.after(novo); if (!ul.querySelector('li')) ul.remove(); }
-    else doc.appendChild(novo);
+    if (ul) {
+      // guarda os itens que vinham DEPOIS desta linha, para não perderem o lugar
+      const depois = [];
+      let sib = blk.nextElementSibling;
+      while (sib) { depois.push(sib); sib = sib.nextElementSibling; }
+      blk.remove();
+      ul.after(novo);                       // a nova linha entra exatamente na posição da antiga
+      if (depois.length) {                  // o restante da lista continua logo abaixo
+        const ul2 = document.createElement('ul');
+        depois.forEach(li => ul2.appendChild(li));
+        novo.after(ul2);
+      }
+      if (!ul.querySelector('li')) ul.remove();   // remove a lista de cima se ficou vazia
+    } else {
+      blk.replaceWith(novo);
+    }
   } else if (blk.tagName === 'LI' && tipo === 'item') {
     blk.textContent = texto;   // já é item, nada a trocar
     novo = blk;
