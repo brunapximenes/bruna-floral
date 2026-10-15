@@ -57,8 +57,29 @@ function renderForn(tipo) {
       <div class="item-total" id="toti-${tipo}-${idx}" style="align-self:center;text-align:right;font-size:13px;font-weight:500;color:var(--verde);padding-right:2px">${fmt(subtotal)}</div>
       <button class="rm-btn" onclick="removerItemInterno('${tipo}',${idx})">×</button>`;
     container.appendChild(row);
+    container.appendChild(_blocoLinkForn(tipo, idx, item));
     container.appendChild(_blocoPagForn(tipo, idx, item));
   });
+}
+
+/* Link do pedido que o fornecedor envia (acesso direto) */
+function _blocoLinkForn(tipo, idx, item) {
+  const div = document.createElement('div');
+  div.className = 'forn-link';
+  const link = (item.link || '').replace(/"/g, '&quot;');
+  div.innerHTML =
+    '<input type="url" class="forn-link-input" placeholder="🔗 Link do pedido (o fornecedor mandou?)" value="' + link + '" ' +
+      'oninput="internoItems[\'' + tipo + '\'][' + idx + '].link=this.value" ' +
+      'onblur="salvarItemInterno(\'' + tipo + '\',' + idx + ')">' +
+    '<button class="forn-link-abrir" onclick="_abrirLinkForn(\'' + tipo + '\',' + idx + ')">abrir</button>';
+  return div;
+}
+function _abrirLinkForn(tipo, idx) {
+  const item = internoItems[tipo] && internoItems[tipo][idx];
+  let l = item && item.link ? item.link.trim() : '';
+  if (!l) { toast('Cole o link do pedido primeiro.', 'erro'); return; }
+  if (!/^https?:\/\//i.test(l)) l = 'https://' + l;   // completa se faltar o http
+  window.open(l, '_blank');
 }
 
 function renderEquipe() {
@@ -130,7 +151,7 @@ async function salvarItemInterno(tipo, idx) {
   const item = internoItems[tipo][idx];
   if (!item || !item.id) return;
 
-  const update = { nome: item.nome || '', qtd: item.qtd || 1, valor: item.valor || 0 };
+  const update = { nome: item.nome || '', qtd: item.qtd || 1, valor: item.valor || 0, link: item.link || null };
   if (tipo === 'equipe') update.funcao = item.funcao || '';
 
   await sb.from('internal_costs').update(update).eq('id', item.id);
