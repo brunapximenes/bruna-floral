@@ -535,7 +535,20 @@ function _htmlDescritivoLimpo() {
   const clone = _descDoc.cloneNode(true);
   clone.querySelectorAll('.ds-ui').forEach(el => el.remove());
   clone.querySelectorAll('.ds-img-sel').forEach(el => el.classList.remove('ds-img-sel'));
+  _removerGrifoBranco(clone);
   return clone.innerHTML;
+}
+
+/* Remove "grifo branco" (background-color branco) — nunca é intencional e vira
+   marca branca no PDF depois que passamos a imprimir os fundos. */
+function _removerGrifoBranco(raiz) {
+  raiz.querySelectorAll('[style]').forEach(el => {
+    const bg = (el.style.backgroundColor || '').replace(/\s/g, '').toLowerCase();
+    if (bg === 'rgb(255,255,255)' || bg === '#fff' || bg === '#ffffff' || bg === 'white') {
+      el.style.backgroundColor = '';
+      if (!el.getAttribute('style')) el.removeAttribute('style');
+    }
+  });
 }
 
 /* Guarda no aparelho, sem quebrar se estourar o limite (imagens pesam) */
@@ -1238,25 +1251,49 @@ async function salvarDescritivoNuvem(html, silencioso) {
   }
 }
 
-function imprimirDescritivo() {
+function imprimirDescritivo()          { _imprimirDescritivo(false); }
+function imprimirDescritivoComNotas()  { _imprimirDescritivo(true); }
+
+function _imprimirDescritivo(comNotas) {
   _desselecionarImagem();
   const doc  = document.getElementById('descritivo-doc');
   const nome = (eventoAtual && eventoAtual.nomes) ? eventoAtual.nomes : 'Descritivo';
   const largura  = doc.offsetWidth;                 // mesma largura da edição
   const conteudo = _htmlDescritivoLimpo();           // sem alças/botões temporários
+
+  // Anotações particulares (só na versão "para mim")
+  let flexIni = '', flexFim = '', notasCss = '', pageCss = '';
+  if (comNotas) {
+    const el = document.getElementById('desc-notas-txt');
+    const n  = el ? ((typeof _notasHtmlLimpo === 'function') ? _notasHtmlLimpo(el) : el.innerHTML) : '';
+    const soTexto = (n || '').replace(/<[^>]*>/g, '').replace(/[\s ]/g, '');
+    const corpoNotas = soTexto ? n : '<em style="color:#bbb">(sem anotações)</em>';
+    const aside = '<aside class="ds-print-notas"><div class="ds-print-notas-tit">📝 Anotações particulares</div>' +
+                  '<div class="ds-print-notas-corpo">' + corpoNotas + '</div></aside>';
+    flexIni = '<div class="ds-print-flex">';
+    flexFim = aside + '</div>';
+    notasCss = ' .ds-print-flex{display:flex;align-items:flex-start;gap:24px;justify-content:center;padding:20px;}' +
+               ' .ds-print-flex .ds-print-wrap{margin:0;}' +
+               ' .ds-print-notas{flex:0 0 250px;border-left:2px solid var(--rosa);padding-left:16px;font-size:12px;color:#2c2c2c;}' +
+               ' .ds-print-notas-tit{font-size:11px;font-weight:600;color:var(--verde);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;}' +
+               ' .ds-print-notas-corpo{line-height:1.6;}';
+    pageCss = '@page{size:A4 landscape;margin:10mm;}';
+  }
+
   const cssImg =
     ' body{padding:0;}' +
     ' .ds-print-wrap{position:relative;box-sizing:border-box;margin:0 auto;padding:36px 44px;}' +
-    ' .ds-img-wrap{position:absolute;display:inline-block;}' +
+    ' .ds-img-wrap{position:absolute;display:inline-block;z-index:5;}' +
     ' .ds-img-wrap .ds-img{width:100%;height:auto;display:block;}' +
-    ' .ds-img-handle,.ds-img-del{display:none!important;}';
+    ' .ds-img-handle,.ds-img-del,.ds-ui{display:none!important;}' +
+    notasCss;
   const win  = window.open('', '_blank');
   win.document.write(
     '<!DOCTYPE html><html lang="pt-BR">' +
-    '<head><meta charset="UTF-8"><title>Descritivo — ' + nome + '</title>' +
+    '<head><meta charset="UTF-8"><title>Descritivo — ' + nome + (comNotas ? ' (com anotações)' : '') + '</title>' +
     '<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">' +
-    '<style>' + _dsCssImprimir() + cssImg + '</style></head>' +
-    '<body><div class="ds-print-wrap" style="width:' + largura + 'px">' + conteudo + '</div></body></html>'
+    '<style>' + _dsCssImprimir() + cssImg + pageCss + '</style></head>' +
+    '<body>' + flexIni + '<div class="ds-print-wrap" style="width:' + largura + 'px">' + conteudo + '</div>' + flexFim + '</body></html>'
   );
   win.document.close();
   win.addEventListener('load', function () { win.focus(); win.print(); });
