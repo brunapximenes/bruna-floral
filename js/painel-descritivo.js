@@ -1272,12 +1272,14 @@ function _imprimirDescritivo(comNotas) {
                   '<div class="ds-print-notas-corpo">' + corpoNotas + '</div></aside>';
     flexIni = '<div class="ds-print-flex">';
     flexFim = aside + '</div>';
-    notasCss = ' .ds-print-flex{display:flex;align-items:flex-start;gap:24px;justify-content:center;padding:20px;}' +
-               ' .ds-print-flex .ds-print-wrap{margin:0;}' +
-               ' .ds-print-notas{flex:0 0 250px;border-left:2px solid var(--rosa);padding-left:16px;font-size:12px;color:#2c2c2c;}' +
+    notasCss = ' .ds-print-flex{display:flex;align-items:flex-start;gap:18px;padding:14px;}' +
+               ' .ds-print-flex .ds-print-wrap{margin:0;flex:0 0 auto;}' +   /* NÃO encolhe: imagens ficam no lugar */
+               ' .ds-print-notas{flex:0 0 220px;border-left:2px solid var(--rosa);padding-left:16px;font-size:12px;color:#2c2c2c;}' +
                ' .ds-print-notas-tit{font-size:11px;font-weight:600;color:var(--verde);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;}' +
-               ' .ds-print-notas-corpo{line-height:1.6;}';
-    pageCss = '@page{size:A4 landscape;margin:10mm;}';
+               ' .ds-print-notas-corpo{line-height:1.6;word-break:break-word;}' +
+               ' .ds-print-notas-corpo img{max-width:100%!important;height:auto!important;display:block;margin:6px 0;}' +
+               ' .ds-print-notas-corpo .ds-img-wrap{position:static!important;display:block;width:auto!important;left:auto!important;top:auto!important;}';
+    pageCss = '@page{size:A4 landscape;margin:8mm;}';
   }
 
   const cssImg =
