@@ -1262,8 +1262,12 @@ function _imprimirDescritivo(comNotas) {
   const conteudo = _htmlDescritivoLimpo();           // sem alças/botões temporários
 
   // Anotações particulares (só na versão "para mim")
-  let flexIni = '', flexFim = '', notasCss = '', pageCss = '';
+  let flexIni = '', flexFim = '', notasCss = '', pageCss = '', wrapStyle = 'width:' + largura + 'px';
   if (comNotas) {
+    const NOTAS_W = 200, GAP = 16, PAD = 12, MARGIN = 8;
+    const usavel  = Math.round((297 - MARGIN * 2) * 3.78);        // largura util A4 paisagem (~1062px)
+    const zoom    = Math.min(1, (usavel - NOTAS_W - GAP - PAD * 2) / largura);
+    wrapStyle += ';zoom:' + zoom.toFixed(3);                      // encolhe o descritivo so se precisar (imagens vao junto)
     const el = document.getElementById('desc-notas-txt');
     const n  = el ? ((typeof _notasHtmlLimpo === 'function') ? _notasHtmlLimpo(el) : el.innerHTML) : '';
     const soTexto = (n || '').replace(/<[^>]*>/g, '').replace(/[\s ]/g, '');
@@ -1272,14 +1276,14 @@ function _imprimirDescritivo(comNotas) {
                   '<div class="ds-print-notas-corpo">' + corpoNotas + '</div></aside>';
     flexIni = '<div class="ds-print-flex">';
     flexFim = aside + '</div>';
-    notasCss = ' .ds-print-flex{display:flex;align-items:flex-start;gap:18px;padding:14px;}' +
+    notasCss = ' .ds-print-flex{display:flex;align-items:flex-start;justify-content:flex-start;gap:' + GAP + 'px;padding:' + PAD + 'px;}' +
                ' .ds-print-flex .ds-print-wrap{margin:0;flex:0 0 auto;}' +   /* NÃO encolhe: imagens ficam no lugar */
-               ' .ds-print-notas{flex:0 0 220px;border-left:2px solid var(--rosa);padding-left:16px;font-size:12px;color:#2c2c2c;}' +
+               ' .ds-print-notas{flex:0 0 ' + NOTAS_W + 'px;border-left:2px solid var(--rosa);padding-left:16px;font-size:12px;color:#2c2c2c;}' +
                ' .ds-print-notas-tit{font-size:11px;font-weight:600;color:var(--verde);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;}' +
                ' .ds-print-notas-corpo{line-height:1.6;word-break:break-word;}' +
                ' .ds-print-notas-corpo img{max-width:100%!important;height:auto!important;display:block;margin:6px 0;}' +
                ' .ds-print-notas-corpo .ds-img-wrap{position:static!important;display:block;width:auto!important;left:auto!important;top:auto!important;}';
-    pageCss = '@page{size:A4 landscape;margin:8mm;}';
+    pageCss = '@page{size:A4 landscape;margin:' + MARGIN + 'mm;}';
   }
 
   const cssImg =
@@ -1295,7 +1299,7 @@ function _imprimirDescritivo(comNotas) {
     '<head><meta charset="UTF-8"><title>Descritivo — ' + nome + (comNotas ? ' (com anotações)' : '') + '</title>' +
     '<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">' +
     '<style>' + _dsCssImprimir() + cssImg + pageCss + '</style></head>' +
-    '<body>' + flexIni + '<div class="ds-print-wrap" style="width:' + largura + 'px">' + conteudo + '</div>' + flexFim + '</body></html>'
+    '<body>' + flexIni + '<div class="ds-print-wrap" style="' + wrapStyle + '">' + conteudo + '</div>' + flexFim + '</body></html>'
   );
   win.document.close();
   win.addEventListener('load', function () { win.focus(); win.print(); });
