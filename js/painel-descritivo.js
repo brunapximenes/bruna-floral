@@ -1465,7 +1465,7 @@ function templateDescritivo(ev) {
 
 function _dsCssImprimir() {
   return ':root{--verde:#3d5a47;--rosa:#c9847a;--creme:#faf7f2;}' +
-    '*{margin:0;padding:0;box-sizing:border-box;}' +
+    '*{margin:0;padding:0;box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact;}' +
     'body{font-family:\'Jost\',sans-serif;font-size:12.5px;color:#2c2c2c;background:#fff;padding:40px 48px;max-width:960px;margin:0 auto;line-height:1.65;}' +
     '.ds-cabecalho{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid var(--verde);padding-bottom:16px;margin-bottom:20px;}' +
     '.ds-nomes{font-family:\'Cormorant Garamond\',serif;font-size:26px;font-weight:600;color:var(--verde);letter-spacing:.03em;}' +

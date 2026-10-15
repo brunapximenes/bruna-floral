@@ -588,7 +588,7 @@ function templateContrato(ev) {
 /* ── CSS PARA A JANELA DE IMPRESSÃO ─────────────────────────── */
 function _ctCssImprimir() {
   return ':root{--verde:#3d5a47;--rosa:#c9847a;}' +
-    '*{margin:0;padding:0;box-sizing:border-box;}' +
+    '*{margin:0;padding:0;box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact;}' +
     'body{font-family:\'Jost\',sans-serif;font-size:12px;color:#2c2c2c;background:#fff;padding:40px 48px;max-width:820px;margin:0 auto;line-height:1.6;text-align:justify;}' +
     '.ct-titulo{font-family:\'Cormorant Garamond\',serif;font-size:24px;font-weight:700;color:var(--verde);text-align:center;margin-bottom:20px;}' +
     '.ct-sec{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--verde);border-bottom:1px solid #d5cfc7;padding-bottom:3px;margin:18px 0 8px;}' +
