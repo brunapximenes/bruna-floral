@@ -49,10 +49,10 @@ function renderForn(tipo) {
         style="width:100%" oninput="internoItems['${tipo}'][${idx}].nome=this.value"
         onblur="salvarItemInterno('${tipo}',${idx})">
       <input type="number" min="1" value="${item.qtd || 1}"
-        style="width:100%" oninput="internoItems['${tipo}'][${idx}].qtd=parseFloat(this.value)||1;updateLinhaInterno('${tipo}',${idx});updateTotais()"
+        style="width:100%" oninput="internoItems['${tipo}'][${idx}].qtd=parseFloat(this.value)||1;updateLinhaInterno('${tipo}',${idx});updateTotais();_atualizarTotalForn('${tipo}',${idx})"
         onblur="salvarItemInterno('${tipo}',${idx})">
       <input type="number" placeholder="0,00" value="${item.valor || ''}"
-        style="width:100%" oninput="internoItems['${tipo}'][${idx}].valor=parseFloat(this.value)||0;updateLinhaInterno('${tipo}',${idx});updateTotais()"
+        style="width:100%" oninput="internoItems['${tipo}'][${idx}].valor=parseFloat(this.value)||0;updateLinhaInterno('${tipo}',${idx});updateTotais();_atualizarTotalForn('${tipo}',${idx})"
         onblur="salvarItemInterno('${tipo}',${idx})">
       <div class="item-total" id="toti-${tipo}-${idx}" style="align-self:center;text-align:right;font-size:13px;font-weight:500;color:var(--verde);padding-right:2px">${fmt(subtotal)}</div>
       <button class="rm-btn" onclick="removerItemInterno('${tipo}',${idx})">×</button>`;
@@ -100,10 +100,10 @@ function renderEquipe() {
         style="width:100%" oninput="internoItems.equipe[${idx}].funcao=this.value"
         onblur="salvarItemInterno('equipe',${idx})">
       <input type="number" min="1" value="${item.qtd || 1}"
-        style="width:100%" oninput="internoItems.equipe[${idx}].qtd=parseFloat(this.value)||1;updateLinhaInterno('equipe',${idx});updateTotais()"
+        style="width:100%" oninput="internoItems.equipe[${idx}].qtd=parseFloat(this.value)||1;updateLinhaInterno('equipe',${idx});updateTotais();_atualizarTotalForn('equipe',${idx})"
         onblur="salvarItemInterno('equipe',${idx})">
       <input type="number" placeholder="0,00" value="${item.valor || ''}"
-        style="width:100%" oninput="internoItems.equipe[${idx}].valor=parseFloat(this.value)||0;updateLinhaInterno('equipe',${idx});updateTotais()"
+        style="width:100%" oninput="internoItems.equipe[${idx}].valor=parseFloat(this.value)||0;updateLinhaInterno('equipe',${idx});updateTotais();_atualizarTotalForn('equipe',${idx})"
         onblur="salvarItemInterno('equipe',${idx})">
       <div class="item-total" id="toti-equipe-${idx}" style="align-self:center;text-align:right;font-size:13px;font-weight:500;color:var(--verde);padding-right:2px">${fmt(subtotal)}</div>
       <button class="rm-btn" onclick="removerItemInterno('equipe',${idx})">×</button>`;
@@ -190,14 +190,33 @@ function _blocoPagForn(tipo, idx, item) {
           'oninput="internoItems[\'' + tipo + '\'][' + idx + '].pagamentos[' + j + '].data=this.value" ' +
           'onchange="salvarPagForn(\'' + tipo + '\',' + idx + ')">' +
         '<input type="number" placeholder="0,00" value="' + (p.valor || '') + '" ' +
-          'oninput="internoItems[\'' + tipo + '\'][' + idx + '].pagamentos[' + j + '].valor=parseFloat(this.value)||0;atualizarTotaisInterno()" ' +
+          'oninput="internoItems[\'' + tipo + '\'][' + idx + '].pagamentos[' + j + '].valor=parseFloat(this.value)||0;atualizarTotaisInterno();_atualizarTotalForn(\'' + tipo + '\',' + idx + ')" ' +
           'onchange="salvarPagForn(\'' + tipo + '\',' + idx + ')">' +
         '<button class="rm-btn" onclick="removerPagForn(\'' + tipo + '\',' + idx + ',' + j + ')">×</button>' +
       '</div>').join('');
   }
+  html += '<div class="forn-resumo" id="fornpago-' + tipo + '-' + idx + '">' + _resumoFornHTML(item) + '</div>';
   html += '<button class="add-pgto" onclick="addPagForn(\'' + tipo + '\',' + idx + ')">+ pagamento</button>';
   div.innerHTML = html;
   return div;
+}
+
+/* Resumo do quanto já foi pago a este fornecedor x total devido */
+function _resumoFornHTML(item) {
+  const devido = (parseFloat(item.valor) || 0) * (parseFloat(item.qtd) || 1);
+  const pago   = (item.pagamentos || []).reduce((s, p) => s + (parseFloat(p.valor) || 0), 0);
+  if (devido <= 0 && pago <= 0) return '';
+  const falta = devido - pago;
+  let status;
+  if (Math.abs(falta) <= 0.005)      status = '<span class="forn-ok">✓ Quitado</span>';
+  else if (falta > 0)                status = '<span class="forn-falta">Falta ' + fmt(falta) + '</span>';
+  else                               status = '<span class="forn-ok">Pago a mais ' + fmt(-falta) + '</span>';
+  return 'Pago <strong>' + fmt(pago) + '</strong> de ' + fmt(devido) + ' · ' + status;
+}
+function _atualizarTotalForn(tipo, idx) {
+  const item = internoItems[tipo] && internoItems[tipo][idx];
+  const el = document.getElementById('fornpago-' + tipo + '-' + idx);
+  if (item && el) el.innerHTML = _resumoFornHTML(item);
 }
 
 async function addPagForn(tipo, idx) {

@@ -266,6 +266,10 @@ body {
 .forn-link-input { flex: 1; padding: 5px 8px; font-size: 12px; border: 1px solid var(--borda); border-radius: 6px; font-family: 'Jost', sans-serif; }
 .forn-link-abrir { font-size: 11.5px; padding: 5px 12px; border: 1px solid var(--borda); background: #fff; color: var(--verde); border-radius: 6px; cursor: pointer; white-space: nowrap; font-family: 'Jost', sans-serif; }
 .forn-link-abrir:hover { background: var(--verde); color: #fff; }
+.forn-resumo { font-size: 11.5px; color: #777; margin: 2px 0 6px; }
+.forn-resumo strong { color: var(--verde); }
+.forn-ok { color: #2e7d32; font-weight: 600; }
+.forn-falta { color: #c0392b; font-weight: 600; }
 #metrics-int-topo { margin-bottom: 16px; }
 
 /* ── ABA DESCRITIVO ──────────────────────────────────── */
