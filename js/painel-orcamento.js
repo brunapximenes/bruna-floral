@@ -198,10 +198,12 @@ function updateTotais() {
 
   const mInt = document.getElementById('metrics-int');
   if (mInt) {
+    const vendaEf = (typeof _totalVendaEvento === 'function') ? _totalVendaEvento() : venda;
+    const lucroEf = vendaEf - custo;
     mInt.innerHTML =
-      metricHTML('Total de venda', fmt(venda), '') +
+      metricHTML('Total de venda', fmt(vendaEf), '') +
       metricHTML('Total de custo', fmt(custo), 'bad') +
-      metricHTML('Lucro do evento', fmt(lucro), lucro >= 0 ? 'ok' : 'bad');
+      metricHTML('Lucro do evento', fmt(lucroEf), lucroEf >= 0 ? 'ok' : 'bad');
   }
 }
 

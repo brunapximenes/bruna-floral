@@ -266,6 +266,31 @@ function _parseValorBR(v) {
   return isNaN(n) ? 0 : n;
 }
 
+/* Lê o valor do "Total geral" digitado no descritivo (ds-ev-total) */
+function _totalDescritivo() {
+  let txt = '';
+  const live = document.querySelector('#descritivo-doc .ds-ev-total');
+  if (live) txt = live.textContent;
+  else {
+    const html = (eventoAtual && eventoAtual.descritivo_html) || '';
+    if (html.indexOf('ds-ev-total') >= 0) {
+      const d = document.createElement('div');
+      d.innerHTML = html;
+      const sp = d.querySelector('.ds-ev-total');
+      if (sp) txt = sp.textContent;
+    }
+  }
+  return _parseValorBR(txt);
+}
+
+/* Total de venda do evento: orçamento se houver; senão o total do descritivo; senão o valor do contrato */
+function _totalVendaEvento() {
+  if (typeof calcVenda === 'function' && calcVenda() > 0) return calcVenda();
+  const d = _totalDescritivo();
+  if (d > 0) return d;
+  return _parseValorBR(eventoAtual && eventoAtual.contrato_valor);
+}
+
 /* Totais no topo do Controle interno: 4 valores (recebido/pendente do cliente,
    pago/pendente aos fornecedores) */
 function atualizarTotaisInterno() {
@@ -273,10 +298,7 @@ function atualizarTotaisInterno() {
   if (!el) return;
 
   const rec  = (typeof calcTotalRecebido === 'function') ? calcTotalRecebido() : 0;
-  // total que o cliente deve: usa o orçamento se houver, senão o valor do contrato
-  const totalCliente = (typeof calcVenda === 'function' && calcVenda() > 0)
-    ? calcVenda()
-    : _parseValorBR(eventoAtual && eventoAtual.contrato_valor);
+  const totalCliente = _totalVendaEvento();   // orçamento → descritivo → contrato
   const pendCliente = totalCliente - rec;
 
   const pago = calcTotalPagoFornecedores();
