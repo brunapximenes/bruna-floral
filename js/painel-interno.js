@@ -255,13 +255,42 @@ function calcTotalPagoFornecedores() {
   return total;
 }
 
-/* Totais no topo do Controle interno: recebido do cliente e pago a fornecedores */
+/* Converte texto de valor em BR (ex.: "R$ 8.000,00") para número */
+function _parseValorBR(v) {
+  if (v == null) return 0;
+  let s = ('' + v).replace(/[^\d.,-]/g, '');
+  if (!s) return 0;
+  if (s.indexOf(',') >= 0) s = s.replace(/\./g, '').replace(',', '.');   // vírgula = decimal
+  else s = s.replace(/\./g, '');                                          // pontos = milhar
+  const n = parseFloat(s);
+  return isNaN(n) ? 0 : n;
+}
+
+/* Totais no topo do Controle interno: 4 valores (recebido/pendente do cliente,
+   pago/pendente aos fornecedores) */
 function atualizarTotaisInterno() {
   const el = document.getElementById('metrics-int-topo');
   if (!el) return;
+
   const rec  = (typeof calcTotalRecebido === 'function') ? calcTotalRecebido() : 0;
+  // total que o cliente deve: usa o orçamento se houver, senão o valor do contrato
+  const totalCliente = (typeof calcVenda === 'function' && calcVenda() > 0)
+    ? calcVenda()
+    : _parseValorBR(eventoAtual && eventoAtual.contrato_valor);
+  const pendCliente = totalCliente - rec;
+
   const pago = calcTotalPagoFornecedores();
+  const devidoForn = (typeof calcCusto === 'function') ? calcCusto() : 0;
+  const pendForn = devidoForn - pago;
+
+  const vPendCli  = totalCliente > 0 ? fmt(Math.max(0, pendCliente)) : '—';
+  const clsPendCli = totalCliente <= 0 ? '' : (pendCliente > 0.005 ? 'bad' : 'ok');
+  const vPendForn = fmt(Math.max(0, pendForn));
+  const clsPendForn = pendForn > 0.005 ? 'bad' : 'ok';
+
   el.innerHTML =
     metricHTML('Total recebido do cliente', fmt(rec), 'ok') +
-    metricHTML('Total pago a fornecedores', fmt(pago), 'bad');
+    metricHTML('Valor pendente do cliente', vPendCli, clsPendCli) +
+    metricHTML('Total pago a fornecedores', fmt(pago), '') +
+    metricHTML('Valor pendente dos fornecedores', vPendForn, clsPendForn);
 }
