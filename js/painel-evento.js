@@ -362,3 +362,47 @@ async function salvarStatus() {
   if (!error) { eventoAtual.status = novoStatus; toast('Status atualizado ✓'); }
   else toast('Erro ao salvar status.', 'erro');
 }
+
+/* Salva em PDF o conteúdo de uma aba (Orçamento, Controle interno, Pagamento).
+   Clona a aba, vira os campos em texto, tira botões, e imprime com o estilo do painel. */
+function imprimirAba(pagId, titulo) {
+  const pag = document.getElementById(pagId);
+  if (!pag) { toast('Nada para imprimir.', 'erro'); return; }
+  const nome = (eventoAtual && eventoAtual.nomes) ? eventoAtual.nomes : '';
+  const clone = pag.cloneNode(true);
+
+  // remove tudo que é interação/controle
+  clone.querySelectorAll('button, .bloco-handle, .add-btn, .add-pgto, .rm-btn, .acoes-wrap, .desc-format-bar, .forn-link-abrir, .ds-ui, .recibo-btn, .orc-dica, .desc-dica-mini')
+       .forEach(e => e.remove());
+
+  // transforma inputs/selects/textareas em texto (pra não imprimir como formulário)
+  clone.querySelectorAll('input, select, textarea').forEach(f => {
+    let v = f.value || '';
+    if (f.tagName === 'SELECT' && f.selectedIndex >= 0) v = f.options[f.selectedIndex].text;
+    const span = document.createElement('span');
+    span.className = 'pdf-field';
+    span.textContent = v;
+    f.replaceWith(span);
+  });
+
+  const win = window.open('', '_blank');
+  win.document.write(
+    '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>' + titulo + ' — ' + nome + '</title>' +
+    '<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">' +
+    '<link rel="stylesheet" href="/css/style.css">' +
+    '<style>' +
+      '*{-webkit-print-color-adjust:exact;print-color-adjust:exact;}' +
+      'body{background:#fff;padding:24px 28px;font-family:\'Jost\',sans-serif;color:#2c2c2c;}' +
+      '.pdf-cab{border-bottom:2px solid #3d5a47;padding-bottom:10px;margin-bottom:18px;}' +
+      '.pdf-cab h1{font-family:\'Cormorant Garamond\',serif;color:#3d5a47;font-size:24px;font-weight:700;}' +
+      '.pdf-cab .pdf-sub{font-size:12px;color:#888;margin-top:2px;}' +
+      '.pdf-field{display:inline-block;min-height:1em;}' +
+      '.item-row{align-items:center;}' +
+      '@page{size:A4 portrait;margin:12mm;}' +
+    '</style></head>' +
+    '<body><div class="pdf-cab"><h1>' + titulo + '</h1><div class="pdf-sub">' + nome + '</div></div>' +
+    clone.innerHTML + '</body></html>'
+  );
+  win.document.close();
+  win.addEventListener('load', function () { win.focus(); win.print(); });
+}
