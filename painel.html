@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Painel — Bruna Floral</title>
+<title>Painel — Bruna Ximenes</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/style.css?v=40">
+<link rel="stylesheet" href="/css/style.css?v=41">
 <style>
 /* ── LOGIN ──────────────────────────────────────────── */
 #tela-login {
@@ -193,11 +193,11 @@
 <div id="tela-login">
   <div class="login-box">
     <div class="logo-wrap">
-      <img src="/assets/logo.png" alt="Bruna Floral" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+      <img src="/assets/logo.png" alt="Bruna Ximenes" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
       <div class="logo-placeholder" style="display:none">🌸</div>
     </div>
     <h1>Painel Profissional</h1>
-    <p>Bruna Floral — acesso restrito</p>
+    <p>Bruna Ximenes — acesso restrito</p>
     <input type="email" id="login-email" placeholder="seu@email.com" value="bruna.p.ximenes@gmail.com">
     <input type="password" id="login-senha" placeholder="Senha" onkeydown="if(event.key==='Enter')entrar()">
     <button class="btn-primary btn-full" onclick="entrar()" id="btn-entrar">Entrar</button>
@@ -211,8 +211,8 @@
   <!-- Header fixo -->
   <div class="app-header">
     <div class="app-header-left">
-      <img src="/assets/logo.png" alt="Bruna Floral" onerror="this.style.display='none'">
-      <h1>Painel Bruna Floral</h1>
+      <img src="/assets/logo.png" alt="Bruna Ximenes" onerror="this.style.display='none'">
+      <h1>Painel Bruna Ximenes</h1>
     </div>
     <div class="app-header-right">
       <button class="btn-link-quest" onclick="copiarLinkQuestionario()">🔗 Link do questionário</button>
@@ -758,13 +758,23 @@
               </div>
             </div>
             <div class="cv-pers-col">
-              <label class="cv-pers-lab">Cor do fundo</label>
-              <div class="cv-cor-row">
-                <input type="color" id="cv-bg-color" value="#3d5a47" onchange="mudarCorFundoConfirmacao(this.value)">
-                <span class="cv-cor-hint" id="cv-bg-hint">Padrão do painel</span>
+              <label class="cv-pers-lab">Cores da página</label>
+              <div class="cv-cores-grid">
+                <div class="cv-cor-item">
+                  <input type="color" id="cv-bg-color" value="#3d5a47" onchange="mudarCorConfirmacao('confirmar_bg', this.value)">
+                  <span>Fundo</span>
+                </div>
+                <div class="cv-cor-item">
+                  <input type="color" id="cv-txt-color" value="#3d5a47" onchange="mudarCorConfirmacao('confirmar_cor_texto', this.value)">
+                  <span>Texto</span>
+                </div>
+                <div class="cv-cor-item">
+                  <input type="color" id="cv-btn-color" value="#3d5a47" onchange="mudarCorConfirmacao('confirmar_cor_botao', this.value)">
+                  <span>Botões</span>
+                </div>
               </div>
               <div class="cv-pers-btns">
-                <button class="cv-btn cv-btn-sec" onclick="resetCorFundoConfirmacao()">Voltar ao padrão</button>
+                <button class="cv-btn cv-btn-sec" onclick="resetCoresConfirmacao()">Voltar as cores ao padrão</button>
                 <button class="cv-btn cv-btn-sec" onclick="window.open(linkConfirmacao(),'_blank')">👁 Ver como ficou</button>
               </div>
             </div>
@@ -844,11 +854,11 @@
 <script src="/js/painel-orcamento.js?v=8"></script>
 <script src="/js/painel-interno.js?v=8"></script>
 <script src="/js/painel-pagamento.js?v=4"></script>
-<script src="/js/gerar-pdf.js?v=6"></script>
+<script src="/js/gerar-pdf.js?v=7"></script>
 <script src="/js/exportar-sheets.js"></script>
 <script src="/js/painel-descritivo.js?v=31"></script>
 <script src="/js/painel-anotacoes.js?v=1"></script>
-<script src="/js/painel-convidados.js?v=3"></script>
+<script src="/js/painel-convidados.js?v=4"></script>
 <script src="/js/assinatura.js?v=1"></script>
 <script src="/js/painel-contrato.js?v=17"></script>
 <script>verificarSessao();</script>

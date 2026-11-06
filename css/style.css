@@ -1,5 +1,5 @@
 /* ============================================================
-   Bruna Floral — CSS Compartilhado
+   Bruna Ximenes — CSS Compartilhado
    ============================================================ */
 
 :root {
@@ -611,3 +611,9 @@ body {
 .cv-cor-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
 .cv-cor-row input[type=color] { width: 54px; height: 40px; border: 1px solid var(--borda); border-radius: 8px; background: #fff; cursor: pointer; padding: 3px; }
 .cv-cor-hint { font-size: 13px; color: var(--texto2); font-variant-numeric: tabular-nums; }
+
+/* Grade de cores da página de confirmação (fundo / texto / botões) */
+.cv-cores-grid { display: flex; gap: 16px; margin-bottom: 12px; flex-wrap: wrap; }
+.cv-cor-item { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+.cv-cor-item input[type=color] { width: 52px; height: 40px; border: 1px solid var(--borda); border-radius: 8px; background: #fff; cursor: pointer; padding: 3px; }
+.cv-cor-item span { font-size: 11.5px; color: var(--texto2); }

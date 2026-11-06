@@ -59,7 +59,7 @@ async function buscarPersonalizacao(eventId) {
     const sb = createClient(url, key);
     const { data, error } = await sb
       .from('events')
-      .select('confirmar_img, confirmar_bg')
+      .select('confirmar_img, confirmar_bg, confirmar_cor_texto, confirmar_cor_botao')
       .eq('id', eventId)
       .single();
     if (error || !data) return {};
@@ -102,10 +102,14 @@ module.exports = async function handler(req, res) {
   // tenta buscar no banco (caso a service role esteja configurada).
   let img = imgSegura(q.img);
   let bg  = corSegura(q.bg);
-  if (!img || !bg) {
+  let txt = corSegura(q.txt);   // cor do texto em destaque
+  let btn = corSegura(q.btn);   // cor dos botões
+  if (!img || !bg || !txt || !btn) {
     const pers = await buscarPersonalizacao(eventId);
     if (!img) img = imgSegura(pers.confirmar_img);
     if (!bg)  bg  = corSegura(pers.confirmar_bg);
+    if (!txt) txt = corSegura(pers.confirmar_cor_texto);
+    if (!btn) btn = corSegura(pers.confirmar_cor_botao);
   }
 
   let head =
@@ -113,10 +117,16 @@ module.exports = async function handler(req, res) {
     + '<meta property="og:title" content="' + esc(titulo) + '">\n'
     + '<meta property="og:description" content="' + esc(desc) + '">\n'
     + '<meta property="og:type" content="website">\n'
-    + '<meta property="og:site_name" content="Bruna Floral">\n'
+    + '<meta property="og:site_name" content="Bruna Ximenes">\n'
     + '<meta name="description" content="' + esc(desc) + '">';
   if (img) head += '\n<meta property="og:image" content="' + esc(img) + '">';
-  if (bg)  head += '\n<style>body{background:' + bg + ' !important;}</style>';
+
+  // Estilo de personalização (fundo + cores do texto e dos botões)
+  let regras = '';
+  if (bg)  regras += 'body{background:' + bg + ' !important;}';
+  if (txt) regras += ':root{--cf-accent:' + txt + ';}';
+  if (btn) regras += ':root{--cf-btn:' + btn + ';}';
+  if (regras) head += '\n<style>' + regras + '</style>';
 
   // Troca o <title> estático pelo bloco dinâmico
   html = html.replace(/<title>[\s\S]*?<\/title>/, head);

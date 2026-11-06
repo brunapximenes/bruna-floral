@@ -27,8 +27,10 @@ function linkConfirmacao() {
     d: eventoAtual.data_evento || ''
   });
   // Personalização vai no próprio link (não depende de leitura no servidor)
-  if (eventoAtual.confirmar_bg)  p.set('bg',  eventoAtual.confirmar_bg);
-  if (eventoAtual.confirmar_img) p.set('img', eventoAtual.confirmar_img);
+  if (eventoAtual.confirmar_bg)         p.set('bg',  eventoAtual.confirmar_bg);
+  if (eventoAtual.confirmar_cor_texto)  p.set('txt', eventoAtual.confirmar_cor_texto);
+  if (eventoAtual.confirmar_cor_botao)  p.set('btn', eventoAtual.confirmar_cor_botao);
+  if (eventoAtual.confirmar_img)        p.set('img', eventoAtual.confirmar_img);
   return base + '/confirmar?' + p.toString();
 }
 
@@ -207,12 +209,15 @@ function _carregarPersonalizacao() {
   }
   if (btnRm) btnRm.style.display = img ? '' : 'none';
 
-  // Cor de fundo
-  const cor = document.getElementById('cv-bg-color');
-  const hint = document.getElementById('cv-bg-hint');
-  const bg = eventoAtual.confirmar_bg || '';
-  if (cor) cor.value = bg || _CV_BG_PADRAO;
-  if (hint) hint.textContent = bg ? bg.toUpperCase() : 'Padrão do painel';
+  // Cores (fundo, texto, botões)
+  _setCor('cv-bg-color',  eventoAtual.confirmar_bg);
+  _setCor('cv-txt-color', eventoAtual.confirmar_cor_texto);
+  _setCor('cv-btn-color', eventoAtual.confirmar_cor_botao);
+}
+
+function _setCor(id, valor) {
+  const el = document.getElementById(id);
+  if (el) el.value = valor || _CV_BG_PADRAO;
 }
 
 async function _salvarCampoEventoCV(campo, valor) {
@@ -246,16 +251,18 @@ async function removerFotoConvite() {
   if (ok) { _carregarPersonalizacao(); toast('Foto removida ✓'); }
 }
 
-async function mudarCorFundoConfirmacao(cor) {
+async function mudarCorConfirmacao(campo, cor) {
   if (!eventoAtual) return;
-  const ok = await _salvarCampoEventoCV('confirmar_bg', cor);
-  if (ok) { _carregarPersonalizacao(); toast('Cor de fundo salva ✓'); }
+  const ok = await _salvarCampoEventoCV(campo, cor);
+  if (ok) { _carregarPersonalizacao(); toast('Cor salva ✓'); }
 }
 
-async function resetCorFundoConfirmacao() {
+async function resetCoresConfirmacao() {
   if (!eventoAtual) return;
-  const ok = await _salvarCampoEventoCV('confirmar_bg', null);
-  if (ok) { _carregarPersonalizacao(); toast('Voltou ao padrão ✓'); }
+  const ok1 = await _salvarCampoEventoCV('confirmar_bg', null);
+  await _salvarCampoEventoCV('confirmar_cor_texto', null);
+  await _salvarCampoEventoCV('confirmar_cor_botao', null);
+  if (ok1) { _carregarPersonalizacao(); toast('Cores voltaram ao padrão ✓'); }
 }
 
 /* ── Compartilhar o link ───────────────────────────────── */

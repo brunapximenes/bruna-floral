@@ -1,5 +1,5 @@
 -- ============================================================
--- schema.sql — Banco de dados Bruna Floral
+-- schema.sql — Banco de dados Bruna Ximenes
 -- Rodar no SQL Editor do Supabase
 -- ============================================================
 
@@ -169,10 +169,12 @@ CREATE POLICY "auth_all_internal"
 ALTER TABLE events ADD COLUMN IF NOT EXISTS anotacoes_pag text;
 
 -- Personalização da página pública de confirmação (RSVP), por evento:
--- foto do convite oficial (URL no Storage) e cor de fundo (#hex).
+-- foto do convite (URL no Storage) e cores (#hex) de fundo, texto e botões.
 -- Vazio = usa o padrão do painel.
-ALTER TABLE events ADD COLUMN IF NOT EXISTS confirmar_img text;
-ALTER TABLE events ADD COLUMN IF NOT EXISTS confirmar_bg  text;
+ALTER TABLE events ADD COLUMN IF NOT EXISTS confirmar_img        text;
+ALTER TABLE events ADD COLUMN IF NOT EXISTS confirmar_bg         text;
+ALTER TABLE events ADD COLUMN IF NOT EXISTS confirmar_cor_texto  text;
+ALTER TABLE events ADD COLUMN IF NOT EXISTS confirmar_cor_botao  text;
 
 -- ============================================================
 -- TABELA: guests (lista de convidados + confirmação RSVP)

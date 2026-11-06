@@ -1,4 +1,4 @@
-# 🌸 Bruna Floral — Portal de Eventos
+# 🌸 Bruna Ximenes — Portal de Eventos
 
 Portal para questionários de decoração floral, gestão de eventos e geração de orçamentos.
 
@@ -13,7 +13,7 @@ bruna-floral/
 ├── painel.html         ← Painel exclusivo da Bruna
 ├── css/style.css       ← Estilos compartilhados
 ├── js/                 ← Lógica em JavaScript
-├── assets/logo.png     ← Logo da Bruna Floral
+├── assets/logo.png     ← Logo da Bruna Ximenes
 ├── api/                ← Funções do servidor (Google Sheets)
 ├── schema.sql          ← Schema do banco de dados (Supabase)
 └── vercel.json         ← Configuração de rotas
@@ -58,7 +58,7 @@ const SUPABASE_ANON_KEY = 'eyJ...SUA-CHAVE-ANON...';
 1. Acesse [console.cloud.google.com](https://console.cloud.google.com)
 2. Crie um projeto → habilite a **Google Sheets API**
 3. Crie uma **Service Account** → baixe o JSON de credenciais
-4. Crie uma planilha no Google Sheets chamada `Bruna Floral — Eventos`
+4. Crie uma planilha no Google Sheets chamada `Bruna Ximenes — Eventos`
 5. Compartilhe a planilha com o email da service account (ex: `bruna-floral@projeto.iam.gserviceaccount.com`)
 6. Copie o ID da planilha da URL (o código entre `/d/` e `/edit`)
 

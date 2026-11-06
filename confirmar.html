@@ -3,12 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Confirmação de presença — Bruna Floral</title>
+<title>Confirmação de presença — Bruna Ximenes</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root{
     --verde:#3d5a47; --verde-claro:#6b8f72; --rosa:#c9847a;
     --creme:#faf7f2; --creme2:#f2ede4; --texto:#2a2a2a; --texto2:#6b6b6b; --borda:#ddd6cc;
+    --cf-accent:#3d5a47;   /* cor do texto em destaque (títulos/rótulos) */
+    --cf-btn:#3d5a47;      /* cor dos botões */
   }
   *{ box-sizing:border-box; }
   body{
@@ -24,11 +26,11 @@
     background:var(--creme); border-radius:18px; padding:30px 26px 26px;
     box-shadow:0 14px 40px rgba(0,0,0,.18);
   }
-  #cf-evento{ font-family:'Cormorant Garamond',serif; font-size:25px; font-weight:500; color:var(--verde); text-align:center; margin:0 0 6px; line-height:1.2; }
+  #cf-evento{ font-family:'Cormorant Garamond',serif; font-size:25px; font-weight:500; color:var(--cf-accent); text-align:center; margin:0 0 6px; line-height:1.2; }
   #cf-sub{ text-align:center; font-size:13.5px; color:var(--texto2); margin:0 0 22px; line-height:1.5; }
 
   .cf-campo{ margin-bottom:16px; }
-  .cf-campo label{ display:block; font-size:12.5px; color:var(--verde); font-weight:500; margin-bottom:6px; }
+  .cf-campo label{ display:block; font-size:12.5px; color:var(--cf-accent); font-weight:500; margin-bottom:6px; }
   .cf-campo input[type=text], .cf-campo input[type=tel], .cf-campo input[type=number], .cf-campo textarea{
     width:100%; padding:12px 14px; font-family:'Jost',sans-serif; font-size:14px;
     border:1px solid var(--borda); border-radius:10px; background:#fff; color:var(--texto); outline:none;
@@ -43,8 +45,8 @@
     cursor:pointer; font-size:14px; font-weight:500; color:var(--texto2); transition:.15s;
   }
   .cf-vai input{ display:none; }
-  .cf-vai input:checked + span{ color:var(--verde); }
-  .cf-vai label:has(input:checked){ border-color:var(--verde); background:#eef3ee; color:var(--verde); }
+  .cf-vai input:checked + span{ color:var(--cf-accent); }
+  .cf-vai label:has(input:checked){ border-color:var(--cf-accent); background:var(--creme2); color:var(--cf-accent); }
 
   .cf-acomp{ display:flex; gap:12px; }
   .cf-acomp .cf-campo{ flex:1; margin-bottom:16px; }
@@ -52,16 +54,16 @@
   .cf-hint{ font-size:11px; color:#9a948b; margin-top:3px; }
 
   #cf-enviar{
-    width:100%; padding:14px; border:none; border-radius:12px; background:var(--verde); color:#fff;
+    width:100%; padding:14px; border:none; border-radius:12px; background:var(--cf-btn); color:#fff;
     font-family:'Jost',sans-serif; font-size:15px; font-weight:500; cursor:pointer; margin-top:6px;
   }
-  #cf-enviar:hover{ background:var(--verde-escuro,#2e4436); }
+  #cf-enviar:hover{ filter:brightness(0.93); }
   #cf-enviar:disabled{ opacity:.6; cursor:default; }
   .cf-erro{ color:#b8706a; font-size:13px; text-align:center; margin-top:12px; min-height:18px; }
 
   .cf-ok{ text-align:center; padding:14px 6px 8px; }
   .cf-ok-ic{ font-size:52px; line-height:1; margin-bottom:10px; }
-  .cf-ok h2{ font-family:'Cormorant Garamond',serif; font-size:26px; color:var(--verde); font-weight:500; margin:0 0 10px; }
+  .cf-ok h2{ font-family:'Cormorant Garamond',serif; font-size:26px; color:var(--cf-accent); font-weight:500; margin:0 0 10px; }
   .cf-ok p{ font-size:14px; color:var(--texto2); margin:6px 0; line-height:1.5; }
   .cf-ok-sub{ color:var(--verde-claro); }
 
@@ -71,7 +73,7 @@
 <body>
   <div class="cf-wrap">
     <div class="cf-top">
-      <div class="marca">Bruna Floral<small>Decoração de eventos</small></div>
+      <div class="marca">Bruna Ximenes<small>Decoração de eventos</small></div>
     </div>
     <div class="cf-card" id="cf-card">
       <!--CF-CONVITE-->

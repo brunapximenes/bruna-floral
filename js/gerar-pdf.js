@@ -133,7 +133,7 @@ function montarTemplatePDF() {
     <!-- Cabeçalho -->
     <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:36px;padding-bottom:24px;border-bottom:2px solid #3d5a47">
       <div>
-        <div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:32px;font-weight:400;color:#3d5a47;letter-spacing:.01em">Bruna Floral</div>
+        <div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:32px;font-weight:400;color:#3d5a47;letter-spacing:.01em">Bruna Ximenes</div>
         <div style="font-size:12px;color:#6b6b6b;letter-spacing:.08em;text-transform:uppercase;margin-top:4px">Decoração Floral</div>
       </div>
       <div style="text-align:right">
@@ -196,7 +196,7 @@ function montarTemplatePDF() {
 
     <!-- Rodapé -->
     <div style="border-top:1px solid #ddd6cc;padding-top:20px;text-align:center;color:#6b6b6b;font-size:12px">
-      <div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:16px;color:#3d5a47;margin-bottom:6px">Bruna Floral · Decoração Floral</div>
+      <div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:16px;color:#3d5a47;margin-bottom:6px">Bruna Ximenes · Decoração Floral</div>
       <div>Esta proposta é válida por 15 dias a partir da data de emissão.</div>
       <div style="margin-top:4px">Dúvidas? Entre em contato pelo WhatsApp.</div>
     </div>
