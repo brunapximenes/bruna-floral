@@ -593,3 +593,21 @@ body {
 @media (max-width: 640px) {
   .cv-totais { grid-template-columns: repeat(2, 1fr); }
 }
+
+/* Personalizar página de confirmação */
+.cv-pers { display: flex; gap: 24px; flex-wrap: wrap; }
+.cv-pers-col { flex: 1; min-width: 220px; }
+.cv-pers-lab { display: block; font-size: 12.5px; color: var(--verde); font-weight: 500; margin-bottom: 8px; }
+.cv-convite-preview {
+  border: 1px dashed var(--borda); border-radius: 10px; background: var(--creme);
+  min-height: 90px; display: flex; align-items: center; justify-content: center;
+  color: var(--texto2); font-size: 12.5px; text-align: center; padding: 12px; margin-bottom: 10px;
+}
+.cv-convite-preview.tem-foto { border-style: solid; padding: 8px; background: #fff; }
+.cv-convite-preview img { max-width: 100%; max-height: 220px; border-radius: 6px; display: block; }
+.cv-pers-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+.cv-btn-sec { background: var(--creme2); color: var(--verde); }
+.cv-btn-sec:hover { background: var(--verde); color: #fff; }
+.cv-cor-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.cv-cor-row input[type=color] { width: 54px; height: 40px; border: 1px solid var(--borda); border-radius: 8px; background: #fff; cursor: pointer; padding: 3px; }
+.cv-cor-hint { font-size: 13px; color: var(--texto2); font-variant-numeric: tabular-nums; }

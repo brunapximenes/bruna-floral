@@ -168,6 +168,12 @@ CREATE POLICY "auth_all_internal"
 -- ============================================================
 ALTER TABLE events ADD COLUMN IF NOT EXISTS anotacoes_pag text;
 
+-- Personalização da página pública de confirmação (RSVP), por evento:
+-- foto do convite oficial (URL no Storage) e cor de fundo (#hex).
+-- Vazio = usa o padrão do painel.
+ALTER TABLE events ADD COLUMN IF NOT EXISTS confirmar_img text;
+ALTER TABLE events ADD COLUMN IF NOT EXISTS confirmar_bg  text;
+
 -- ============================================================
 -- TABELA: guests (lista de convidados + confirmação RSVP)
 -- O convidado confirma presença pelo link público (confirmar.html):

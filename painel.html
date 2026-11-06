@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Painel — Bruna Floral</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/style.css?v=39">
+<link rel="stylesheet" href="/css/style.css?v=40">
 <style>
 /* ── LOGIN ──────────────────────────────────────────── */
 #tela-login {
@@ -745,6 +745,33 @@
         </div>
 
         <div class="card">
+          <div class="card-title">Personalizar a página de confirmação</div>
+          <p class="cv-link-exp">Deixe a página com a cara do evento. Se você não mexer, ela continua no padrão do painel (fundo verde).</p>
+          <div class="cv-pers">
+            <div class="cv-pers-col">
+              <label class="cv-pers-lab">Foto do convite oficial</label>
+              <div id="cv-convite-preview" class="cv-convite-preview">Nenhuma foto — usando o padrão.</div>
+              <input type="file" id="cv-convite-file" accept="image/*" style="display:none" onchange="trocarFotoConvite(this)">
+              <div class="cv-pers-btns">
+                <button class="cv-btn" onclick="document.getElementById('cv-convite-file').click()">🖼 Adicionar / trocar foto</button>
+                <button class="cv-btn cv-btn-sec" id="cv-convite-rm" onclick="removerFotoConvite()" style="display:none">Remover foto</button>
+              </div>
+            </div>
+            <div class="cv-pers-col">
+              <label class="cv-pers-lab">Cor do fundo</label>
+              <div class="cv-cor-row">
+                <input type="color" id="cv-bg-color" value="#3d5a47" onchange="mudarCorFundoConfirmacao(this.value)">
+                <span class="cv-cor-hint" id="cv-bg-hint">Padrão do painel</span>
+              </div>
+              <div class="cv-pers-btns">
+                <button class="cv-btn cv-btn-sec" onclick="resetCorFundoConfirmacao()">Voltar ao padrão</button>
+                <button class="cv-btn cv-btn-sec" onclick="window.open(linkConfirmacao(),'_blank')">👁 Ver como ficou</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
           <div class="card-title">Resumo</div>
           <div class="cv-totais" id="cv-totais"></div>
         </div>
@@ -821,7 +848,7 @@
 <script src="/js/exportar-sheets.js"></script>
 <script src="/js/painel-descritivo.js?v=31"></script>
 <script src="/js/painel-anotacoes.js?v=1"></script>
-<script src="/js/painel-convidados.js?v=1"></script>
+<script src="/js/painel-convidados.js?v=2"></script>
 <script src="/js/assinatura.js?v=1"></script>
 <script src="/js/painel-contrato.js?v=17"></script>
 <script>verificarSessao();</script>

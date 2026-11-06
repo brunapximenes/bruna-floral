@@ -13,6 +13,7 @@
 
 const fs   = require('fs');
 const path = require('path');
+const { createClient } = require('@supabase/supabase-js');
 
 const TIPO_TXT = {
   casamento: 'o casamento', noivado: 'o noivado', aniversario: 'o aniversário',
@@ -35,11 +36,39 @@ function fmtDataBR(str) {
 // __dirname garante que o rastreador do Vercel inclua o arquivo no deploy
 const HTML_PATH = path.join(__dirname, '..', 'confirmar.html');
 
-module.exports = function handler(req, res) {
+// Só aceita cor em formato seguro (#hex). Evita injeção no <style>.
+function corSegura(c) {
+  c = (c || '').toString().trim();
+  return /^#[0-9a-fA-F]{3,8}$/.test(c) ? c : '';
+}
+
+// Busca a personalização (foto do convite + cor de fundo) do evento.
+// Usa a service role (só no servidor); se não der, segue no padrão.
+async function buscarPersonalizacao(eventId) {
+  if (!eventId) return {};
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) return {};
+  try {
+    const sb = createClient(url, key);
+    const { data, error } = await sb
+      .from('events')
+      .select('confirmar_img, confirmar_bg')
+      .eq('id', eventId)
+      .single();
+    if (error || !data) return {};
+    return data;
+  } catch (e) {
+    return {};
+  }
+}
+
+module.exports = async function handler(req, res) {
   const q = (req.query) || {};
   const nome = (q.n || '').toString().trim();
   const tipo = (q.t || '').toString().trim();
   const data = (q.d || '').toString().trim();
+  const eventId = (q.e || '').toString().trim();
 
   const titulo = nome ? ('Confirmação de presença — ' + nome) : 'Confirmação de presença';
 
@@ -62,16 +91,29 @@ module.exports = function handler(req, res) {
     return;
   }
 
-  const head =
+  // Personalização do evento (foto do convite + cor de fundo)
+  const pers = await buscarPersonalizacao(eventId);
+  const img  = (pers.confirmar_img || '').toString().trim();
+  const bg   = corSegura(pers.confirmar_bg);
+
+  let head =
       '<title>' + esc(titulo) + '</title>\n'
     + '<meta property="og:title" content="' + esc(titulo) + '">\n'
     + '<meta property="og:description" content="' + esc(desc) + '">\n'
     + '<meta property="og:type" content="website">\n'
     + '<meta property="og:site_name" content="Bruna Floral">\n'
     + '<meta name="description" content="' + esc(desc) + '">';
+  if (img) head += '\n<meta property="og:image" content="' + esc(img) + '">';
+  if (bg)  head += '\n<style>body{background:' + bg + ' !important;}</style>';
 
   // Troca o <title> estático pelo bloco dinâmico
   html = html.replace(/<title>[\s\S]*?<\/title>/, head);
+
+  // Insere a foto do convite (se houver) no lugar do marcador
+  if (img) {
+    html = html.replace('<!--CF-CONVITE-->',
+      '<img class="cf-convite" src="' + esc(img) + '" alt="Convite">');
+  }
 
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
   // Preview pode ficar em cache; evita cache longo para refletir mudanças

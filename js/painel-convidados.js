@@ -34,6 +34,8 @@ async function carregarConvidados() {
   const inp = document.getElementById('cv-link');
   if (inp) inp.value = linkConfirmacao();
 
+  _carregarPersonalizacao();
+
   const { data, error } = await sb
     .from('guests')
     .select('*')
@@ -180,6 +182,77 @@ async function removerConvidado(id) {
   _convidados = _convidados.filter(x => x.id !== id);
   _renderConvidados();
   toast('Removido ✓');
+}
+
+/* ── Personalizar a página de confirmação (foto + cor de fundo) ── */
+const _CV_BG_PADRAO = '#3d5a47';   // verde do painel
+
+function _carregarPersonalizacao() {
+  if (!eventoAtual) return;
+  // Foto do convite
+  const prev = document.getElementById('cv-convite-preview');
+  const btnRm = document.getElementById('cv-convite-rm');
+  const img = eventoAtual.confirmar_img || '';
+  if (prev) {
+    if (img) {
+      prev.innerHTML = '<img src="' + _cvEsc(img) + '" alt="Convite">';
+      prev.classList.add('tem-foto');
+    } else {
+      prev.textContent = 'Nenhuma foto — usando o padrão.';
+      prev.classList.remove('tem-foto');
+    }
+  }
+  if (btnRm) btnRm.style.display = img ? '' : 'none';
+
+  // Cor de fundo
+  const cor = document.getElementById('cv-bg-color');
+  const hint = document.getElementById('cv-bg-hint');
+  const bg = eventoAtual.confirmar_bg || '';
+  if (cor) cor.value = bg || _CV_BG_PADRAO;
+  if (hint) hint.textContent = bg ? bg.toUpperCase() : 'Padrão do painel';
+}
+
+async function _salvarCampoEventoCV(campo, valor) {
+  if (!eventoAtual) return false;
+  const { error } = await sb.from('events').update({ [campo]: valor }).eq('id', eventoAtual.id);
+  if (error) { toast('Erro ao salvar.', 'erro'); return false; }
+  eventoAtual[campo] = valor;
+  return true;
+}
+
+async function trocarFotoConvite(input) {
+  const file = input.files && input.files[0];
+  input.value = '';
+  if (!file || !eventoAtual) return;
+  if (!file.type || file.type.indexOf('image/') !== 0) { toast('Selecione uma imagem.', 'erro'); return; }
+
+  toast('Enviando a foto do convite...');
+  try {
+    const url = await _uploadImagem(file);   // reaproveita o upload do descritivo (bucket público)
+    const ok = await _salvarCampoEventoCV('confirmar_img', url);
+    if (ok) { _carregarPersonalizacao(); toast('Foto do convite salva ✓'); }
+  } catch (e) {
+    toast('Não foi possível enviar a foto. Tente de novo.', 'erro');
+  }
+}
+
+async function removerFotoConvite() {
+  if (!eventoAtual) return;
+  if (!confirm('Remover a foto do convite desta página de confirmação?')) return;
+  const ok = await _salvarCampoEventoCV('confirmar_img', null);
+  if (ok) { _carregarPersonalizacao(); toast('Foto removida ✓'); }
+}
+
+async function mudarCorFundoConfirmacao(cor) {
+  if (!eventoAtual) return;
+  const ok = await _salvarCampoEventoCV('confirmar_bg', cor);
+  if (ok) { _carregarPersonalizacao(); toast('Cor de fundo salva ✓'); }
+}
+
+async function resetCorFundoConfirmacao() {
+  if (!eventoAtual) return;
+  const ok = await _salvarCampoEventoCV('confirmar_bg', null);
+  if (ok) { _carregarPersonalizacao(); toast('Voltou ao padrão ✓'); }
 }
 
 /* ── Compartilhar o link ───────────────────────────────── */
