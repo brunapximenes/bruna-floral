@@ -2,7 +2,8 @@
   "rewrites": [
     { "source": "/questionario", "destination": "/questionario.html" },
     { "source": "/dados",        "destination": "/dados.html"        },
-    { "source": "/painel",       "destination": "/painel.html"       }
+    { "source": "/painel",       "destination": "/painel.html"       },
+    { "source": "/confirmar",    "destination": "/confirmar.html"    }
   ],
   "headers": [
     {

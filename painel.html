@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Painel — Bruna Floral</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/style.css?v=38">
+<link rel="stylesheet" href="/css/style.css?v=39">
 <style>
 /* ── LOGIN ──────────────────────────────────────────── */
 #tela-login {
@@ -286,9 +286,11 @@
       <button class="aba"        data-aba="demais"      onclick="goAba('demais',this)">Demais áreas</button>
       <div class="abas-break"></div>
       <button class="aba"        data-aba="orcamento"   onclick="goAba('orcamento',this)">Orçamento</button>
+      <button class="aba"        data-aba="anotacoes"   onclick="goAba('anotacoes',this);carregarAnotacoes()">Anotações</button>
       <button class="aba"        data-aba="contrato"    onclick="goAba('contrato',this);carregarContrato()">Contrato</button>
       <button class="aba"        data-aba="interno"     onclick="goAba('interno',this)">Controle interno</button>
       <button class="aba"        data-aba="pagamento"   onclick="goAba('pagamento',this);carregarPagamentos()">Pagamento do cliente</button>
+      <button class="aba"        data-aba="convidados-lista" onclick="goAba('convidados-lista',this);carregarConvidados()">Lista de convidados</button>
     </div>
 
     <div class="evento-content">
@@ -675,6 +677,98 @@
         </div>
       </div>
 
+      <!-- ANOTAÇÕES (página livre, por evento) -->
+      <div class="pag" id="pag-anotacoes">
+        <div class="desc-format-bar">
+          <span class="desc-format-label">Formatar a linha:</span>
+          <button onmousedown="event.preventDefault()" onclick="aplicarEstiloDesc('secao')">Título de seção</button>
+          <button onmousedown="event.preventDefault()" onclick="aplicarEstiloDesc('sub')">Subtítulo</button>
+          <button onmousedown="event.preventDefault()" onclick="aplicarEstiloDesc('item')">• Item da lista</button>
+          <button onmousedown="event.preventDefault()" onclick="aplicarEstiloDesc('normal')">Texto normal</button>
+          <span class="fmt-sep"></span>
+          <button class="fmt-ic" title="Negrito" onmousedown="event.preventDefault()" onclick="fmtDesc('bold')"><b>N</b></button>
+          <button class="fmt-ic" title="Itálico" onmousedown="event.preventDefault()" onclick="fmtDesc('italic')"><i>I</i></button>
+          <button class="fmt-ic" title="Sublinhado" onmousedown="event.preventDefault()" onclick="fmtDesc('underline')"><u>S</u></button>
+          <button class="fmt-ic" title="Tachado" onmousedown="event.preventDefault()" onclick="fmtDesc('strikeThrough')"><s>T</s></button>
+          <span class="fmt-sep"></span>
+          <span class="desc-format-label">Fonte:</span>
+          <select class="fmt-tam" title="Tamanho da fonte (px)" onchange="fmtTamanhoPx(this.value); this.selectedIndex=0">
+            <option value="">Tamanho</option>
+            <option value="10px">10</option>
+            <option value="11px">11</option>
+            <option value="11.5px">11,5</option>
+            <option value="12px">12</option>
+            <option value="12.5px">12,5 (padrão)</option>
+            <option value="13px">13</option>
+            <option value="14px">14</option>
+            <option value="15px">15</option>
+            <option value="17px">17 (título)</option>
+            <option value="20px">20</option>
+            <option value="24px">24</option>
+            <option value="26px">26</option>
+          </select>
+          <div class="fmt-break"></div>
+          <span class="desc-format-label">Cor:</span>
+          <button class="fmt-cor" style="background:#2c2c2c" title="Preto" onmousedown="event.preventDefault()" onclick="fmtDesc('foreColor','#2c2c2c')"></button>
+          <button class="fmt-cor" style="background:#c0392b" title="Vermelho" onmousedown="event.preventDefault()" onclick="fmtDesc('foreColor','#c0392b')"></button>
+          <button class="fmt-cor" style="background:#3d5a47" title="Verde" onmousedown="event.preventDefault()" onclick="fmtDesc('foreColor','#3d5a47')"></button>
+          <button class="fmt-cor" style="background:#2f6db0" title="Azul" onmousedown="event.preventDefault()" onclick="fmtDesc('foreColor','#2f6db0')"></button>
+          <button class="fmt-cor" style="background:#c9847a" title="Rosa" onmousedown="event.preventDefault()" onclick="fmtDesc('foreColor','#c9847a')"></button>
+          <button class="fmt-cor" style="background:#8e44ad" title="Roxo" onmousedown="event.preventDefault()" onclick="fmtDesc('foreColor','#8e44ad')"></button>
+          <button class="fmt-cor" style="background:#888888" title="Cinza claro" onmousedown="event.preventDefault()" onclick="fmtDesc('foreColor','#888888')"></button>
+          <span class="fmt-sep"></span>
+          <span class="desc-format-label">Grifar:</span>
+          <button class="fmt-grifo" style="background:#fff28a" title="Amarelo" onmousedown="event.preventDefault()" onclick="grifarDesc('#fff28a')"></button>
+          <button class="fmt-grifo" style="background:#bfe8c2" title="Verde" onmousedown="event.preventDefault()" onclick="grifarDesc('#bfe8c2')"></button>
+          <button class="fmt-grifo" style="background:#f9c9d3" title="Rosa" onmousedown="event.preventDefault()" onclick="grifarDesc('#f9c9d3')"></button>
+          <button class="fmt-grifo" style="background:#cfe3ff" title="Azul" onmousedown="event.preventDefault()" onclick="grifarDesc('#cfe3ff')"></button>
+          <button class="fmt-grifo" style="background:#ffd9a8" title="Laranja" onmousedown="event.preventDefault()" onclick="grifarDesc('#ffd9a8')"></button>
+          <button class="fmt-grifo fmt-nogrifo" title="Tirar o grifo" onmousedown="event.preventDefault()" onclick="grifarDesc('transparent')"></button>
+          <span class="fmt-sep"></span>
+          <button class="fmt-ic" title="Limpar toda a formatação" onmousedown="event.preventDefault()" onclick="limparFormatoDesc()">⌫</button>
+          <div class="fmt-break"></div>
+          <span class="desc-dica-mini">💡 Página livre de anotações deste evento — só para você. Dica: digite <code>2+2=</code> e dê espaço que ele calcula sozinho.</span>
+        </div>
+        <div id="anotacoes-doc" contenteditable="true" data-ph="Escreva aqui suas anotações deste evento..."></div>
+      </div>
+
+      <!-- LISTA DE CONVIDADOS (RSVP) -->
+      <div class="pag" id="pag-convidados-lista">
+        <div class="card cv-link-card">
+          <div class="card-title">Link de confirmação</div>
+          <p class="cv-link-exp">Mande este link para os convidados. Cada um confirma presença sozinho (nome, acompanhantes adultos e crianças) e aparece aqui na lista automaticamente.</p>
+          <div class="cv-link-row">
+            <input id="cv-link" type="text" readonly onclick="this.select()">
+            <button class="cv-btn" onclick="copiarLinkConfirmacao()">📋 Copiar link</button>
+            <button class="cv-btn cv-btn-wa" onclick="compartilharLinkConfirmacao()">📱 WhatsApp</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Resumo</div>
+          <div class="cv-totais" id="cv-totais"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Convidados</div>
+          <div class="cv-add">
+            <input id="cv-add-nome" type="text" placeholder="Nome do convidado principal">
+            <input id="cv-add-adultos" type="number" min="0" value="0" title="Acompanhantes adultos">
+            <input id="cv-add-criancas" type="number" min="0" value="0" title="Crianças">
+            <select id="cv-add-status">
+              <option value="pendente">Pendente</option>
+              <option value="confirmado">Confirmado</option>
+              <option value="recusado">Não vai</option>
+            </select>
+            <button class="cv-btn" onclick="adicionarConvidado()">+ Adicionar</button>
+          </div>
+          <div class="cv-tabela-wrap">
+            <table class="cv-tabela" id="cv-tabela"></table>
+          </div>
+          <div class="cv-vazio" id="cv-vazio" style="display:none">Nenhum convidado ainda. Adicione acima ou compartilhe o link de confirmação.</div>
+        </div>
+      </div>
+
     </div><!-- /evento-content -->
   </div><!-- /tela-evento -->
 
@@ -719,13 +813,15 @@
 <script src="/js/utils.js?v=4"></script>
 <script src="/js/painel-auth.js?v=2"></script>
 <script src="/js/painel-lista.js?v=5"></script>
-<script src="/js/painel-evento.js?v=5"></script>
+<script src="/js/painel-evento.js?v=6"></script>
 <script src="/js/painel-orcamento.js?v=8"></script>
 <script src="/js/painel-interno.js?v=8"></script>
 <script src="/js/painel-pagamento.js?v=4"></script>
 <script src="/js/gerar-pdf.js?v=6"></script>
 <script src="/js/exportar-sheets.js"></script>
-<script src="/js/painel-descritivo.js?v=30"></script>
+<script src="/js/painel-descritivo.js?v=31"></script>
+<script src="/js/painel-anotacoes.js?v=1"></script>
+<script src="/js/painel-convidados.js?v=1"></script>
 <script src="/js/assinatura.js?v=1"></script>
 <script src="/js/painel-contrato.js?v=17"></script>
 <script>verificarSessao();</script>

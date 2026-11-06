@@ -235,20 +235,22 @@ function _notasCalcKeydownCE(e) {
 
 /* ── FORMATAÇÃO DE TEXTO (vale para o descritivo E para as anotações) ──
    Age sobre o campo editável que está com a seleção/foco. ── */
+const _EDITAVEIS_SEL = '#descritivo-doc,#desc-notas-txt,#anotacoes-doc';
 function _editavelAtivo() {
   const a = document.activeElement;
-  if (a && (a.id === 'descritivo-doc' || a.id === 'desc-notas-txt')) return a;
+  if (a && (a.id === 'descritivo-doc' || a.id === 'desc-notas-txt' || a.id === 'anotacoes-doc')) return a;
   const sel = window.getSelection();
   if (sel && sel.rangeCount) {
     let n = sel.anchorNode;
     if (n && n.nodeType === 3) n = n.parentElement;
-    const doc = n && n.closest ? n.closest('#descritivo-doc,#desc-notas-txt') : null;
+    const doc = n && n.closest ? n.closest(_EDITAVEIS_SEL) : null;
     if (doc) return doc;
   }
   return document.getElementById('descritivo-doc');
 }
 function _salvarEditavel(el) {
   if (el && el.id === 'desc-notas-txt') { _padNotasCE(el); _salvarNotasDesc(); }
+  else if (el && el.id === 'anotacoes-doc') { if (typeof _salvarAnotacoesPag === 'function') _salvarAnotacoesPag(); }
   else if (typeof _salvarDescritivo === 'function') _salvarDescritivo();
 }
 function fmtDesc(cmd, val) {
@@ -279,7 +281,7 @@ document.addEventListener('selectionchange', () => {
   if (!s || !s.rangeCount) return;
   let n = s.anchorNode;
   if (n && n.nodeType === 3) n = n.parentElement;
-  const doc = n && n.closest ? n.closest('#descritivo-doc,#desc-notas-txt') : null;
+  const doc = n && n.closest ? n.closest(_EDITAVEIS_SEL) : null;
   if (doc) { _selRange = s.getRangeAt(0).cloneRange(); _selDoc = doc; }
 });
 
@@ -467,7 +469,7 @@ function _descTab(e) {
 
 /* ── FORMATAR A LINHA no estilo do documento (1 clique) ─────── */
 function aplicarEstiloDesc(tipo) {
-  const doc = document.getElementById('descritivo-doc');
+  const doc = _editavelAtivo();
   const sel = window.getSelection();
   if (!sel || !sel.rangeCount) { toast('Clique na linha que quer formatar.', 'erro'); return; }
 
@@ -526,7 +528,7 @@ function aplicarEstiloDesc(tipo) {
     blk.replaceWith(novo);
   }
 
-  _salvarDescritivo();
+  _salvarEditavel(doc);
   toast('Formatação aplicada ✓');
 }
 

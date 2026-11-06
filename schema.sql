@@ -162,3 +162,47 @@ CREATE POLICY "auth_all_internal"
   TO authenticated
   USING (true)
   WITH CHECK (true);
+
+-- ============================================================
+-- Página de anotações livre por evento
+-- ============================================================
+ALTER TABLE events ADD COLUMN IF NOT EXISTS anotacoes_pag text;
+
+-- ============================================================
+-- TABELA: guests (lista de convidados + confirmação RSVP)
+-- O convidado confirma presença pelo link público (confirmar.html):
+-- anon só pode INSERIR (não lê a lista). Bruna (auth) gerencia tudo.
+-- ============================================================
+CREATE TABLE guests (
+  id           UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  event_id     UUID NOT NULL REFERENCES events(id) ON DELETE CASCADE,
+  created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  nome         TEXT NOT NULL DEFAULT '',
+  telefone     TEXT,
+  status       TEXT NOT NULL DEFAULT 'pendente'
+               CHECK (status IN ('confirmado','recusado','pendente')),
+  adultos      INTEGER NOT NULL DEFAULT 0,   -- acompanhantes adultos (além do principal)
+  criancas     INTEGER NOT NULL DEFAULT 0,
+  mensagem     TEXT,
+  confirmed_at TIMESTAMPTZ,
+  ordem        INTEGER DEFAULT 0
+);
+
+CREATE INDEX idx_guests_event ON guests (event_id);
+
+ALTER TABLE guests ENABLE ROW LEVEL SECURITY;
+
+-- Convidado anônimo só INSERE a própria confirmação (não pode ler a lista)
+GRANT INSERT ON TABLE guests TO anon;
+CREATE POLICY "anon_insert_guests"
+  ON guests FOR INSERT
+  TO anon
+  WITH CHECK (true);
+
+-- Bruna (autenticada) gerencia tudo
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE guests TO authenticated;
+CREATE POLICY "auth_all_guests"
+  ON guests FOR ALL
+  TO authenticated
+  USING (true)
+  WITH CHECK (true);
