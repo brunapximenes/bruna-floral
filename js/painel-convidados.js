@@ -26,6 +26,9 @@ function linkConfirmacao() {
     t: eventoAtual.tipo_evento || '',
     d: eventoAtual.data_evento || ''
   });
+  // Personalização vai no próprio link (não depende de leitura no servidor)
+  if (eventoAtual.confirmar_bg)  p.set('bg',  eventoAtual.confirmar_bg);
+  if (eventoAtual.confirmar_img) p.set('img', eventoAtual.confirmar_img);
   return base + '/confirmar?' + p.toString();
 }
 

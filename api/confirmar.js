@@ -42,6 +42,12 @@ function corSegura(c) {
   return /^#[0-9a-fA-F]{3,8}$/.test(c) ? c : '';
 }
 
+// Só aceita imagem do próprio Storage do projeto (evita injetar URL externa).
+function imgSegura(u) {
+  u = (u || '').toString().trim();
+  return u.indexOf('https://jimkkxlrrsjdylrccnpb.supabase.co/storage/') === 0 ? u : '';
+}
+
 // Busca a personalização (foto do convite + cor de fundo) do evento.
 // Usa a service role (só no servidor); se não der, segue no padrão.
 async function buscarPersonalizacao(eventId) {
@@ -91,10 +97,16 @@ module.exports = async function handler(req, res) {
     return;
   }
 
-  // Personalização do evento (foto do convite + cor de fundo)
-  const pers = await buscarPersonalizacao(eventId);
-  const img  = (pers.confirmar_img || '').toString().trim();
-  const bg   = corSegura(pers.confirmar_bg);
+  // Personalização do evento (foto do convite + cor de fundo).
+  // Primeiro vem pelo próprio link (não depende do servidor); se não vier,
+  // tenta buscar no banco (caso a service role esteja configurada).
+  let img = imgSegura(q.img);
+  let bg  = corSegura(q.bg);
+  if (!img || !bg) {
+    const pers = await buscarPersonalizacao(eventId);
+    if (!img) img = imgSegura(pers.confirmar_img);
+    if (!bg)  bg  = corSegura(pers.confirmar_bg);
+  }
 
   let head =
       '<title>' + esc(titulo) + '</title>\n'
