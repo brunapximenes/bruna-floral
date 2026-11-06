@@ -1,9 +1,12 @@
 {
+  "functions": {
+    "api/confirmar.js": { "includeFiles": "confirmar.html" }
+  },
   "rewrites": [
     { "source": "/questionario", "destination": "/questionario.html" },
     { "source": "/dados",        "destination": "/dados.html"        },
     { "source": "/painel",       "destination": "/painel.html"       },
-    { "source": "/confirmar",    "destination": "/confirmar.html"    }
+    { "source": "/confirmar",    "destination": "/api/confirmar"     }
   ],
   "headers": [
     {
