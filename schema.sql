@@ -176,6 +176,34 @@ ALTER TABLE events ADD COLUMN IF NOT EXISTS confirmar_bg         text;
 ALTER TABLE events ADD COLUMN IF NOT EXISTS confirmar_cor_texto  text;
 ALTER TABLE events ADD COLUMN IF NOT EXISTS confirmar_cor_botao  text;
 
+-- Código curto para o link de confirmação: /c/<codigo>
+ALTER TABLE events ADD COLUMN IF NOT EXISTS confirmar_code text;
+CREATE UNIQUE INDEX IF NOT EXISTS idx_events_confirmar_code
+  ON events(confirmar_code) WHERE confirmar_code IS NOT NULL;
+
+-- Funções (SECURITY DEFINER) que entregam SÓ os dados públicos da confirmação
+-- para o anônimo (por código curto ou por id), sem expor o resto do evento.
+CREATE OR REPLACE FUNCTION get_confirmacao_code(p_code text)
+RETURNS TABLE(id uuid, nomes text, tipo_evento text, data_evento date,
+              confirmar_img text, confirmar_bg text, confirmar_cor_texto text, confirmar_cor_botao text)
+LANGUAGE sql SECURITY DEFINER STABLE SET search_path = public AS $$
+  SELECT id, nomes, tipo_evento, data_evento, confirmar_img, confirmar_bg,
+         confirmar_cor_texto, confirmar_cor_botao
+  FROM events WHERE confirmar_code = p_code;
+$$;
+CREATE OR REPLACE FUNCTION get_confirmacao(p_event uuid)
+RETURNS TABLE(id uuid, nomes text, tipo_evento text, data_evento date,
+              confirmar_img text, confirmar_bg text, confirmar_cor_texto text, confirmar_cor_botao text)
+LANGUAGE sql SECURITY DEFINER STABLE SET search_path = public AS $$
+  SELECT id, nomes, tipo_evento, data_evento, confirmar_img, confirmar_bg,
+         confirmar_cor_texto, confirmar_cor_botao
+  FROM events WHERE id = p_event;
+$$;
+REVOKE ALL ON FUNCTION get_confirmacao_code(text) FROM public;
+REVOKE ALL ON FUNCTION get_confirmacao(uuid)      FROM public;
+GRANT EXECUTE ON FUNCTION get_confirmacao_code(text) TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION get_confirmacao(uuid)      TO anon, authenticated;
+
 -- ============================================================
 -- TABELA: guests (lista de convidados + confirmação RSVP)
 -- O convidado confirma presença pelo link público (confirmar.html):

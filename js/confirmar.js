@@ -5,7 +5,9 @@
    ============================================================ */
 
 const _params = new URLSearchParams(location.search);
-const _eventId = _params.get('e') || '';
+// Dados injetados pelo servidor (link curto /c/<codigo>); reserva: parâmetros do link antigo
+const _CF = (typeof window !== 'undefined' && window.CF) ? window.CF : {};
+const _eventId = _CF.id || _params.get('e') || '';
 
 const TIPO_TXT = {
   casamento: 'o casamento', noivado: 'o noivado', aniversario: 'o aniversário',
@@ -20,9 +22,9 @@ function _fmtDataBR(str) {
 }
 
 function initConfirmar() {
-  const nome = _params.get('n') || '';
-  const tipo = _params.get('t') || '';
-  const data = _params.get('d') || '';
+  const nome = _CF.nome || _params.get('n') || '';
+  const tipo = _CF.tipo || _params.get('t') || '';
+  const data = _CF.data || _params.get('d') || '';
 
   if (!_eventId) {
     document.getElementById('cf-card').innerHTML =

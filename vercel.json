@@ -6,7 +6,8 @@
     { "source": "/questionario", "destination": "/questionario.html" },
     { "source": "/dados",        "destination": "/dados.html"        },
     { "source": "/painel",       "destination": "/painel.html"       },
-    { "source": "/confirmar",    "destination": "/api/confirmar"     }
+    { "source": "/confirmar",    "destination": "/api/confirmar"     },
+    { "source": "/c/:code",      "destination": "/api/confirmar?c=:code" }
   ],
   "headers": [
     {

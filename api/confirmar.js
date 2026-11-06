@@ -1,19 +1,24 @@
 /* ============================================================
-   api/confirmar.js — Serve a página de confirmação (RSVP) com
-   título e meta tags (Open Graph) DINÂMICOS, baseados no evento.
+   api/confirmar.js — Serve a página de confirmação (RSVP).
 
-   Por quê: o WhatsApp/Facebook monta o preview do link lendo o HTML
-   SEM rodar JavaScript. Então o nome do evento precisa já vir no
-   <title>/og:title pelo servidor — não dá pra fazer só no front.
+   O link é curto: /c/<codigo>  (ou, legado, /confirmar?e=<id>).
+   O servidor busca no banco (função get_confirmacao_code / get_confirmacao,
+   lidas com a chave pública anon) os dados do evento e monta:
+   - <title>/og:title/og:image dinâmicos (o WhatsApp lê sem rodar JS);
+   - cores de fundo/texto/botões e a foto do convite;
+   - injeta o id do evento (window.CF) para o formulário salvar a confirmação.
 
-   A rota /confirmar aponta para cá (ver vercel.json). Se por algum
-   motivo não conseguir ler o HTML, redireciona para o arquivo
-   estático, para o convidado nunca ficar sem a página.
+   Se não conseguir ler o HTML, redireciona para o arquivo estático,
+   para o convidado nunca ficar sem a página.
    ============================================================ */
 
 const fs   = require('fs');
 const path = require('path');
 const { createClient } = require('@supabase/supabase-js');
+
+// Valores públicos (os mesmos do front — a anon key não é segredo)
+const SB_URL  = 'https://jimkkxlrrsjdylrccnpb.supabase.co';
+const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImppbWtreGxycnNqZHlscmNjbnBiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2MDgzNjAsImV4cCI6MjA5NjE4NDM2MH0.Vjhy8qQlYfQMG7gvaxIVrvsrMhRcRaMV2eMQDvZCyg0';
 
 const TIPO_TXT = {
   casamento: 'o casamento', noivado: 'o noivado', aniversario: 'o aniversário',
@@ -25,10 +30,17 @@ function esc(s) {
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
 }
+// Escapa para usar com segurança dentro de aspas de uma string JS
+function escJs(s) {
+  return String(s == null ? '' : s)
+    .replace(/\\/g, '\\\\').replace(/"/g, '\\"')
+    .replace(/</g, '\\u003c').replace(/>/g, '\\u003e')
+    .replace(/\r?\n/g, ' ');
+}
 
 function fmtDataBR(str) {
   if (!str) return '';
-  const d = new Date(str + 'T12:00:00');
+  const d = new Date(String(str).slice(0, 10) + 'T12:00:00');
   if (isNaN(d.getTime())) return '';
   return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
 }
@@ -45,25 +57,19 @@ function corSegura(c) {
 // Só aceita imagem do próprio Storage do projeto (evita injetar URL externa).
 function imgSegura(u) {
   u = (u || '').toString().trim();
-  return u.indexOf('https://jimkkxlrrsjdylrccnpb.supabase.co/storage/') === 0 ? u : '';
+  return u.indexOf(SB_URL + '/storage/') === 0 ? u : '';
 }
 
-// Busca a personalização (foto do convite + cor de fundo) do evento.
-// Usa a service role (só no servidor); se não der, segue no padrão.
-async function buscarPersonalizacao(eventId) {
-  if (!eventId) return {};
-  const url = process.env.SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!url || !key) return {};
+// Busca os dados do evento pela função do banco (por código curto ou por id).
+async function buscarEvento(code, eventId) {
   try {
-    const sb = createClient(url, key);
-    const { data, error } = await sb
-      .from('events')
-      .select('confirmar_img, confirmar_bg, confirmar_cor_texto, confirmar_cor_botao')
-      .eq('id', eventId)
-      .single();
-    if (error || !data) return {};
-    return data;
+    const sb = createClient(SB_URL, SB_ANON);
+    let r;
+    if (code) r = await sb.rpc('get_confirmacao_code', { p_code: code });
+    else if (eventId) r = await sb.rpc('get_confirmacao', { p_event: eventId });
+    else return {};
+    if (r.error || !r.data || !r.data.length) return {};
+    return r.data[0];
   } catch (e) {
     return {};
   }
@@ -71,25 +77,13 @@ async function buscarPersonalizacao(eventId) {
 
 module.exports = async function handler(req, res) {
   const q = (req.query) || {};
-  const nome = (q.n || '').toString().trim();
-  const tipo = (q.t || '').toString().trim();
-  const data = (q.d || '').toString().trim();
-  const eventId = (q.e || '').toString().trim();
-
-  const titulo = nome ? ('Confirmação de presença — ' + nome) : 'Confirmação de presença';
-
-  let desc = 'Confirme sua presença';
-  const partes = [];
-  if (tipo && TIPO_TXT[tipo]) partes.push('em ' + TIPO_TXT[tipo]);
-  const dataFmt = fmtDataBR(data);
-  if (dataFmt) partes.push(dataFmt);
-  if (partes.length) desc = 'Confirme sua presença ' + partes.join(' · ');
+  const code    = (q.c || '').toString().trim();
+  let   eventId = (q.e || '').toString().trim();
 
   let html;
   try {
     html = fs.readFileSync(HTML_PATH, 'utf8');
   } catch (e) {
-    // Fallback: manda para o arquivo estático preservando os parâmetros
     const qs = req.url && req.url.indexOf('?') >= 0 ? req.url.slice(req.url.indexOf('?')) : '';
     res.setHeader('Location', '/confirmar.html' + qs);
     res.statusCode = 302;
@@ -97,20 +91,27 @@ module.exports = async function handler(req, res) {
     return;
   }
 
-  // Personalização do evento (foto do convite + cor de fundo).
-  // Primeiro vem pelo próprio link (não depende do servidor); se não vier,
-  // tenta buscar no banco (caso a service role esteja configurada).
-  let img = imgSegura(q.img);
-  let bg  = corSegura(q.bg);
-  let txt = corSegura(q.txt);   // cor do texto em destaque
-  let btn = corSegura(q.btn);   // cor dos botões
-  if (!img || !bg || !txt || !btn) {
-    const pers = await buscarPersonalizacao(eventId);
-    if (!img) img = imgSegura(pers.confirmar_img);
-    if (!bg)  bg  = corSegura(pers.confirmar_bg);
-    if (!txt) txt = corSegura(pers.confirmar_cor_texto);
-    if (!btn) btn = corSegura(pers.confirmar_cor_botao);
-  }
+  // Dados do evento vêm do banco; parâmetros do link servem de reserva
+  // (mantém os links antigos, longos, ainda funcionando).
+  const ev = await buscarEvento(code, eventId);
+  if (ev.id) eventId = ev.id;
+
+  const nome = (ev.nomes || q.n || '').toString().trim();
+  const tipo = (ev.tipo_evento || q.t || '').toString().trim();
+  const data = (ev.data_evento || q.d || '').toString().trim();
+
+  const img = imgSegura(ev.confirmar_img) || imgSegura(q.img);
+  const bg  = corSegura(ev.confirmar_bg)        || corSegura(q.bg);
+  const txt = corSegura(ev.confirmar_cor_texto) || corSegura(q.txt);
+  const btn = corSegura(ev.confirmar_cor_botao) || corSegura(q.btn);
+
+  const titulo = nome ? ('Confirmação de presença — ' + nome) : 'Confirmação de presença';
+  let desc = 'Confirme sua presença';
+  const partes = [];
+  if (tipo && TIPO_TXT[tipo]) partes.push('em ' + TIPO_TXT[tipo]);
+  const dataFmt = fmtDataBR(data);
+  if (dataFmt) partes.push(dataFmt);
+  if (partes.length) desc = 'Confirme sua presença ' + partes.join(' · ');
 
   let head =
       '<title>' + esc(titulo) + '</title>\n'
@@ -121,26 +122,26 @@ module.exports = async function handler(req, res) {
     + '<meta name="description" content="' + esc(desc) + '">';
   if (img) head += '\n<meta property="og:image" content="' + esc(img) + '">';
 
-  // Estilo de personalização (fundo + cores do texto e dos botões)
-  // !important nas variáveis para vencer o :root padrão do confirmar.html,
-  // que aparece depois desta injeção no <head>.
+  // Estilo de personalização (fundo + cores do texto e dos botões).
+  // !important vence o :root padrão do confirmar.html (que vem depois).
   let regras = '';
   if (bg)  regras += 'body{background:' + bg + ' !important;}';
   if (txt) regras += ':root{--cf-accent:' + txt + ' !important;}';
   if (btn) regras += ':root{--cf-btn:' + btn + ' !important;}';
   if (regras) head += '\n<style>' + regras + '</style>';
 
-  // Troca o <title> estático pelo bloco dinâmico
+  // Dados que o formulário precisa (id do evento para salvar, e textos do cabeçalho)
+  head += '\n<script>window.CF={id:"' + escJs(eventId) + '",nome:"' + escJs(nome)
+        + '",tipo:"' + escJs(tipo) + '",data:"' + escJs(data) + '"};</script>';
+
   html = html.replace(/<title>[\s\S]*?<\/title>/, head);
 
-  // Insere a foto do convite (se houver) no lugar do marcador
   if (img) {
     html = html.replace('<!--CF-CONVITE-->',
       '<img class="cf-convite" src="' + esc(img) + '" alt="Convite">');
   }
 
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
-  // Preview pode ficar em cache; evita cache longo para refletir mudanças
   res.setHeader('Cache-Control', 'public, max-age=0, must-revalidate');
   res.statusCode = 200;
   res.end(html);

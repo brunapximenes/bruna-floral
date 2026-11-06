@@ -15,27 +15,41 @@ function _cvEsc(s) {
     .replace(/"/g, '&quot;');
 }
 
-/* Link público de confirmação deste evento */
+function _baseUrl() {
+  return (location.origin && location.origin.startsWith('http'))
+    ? location.origin : 'https://bruna-floral.vercel.app';
+}
+
+/* Link público de confirmação deste evento — curto: /c/<codigo>.
+   Os dados (nome, foto, cores) o servidor busca no banco pelo código. */
 function linkConfirmacao() {
   if (!eventoAtual) return '';
-  const base = location.origin && location.origin.startsWith('http')
-    ? location.origin : 'https://bruna-floral.vercel.app';
-  const p = new URLSearchParams({
-    e: eventoAtual.id,
-    n: eventoAtual.nomes || '',
-    t: eventoAtual.tipo_evento || '',
-    d: eventoAtual.data_evento || ''
-  });
-  // Personalização vai no próprio link (não depende de leitura no servidor)
-  if (eventoAtual.confirmar_bg)         p.set('bg',  eventoAtual.confirmar_bg);
-  if (eventoAtual.confirmar_cor_texto)  p.set('txt', eventoAtual.confirmar_cor_texto);
-  if (eventoAtual.confirmar_cor_botao)  p.set('btn', eventoAtual.confirmar_cor_botao);
-  if (eventoAtual.confirmar_img)        p.set('img', eventoAtual.confirmar_img);
-  return base + '/confirmar?' + p.toString();
+  if (eventoAtual.confirmar_code) return _baseUrl() + '/c/' + eventoAtual.confirmar_code;
+  // Reserva (enquanto o código ainda não foi gerado)
+  return _baseUrl() + '/confirmar?e=' + eventoAtual.id;
+}
+
+/* Gera um código curto único para o evento, se ainda não tiver. */
+function _gerarCodigo(n) {
+  const c = 'abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // sem 0/O/1/l/I
+  let s = '';
+  for (let i = 0; i < n; i++) s += c[Math.floor(Math.random() * c.length)];
+  return s;
+}
+async function _garantirCodigoConfirmacao() {
+  if (!eventoAtual || eventoAtual.confirmar_code) return;
+  for (let t = 0; t < 6; t++) {
+    const code = _gerarCodigo(6);
+    const { error } = await sb.from('events').update({ confirmar_code: code }).eq('id', eventoAtual.id);
+    if (!error) { eventoAtual.confirmar_code = code; return; }
+    // erro provável = código repetido (índice único) → tenta outro
+  }
 }
 
 async function carregarConvidados() {
   if (!eventoAtual) return;
+
+  await _garantirCodigoConfirmacao();
   const inp = document.getElementById('cv-link');
   if (inp) inp.value = linkConfirmacao();
 
