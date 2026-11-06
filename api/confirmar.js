@@ -122,10 +122,12 @@ module.exports = async function handler(req, res) {
   if (img) head += '\n<meta property="og:image" content="' + esc(img) + '">';
 
   // Estilo de personalização (fundo + cores do texto e dos botões)
+  // !important nas variáveis para vencer o :root padrão do confirmar.html,
+  // que aparece depois desta injeção no <head>.
   let regras = '';
   if (bg)  regras += 'body{background:' + bg + ' !important;}';
-  if (txt) regras += ':root{--cf-accent:' + txt + ';}';
-  if (btn) regras += ':root{--cf-btn:' + btn + ';}';
+  if (txt) regras += ':root{--cf-accent:' + txt + ' !important;}';
+  if (btn) regras += ':root{--cf-btn:' + btn + ' !important;}';
   if (regras) head += '\n<style>' + regras + '</style>';
 
   // Troca o <title> estático pelo bloco dinâmico
