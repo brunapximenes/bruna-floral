@@ -242,3 +242,17 @@ CREATE POLICY "auth_all_guests"
   TO authenticated
   USING (true)
   WITH CHECK (true);
+
+-- ============================================================
+-- TABELA: logistica (planejamento de logística dos eventos)
+-- Documento único (id='geral') em JSON com eventos, equipe,
+-- materiais e observações. Só a Bruna (autenticada) acessa.
+-- ============================================================
+CREATE TABLE IF NOT EXISTS logistica (
+  id         text PRIMARY KEY DEFAULT 'geral',
+  data       jsonb NOT NULL DEFAULT '{}'::jsonb,
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+ALTER TABLE logistica ENABLE ROW LEVEL SECURITY;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE logistica TO authenticated;
+CREATE POLICY auth_all_logistica ON logistica FOR ALL TO authenticated USING (true) WITH CHECK (true);

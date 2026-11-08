@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Painel — Bruna Ximenes</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/style.css?v=41">
+<link rel="stylesheet" href="/css/style.css?v=42">
 <style>
 /* ── LOGIN ──────────────────────────────────────────── */
 #tela-login {
@@ -215,6 +215,7 @@
       <h1>Painel Bruna Ximenes</h1>
     </div>
     <div class="app-header-right">
+      <button class="btn-link-quest" onclick="abrirLogistica()">📋 Logística</button>
       <button class="btn-link-quest" onclick="copiarLinkQuestionario()">🔗 Link do questionário</button>
       <button class="btn-novo-evento" onclick="novoEvento()">+ Novo evento</button>
       <button class="btn-logout" onclick="sair()">Sair</button>
@@ -809,6 +810,42 @@
     </div><!-- /evento-content -->
   </div><!-- /tela-evento -->
 
+  <!-- ── TELA: LOGÍSTICA ── -->
+  <div id="tela-logistica">
+    <div class="evento-header">
+      <button class="btn-voltar-lista" onclick="voltarDaLogistica()">← Eventos</button>
+      <div class="evento-header-nome">📋 Logística</div>
+      <button class="btn-ver-orcamento" onclick="imprimirLogistica()">🖨 Imprimir / PDF</button>
+    </div>
+    <div class="logistica-content">
+
+      <div class="card">
+        <div class="card-title">📅 Eventos da semana</div>
+        <div id="log-eventos"></div>
+        <button class="log-add" onclick="logAddEvento()">+ Adicionar evento</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">👥 Equipe — quem faz o quê e em que horário</div>
+        <div class="log-tab-wrap"><table class="log-tabela" id="log-equipe"></table></div>
+        <button class="log-add" onclick="logAddEquipe()">+ Adicionar pessoa</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📦 Materiais — recolher · levar · montar · desmontar · devolver</div>
+        <div class="log-tab-wrap"><table class="log-tabela log-tabela-mat" id="log-materiais"></table></div>
+        <button class="log-add" onclick="logAddMaterial()">+ Adicionar material</button>
+        <div class="log-legenda">Marque as caixinhas conforme for fazendo: <b>R</b> recolhido · <b>M</b> montado · <b>D</b> desmontado · <b>V</b> devolvido ao fornecedor.</div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">🕐 Cronograma e observações gerais</div>
+        <textarea id="log-obs" class="log-obs" placeholder="Ex.: 12/11 — 7h sair da loja · 8h recolher no fornecedor X · 10h montagem Clara · ...&#10;Desmontagem e devoluções, telefones úteis, observações da equipe..." oninput="logObsInput()"></textarea>
+      </div>
+
+    </div>
+  </div>
+
 </div><!-- /tela-app -->
 
 <!-- Template oculto para geração de PDF -->
@@ -859,6 +896,7 @@
 <script src="/js/painel-descritivo.js?v=31"></script>
 <script src="/js/painel-anotacoes.js?v=1"></script>
 <script src="/js/painel-convidados.js?v=5"></script>
+<script src="/js/painel-logistica.js?v=1"></script>
 <script src="/js/assinatura.js?v=1"></script>
 <script src="/js/painel-contrato.js?v=17"></script>
 <script>verificarSessao();</script>
