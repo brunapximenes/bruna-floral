@@ -169,6 +169,9 @@ function logDelDia(di) {
 function logSetDia(di, campo, valor) {
   if (_log.dias[di]) { _log.dias[di][campo] = valor; _renderDias(); _logSaveSoon(); }
 }
+function logSetDiaObs(di, valor) {   // nota do dia: salva sem re-render (não perde o foco)
+  if (_log.dias[di]) { _log.dias[di].obs = valor; _logSaveSoon(); }
+}
 function logAddItem(di) {
   if (_log.dias[di]) {
     (_log.dias[di].itens = _log.dias[di].itens || []).push({ hora: '', pessoa: '', atividade: '', evento: '' });
@@ -285,6 +288,7 @@ function _renderDias() {
       + '</div>'
       + '<div class="log-dia-itens">' + itens + '</div>'
       + '<button class="log-add-min" onclick="logAddItem(' + di + ')">+ Adicionar linha</button>'
+      + '<textarea class="log-dia-obs" placeholder="📝 Observações do dia" onchange="logSetDiaObs(' + di + ',this.value)">' + _le(d.obs || '') + '</textarea>'
       + '</div>';
   }).join('');
 }
@@ -317,9 +321,10 @@ function imprimirLogistica() {
       html += '<tr><td>' + _le(it.hora || '') + '</td><td>' + _le(it.pessoa || '') + '</td><td>' + _le(it.atividade || '') + '</td><td>' + _le(it.evento || '') + '</td></tr>';
     });
     html += '</tbody></table>';
+    if (d.obs && d.obs.trim()) html += '<p class="diaobs">📝 ' + _le(d.obs) + '</p>';
   });
 
-  if (_log.obs && _log.obs.trim()) html += '<h2>Observações</h2><pre>' + _le(_log.obs) + '</pre>';
+  if (_log.obs && _log.obs.trim()) html += '<h2>Observações gerais</h2><pre>' + _le(_log.obs) + '</pre>';
 
   const w = window.open('', '_blank');
   if (!w) { if (typeof toast === 'function') toast('Permita abrir a janela de impressão.', 'erro'); return; }
@@ -329,6 +334,7 @@ function imprimirLogistica() {
     + 'h1{color:#3d5a47;font-size:22px;margin:0 0 12px;} h2{color:#3d5a47;font-size:15px;margin:18px 0 6px;border-bottom:1px solid #ddd6cc;padding-bottom:3px;}'
     + 'h3{color:#3d5a47;font-size:13px;margin:14px 0 4px;}'
     + '.ev{margin-bottom:8px;} .ev .sub{color:#6b6b6b;font-size:11px;}'
+    + '.diaobs{background:#faf7f2;border-left:3px solid #c9847a;padding:6px 10px;margin:0 0 10px;font-size:11px;color:#6b6b6b;}'
     + 'table{width:100%;border-collapse:collapse;margin-bottom:8px;} th,td{border:1px solid #ddd6cc;padding:5px 7px;text-align:left;vertical-align:top;} th{background:#f2ede4;}'
     + 'pre{white-space:pre-wrap;font-family:Arial,sans-serif;background:#faf7f2;padding:10px;border-radius:6px;}'
     + '</style></head><body>' + html + '</body></html>'

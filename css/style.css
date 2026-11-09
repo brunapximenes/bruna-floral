@@ -686,6 +686,13 @@ body {
 .log-item-desc { width: 100%; }
 
 .log-add-min { width: 100%; }
+.log-dia-obs {
+  width: 100%; margin-top: 8px; min-height: 46px; padding: 7px 9px;
+  font-family: 'Jost', sans-serif; font-size: 12px; line-height: 1.5;
+  border: 1px dashed var(--borda); border-radius: 8px; background: #fff; color: var(--texto);
+  resize: vertical; outline: none;
+}
+.log-dia-obs:focus { border-color: var(--rosa); border-style: solid; }
 
 .log-add-min {
   margin-top: 10px; padding: 7px 14px; border: 1px dashed var(--verde-claro);
