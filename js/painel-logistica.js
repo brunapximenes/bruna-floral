@@ -190,6 +190,7 @@ function logSetItem(di, ii, campo, valor) {
 function _renderLog() {
   _renderEventos();
   _renderEquipe();
+  _renderExportSelect();
   _renderDias();
   const obs = document.getElementById('log-obs');
   if (obs) obs.value = _log.obs || '';
@@ -234,6 +235,7 @@ function _renderEquipe() {
     + '<button class="log-del" title="Remover" onclick="logDelPessoa(' + i + ')">🗑</button>'
     + '</div>'
   ).join('');
+  _renderExportSelect();   // mantém a lista de exportação em sincronia
 }
 
 function _optsPessoas(sel) {
@@ -291,6 +293,95 @@ function _renderDias() {
       + '<textarea class="log-dia-obs" placeholder="📝 Observações do dia" onchange="logSetDiaObs(' + di + ',this.value)">' + _le(d.obs || '') + '</textarea>'
       + '</div>';
   }).join('');
+}
+
+/* ── Exportar a logística de UMA pessoa (para mandar para ela) ── */
+function _renderExportSelect() {
+  const sel = document.getElementById('log-export-pessoa');
+  if (!sel) return;
+  const atual = sel.value;
+  const nomes = (_log.equipe || []).map(p => p.nome).filter(n => n && n.trim());
+  sel.innerHTML = '<option value="">— escolher pessoa —</option>' +
+    nomes.map(n => '<option value="' + _le(n) + '">' + _le(n) + '</option>').join('');
+  if (atual) sel.value = atual;
+}
+
+function _itensDaPessoa(nome) {
+  const res = [];
+  (_log.dias || []).forEach(dia => {
+    const its = (dia.itens || []).filter(it => (it.pessoa || '') === nome);
+    if (its.length) res.push({ data: dia.data, itens: its });
+  });
+  return res;
+}
+
+function _textoPessoa(nome) {
+  const blocos = _itensDaPessoa(nome);
+  let txt = '📋 Logística — ' + nome + '\n';
+  if (!blocos.length) return txt + '\n(Sem atividades registradas.)';
+  blocos.forEach(b => {
+    const semana = _diaSemana(b.data);
+    txt += '\n' + (semana ? semana + ', ' : '') + _dataBR(b.data) + '\n';
+    b.itens.forEach(it => {
+      const h = it.hora ? it.hora + ' — ' : '';
+      const ev = it.evento ? ' (' + it.evento + ')' : '';
+      txt += '• ' + h + it.atividade + ev + '\n';
+    });
+  });
+  return txt;
+}
+
+function _pessoaSelecionada() {
+  const sel = document.getElementById('log-export-pessoa');
+  const nome = sel ? sel.value : '';
+  if (!nome) { if (typeof toast === 'function') toast('Escolha uma pessoa na lista.', 'erro'); return ''; }
+  return nome;
+}
+
+function exportarPessoaSelecionada() {
+  const nome = _pessoaSelecionada();
+  if (!nome) return;
+  const blocos = _itensDaPessoa(nome);
+  let html = '<h1>Logística — ' + _le(nome) + '</h1>';
+  if (!blocos.length) html += '<p>Sem atividades registradas para esta pessoa.</p>';
+  blocos.forEach(b => {
+    const titulo = [_diaSemana(b.data), _dataBR(b.data)].filter(Boolean).join(' — ');
+    html += '<h2>' + _le(titulo) + '</h2><table><tbody>';
+    b.itens.forEach(it => {
+      html += '<tr><td class="h">' + _le(it.hora || '') + '</td><td>' + _le(it.atividade || '')
+        + (it.evento ? ' <span class="ev">(' + _le(it.evento) + ')</span>' : '') + '</td></tr>';
+    });
+    html += '</tbody></table>';
+  });
+  const w = window.open('', '_blank');
+  if (!w) { if (typeof toast === 'function') toast('Permita abrir a janela de impressão.', 'erro'); return; }
+  w.document.write(
+    '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Logística — ' + _le(nome) + '</title><style>'
+    + 'body{font-family:Arial,sans-serif;color:#2a2a2a;padding:24px;font-size:13px;}'
+    + 'h1{color:#3d5a47;font-size:20px;margin:0 0 12px;} h2{color:#3d5a47;font-size:14px;margin:16px 0 6px;border-bottom:1px solid #ddd6cc;padding-bottom:3px;}'
+    + 'table{width:100%;border-collapse:collapse;margin-bottom:6px;} td{border-bottom:1px solid #eee;padding:6px 8px;vertical-align:top;} td.h{white-space:nowrap;font-weight:bold;color:#3d5a47;width:90px;}'
+    + '.ev{color:#c9847a;font-size:11px;}'
+    + '</style></head><body>' + html + '</body></html>'
+  );
+  w.document.close();
+  w.focus();
+  setTimeout(() => { w.print(); }, 350);
+}
+
+async function copiarPessoaSelecionada() {
+  const nome = _pessoaSelecionada();
+  if (!nome) return;
+  const txt = _textoPessoa(nome);
+  try {
+    await navigator.clipboard.writeText(txt);
+    if (typeof toast === 'function') toast('Logística de ' + nome + ' copiada! É só colar no WhatsApp.', 'ok');
+  } catch (e) {
+    const ta = document.createElement('textarea');
+    ta.value = txt; document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); if (typeof toast === 'function') toast('Logística de ' + nome + ' copiada!', 'ok'); }
+    catch (_) { if (typeof toast === 'function') toast('Não consegui copiar automaticamente.', 'erro'); }
+    document.body.removeChild(ta);
+  }
 }
 
 /* ── Imprimir / PDF ────────────────────────────────────── */
