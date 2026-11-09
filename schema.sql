@@ -121,7 +121,7 @@ CREATE TABLE internal_costs (
   id         UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   event_id   UUID NOT NULL REFERENCES events(id) ON DELETE CASCADE,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  tipo       TEXT NOT NULL CHECK (tipo IN ('flores','mobilia','equipe')),
+  tipo       TEXT NOT NULL CHECK (tipo IN ('flores','mobilia','materiais','equipe')),
   nome       TEXT NOT NULL DEFAULT '',
   funcao     TEXT,
   valor      NUMERIC(12,2) NOT NULL DEFAULT 0,

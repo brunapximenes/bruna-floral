@@ -2,7 +2,7 @@
    painel-interno.js — Controle interno de custos (internal_costs)
    ============================================================ */
 
-let internoItems = { flores: [], mobilia: [], equipe: [] };
+let internoItems = { flores: [], mobilia: [], materiais: [], equipe: [] };
 
 /* ── CARREGAR ───────────────────────────────────────────────── */
 async function carregarItensInterno() {
@@ -16,7 +16,7 @@ async function carregarItensInterno() {
 
   if (error) return;
 
-  internoItems = { flores: [], mobilia: [], equipe: [] };
+  internoItems = { flores: [], mobilia: [], materiais: [], equipe: [] };
   (data || []).forEach(item => {
     if (internoItems[item.tipo]) internoItems[item.tipo].push(item);
   });
@@ -29,6 +29,7 @@ async function carregarItensInterno() {
 function renderInterno() {
   renderForn('flores');
   renderForn('mobilia');
+  renderForn('materiais');
   renderEquipe();
   atualizarTotaisInterno();
   updateTotais();
@@ -170,7 +171,7 @@ async function removerItemInterno(tipo, idx) {
 /* ── CÁLCULO CUSTO TOTAL ────────────────────────────────────── */
 function calcCusto() {
   let total = 0;
-  ['flores', 'mobilia', 'equipe'].forEach(tipo => {
+  ['flores', 'mobilia', 'materiais', 'equipe'].forEach(tipo => {
     internoItems[tipo].forEach(i => { total += (parseFloat(i.valor) || 0) * (parseFloat(i.qtd) || 1); });
   });
   return total;
@@ -247,7 +248,7 @@ async function salvarPagForn(tipo, idx) {
 
 function calcTotalPagoFornecedores() {
   let total = 0;
-  ['flores', 'mobilia', 'equipe'].forEach(tipo => {
+  ['flores', 'mobilia', 'materiais', 'equipe'].forEach(tipo => {
     (internoItems[tipo] || []).forEach(i => {
       (i.pagamentos || []).forEach(p => { total += parseFloat(p.valor) || 0; });
     });
