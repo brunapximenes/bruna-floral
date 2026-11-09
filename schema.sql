@@ -245,8 +245,10 @@ CREATE POLICY "auth_all_guests"
 
 -- ============================================================
 -- TABELA: logistica (planejamento de logística dos eventos)
--- Documento único (id='geral') em JSON com eventos, equipe,
--- materiais e observações. Só a Bruna (autenticada) acessa.
+-- Documento único (id='geral') em JSON: eventos da semana, equipe
+-- (lista de nomes), agenda dia a dia (dias[].itens[] = horário,
+-- pessoa, atividade, evento) e observações gerais.
+-- Só a Bruna (autenticada) acessa.
 -- ============================================================
 CREATE TABLE IF NOT EXISTS logistica (
   id         text PRIMARY KEY DEFAULT 'geral',

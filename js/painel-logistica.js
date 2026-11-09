@@ -1,18 +1,32 @@
 /* ============================================================
    painel-logistica.js — Área de Logística de eventos (global)
-   Planejamento editável da operação da semana: eventos, equipe
-   (quem faz o quê e em que horário), materiais (recolher nos
-   fornecedores → levar → montar → desmontar → devolver) e um
-   cronograma/observações livre. Salvo em `logistica` (sincroniza
-   em todos os aparelhos). Só a Bruna (autenticada) acessa.
+   Planejamento editável da operação da semana como uma AGENDA:
+   - Eventos da semana (contexto: datas, horários de montagem/desmontagem)
+   - Equipe da semana (lista de nomes cadastrada uma vez)
+   - Agenda dia a dia: cada linha = horário · pessoa (escolhida da
+     equipe) · o que ela faz · de qual evento é.
+   - Observações gerais (materiais, telefones, lembretes).
+   Salvo em `logistica` (sincroniza em todos os aparelhos).
+   Só a Bruna (autenticada) acessa.
    ============================================================ */
 
-let _log = { eventos: [], equipe: [], materiais: [], obs: '' };
+let _log = { eventos: [], equipe: [], dias: [], obs: '' };
 let _logTimer = null;
 
 function _le(s) {
   return (s == null ? '' : String(s))
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+function _diaSemana(d) {
+  const p = (d || '').split('-');
+  if (p.length !== 3) return '';
+  const dt = new Date(+p[0], +p[1] - 1, +p[2]);
+  const nomes = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
+  return nomes[dt.getDay()] || '';
+}
+function _dataBR(d) {
+  const p = (d || '').split('-');
+  return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : (d || '');
 }
 
 /* ── Navegação entre telas ─────────────────────────────── */
@@ -37,17 +51,65 @@ function _logSeed() {
       { nome: 'Festa da Clara (infantil)', data: '2026-11-12', local: '', h_montagem: '', h_evento: '', h_desmontagem: '' },
       { nome: 'Miriam — 60 anos',          data: '2026-11-13', local: '', h_montagem: '', h_evento: '', h_desmontagem: '' }
     ],
-    equipe:    [ { nome: '', tarefa: '', evento: '', horario: '' } ],
-    materiais: [ { material: '', fornecedor: '', destino: '', recolher: '', devolver: '', r: false, m: false, d: false, v: false } ],
+    equipe: [ { nome: '' }, { nome: '' }, { nome: '' } ],
+    dias: [
+      { data: '2026-11-12', itens: [ { hora: '', pessoa: '', atividade: '', evento: 'Festa da Clara (infantil)' } ] },
+      { data: '2026-11-13', itens: [ { hora: '', pessoa: '', atividade: '', evento: 'Miriam — 60 anos' } ] }
+    ],
     obs: ''
   };
+}
+
+/* ── Migração do formato antigo (equipe/materiais em tabela) ──
+   Se os dados salvos ainda não têm "dias", converte o que já
+   existia numa agenda, sem perder nada que a Bruna tenha digitado. */
+function _migra() {
+  if (Array.isArray(_log.dias) && _log.dias.length) {
+    if (!Array.isArray(_log.equipe)) _log.equipe = [];
+    // garante que a equipe seja lista de nomes { nome }
+    _log.equipe = _log.equipe.map(p => (p && typeof p === 'object') ? { nome: p.nome || '' } : { nome: String(p || '') });
+    return;
+  }
+  const dias = [];
+  const diaDe = (data) => {
+    let d = dias.find(x => x.data === (data || ''));
+    if (!d) { d = { data: data || '', itens: [] }; dias.push(d); }
+    return d;
+  };
+  [...new Set((_log.eventos || []).map(e => e.data).filter(Boolean))].sort().forEach(diaDe);
+  const primeiro = () => dias[0] || diaDe('');
+  const roster = [];
+  (_log.equipe || []).forEach(p => {
+    if (p && typeof p === 'object') {
+      if (p.nome) roster.push({ nome: p.nome });
+      if (p.nome || p.tarefa || p.horario || p.evento) {
+        primeiro().itens.push({ hora: p.horario || '', pessoa: p.nome || '', atividade: p.tarefa || '', evento: p.evento || '' });
+      }
+    }
+  });
+  (_log.materiais || []).forEach(m => {
+    if (m && (m.material || m.fornecedor || m.recolher || m.devolver)) {
+      const at = ['Recolher ' + (m.material || ''),
+                  m.fornecedor ? ('— fornecedor: ' + m.fornecedor) : '',
+                  m.devolver ? ('· devolver: ' + m.devolver) : ''].join(' ').trim();
+      primeiro().itens.push({ hora: m.recolher || '', pessoa: '', atividade: at, evento: m.destino || '' });
+    }
+  });
+  if (!dias.length) dias.push({ data: '', itens: [] });
+  dias.forEach(d => { if (!d.itens.length) d.itens.push({ hora: '', pessoa: '', atividade: '', evento: '' }); });
+  _log.dias = dias;
+  const vistos = {};
+  _log.equipe = roster.filter(p => { const k = (p.nome || '').trim(); if (!k || vistos[k]) return false; vistos[k] = 1; return true; });
+  if (!_log.equipe.length) _log.equipe = [ { nome: '' }, { nome: '' } ];
+  delete _log.materiais;
 }
 
 /* ── Carregar / salvar ─────────────────────────────────── */
 async function carregarLogistica() {
   const { data, error } = await sb.from('logistica').select('data').eq('id', 'geral').maybeSingle();
   if (!error && data && data.data && Object.keys(data.data).length) {
-    _log = Object.assign({ eventos: [], equipe: [], materiais: [], obs: '' }, data.data);
+    _log = Object.assign({ eventos: [], equipe: [], dias: [], obs: '' }, data.data);
+    _migra();
   } else {
     _log = _logSeed();
     _salvarLogistica();   // grava o exemplo inicial
@@ -64,35 +126,68 @@ async function _salvarLogistica() {
   if (obs) _log.obs = obs.value;
   await sb.from('logistica').upsert({ id: 'geral', data: _log, updated_at: new Date().toISOString() });
 }
-
-/* ── Edição de campos ──────────────────────────────────── */
-function logSet(secao, i, campo, valor) {
-  if (_log[secao] && _log[secao][i]) { _log[secao][i][campo] = valor; _logSaveSoon(); }
-}
-function logChk(i, campo, marcado) {
-  if (_log.materiais[i]) { _log.materiais[i][campo] = marcado; _logSaveSoon(); }
-}
 function logObsInput() { _logSaveSoon(); }
 
-function logAddEvento()  { _log.eventos.push({ nome: '', data: '', local: '', h_montagem: '', h_evento: '', h_desmontagem: '' }); _renderEventos(); _logSaveSoon(); }
-function logAddEquipe()  { _log.equipe.push({ nome: '', tarefa: '', evento: '', horario: '' }); _renderEquipe(); _logSaveSoon(); }
-function logAddMaterial(){ _log.materiais.push({ material: '', fornecedor: '', destino: '', recolher: '', devolver: '', r: false, m: false, d: false, v: false }); _renderMateriais(); _logSaveSoon(); }
-
+/* ── Eventos da semana ─────────────────────────────────── */
+function logSet(secao, i, campo, valor) {
+  if (_log[secao] && _log[secao][i]) {
+    _log[secao][i][campo] = valor;
+    if (secao === 'eventos') _renderDias();   // atualiza as opções de evento na agenda
+    _logSaveSoon();
+  }
+}
+function logAddEvento() {
+  _log.eventos.push({ nome: '', data: '', local: '', h_montagem: '', h_evento: '', h_desmontagem: '' });
+  _renderEventos(); _renderDias(); _logSaveSoon();
+}
 function logDel(secao, i) {
-  const nomes = { eventos: 'este evento', equipe: 'esta pessoa', materiais: 'este material' };
-  if (!confirm('Remover ' + (nomes[secao] || 'este item') + '?')) return;
+  if (!confirm('Remover este evento?')) return;
   _log[secao].splice(i, 1);
-  if (secao === 'eventos') _renderEventos();
-  else if (secao === 'equipe') _renderEquipe();
-  else _renderMateriais();
+  if (secao === 'eventos') { _renderEventos(); _renderDias(); }
   _logSaveSoon();
+}
+
+/* ── Equipe (lista de nomes) ───────────────────────────── */
+function logAddPessoa() { _log.equipe.push({ nome: '' }); _renderEquipe(); _logSaveSoon(); }
+function logDelPessoa(i) {
+  if (!confirm('Remover esta pessoa da equipe?')) return;
+  _log.equipe.splice(i, 1); _renderEquipe(); _renderDias(); _logSaveSoon();
+}
+function logSetPessoa(i, valor) {
+  if (_log.equipe[i]) { _log.equipe[i].nome = valor; _renderDias(); _logSaveSoon(); }
+}
+
+/* ── Agenda (dias e linhas) ────────────────────────────── */
+function logAddDia() {
+  _log.dias.push({ data: '', itens: [ { hora: '', pessoa: '', atividade: '', evento: '' } ] });
+  _renderDias(); _logSaveSoon();
+}
+function logDelDia(di) {
+  if (!confirm('Remover este dia inteiro da agenda?')) return;
+  _log.dias.splice(di, 1); _renderDias(); _logSaveSoon();
+}
+function logSetDia(di, campo, valor) {
+  if (_log.dias[di]) { _log.dias[di][campo] = valor; _renderDias(); _logSaveSoon(); }
+}
+function logAddItem(di) {
+  if (_log.dias[di]) {
+    (_log.dias[di].itens = _log.dias[di].itens || []).push({ hora: '', pessoa: '', atividade: '', evento: '' });
+    _renderDias(); _logSaveSoon();
+  }
+}
+function logDelItem(di, ii) {
+  if (_log.dias[di] && _log.dias[di].itens) { _log.dias[di].itens.splice(ii, 1); _renderDias(); _logSaveSoon(); }
+}
+function logSetItem(di, ii, campo, valor) {
+  const it = _log.dias[di] && _log.dias[di].itens && _log.dias[di].itens[ii];
+  if (it) { it[campo] = valor; _logSaveSoon(); }   // sem re-render: não perde o foco
 }
 
 /* ── Renderização ──────────────────────────────────────── */
 function _renderLog() {
   _renderEventos();
   _renderEquipe();
-  _renderMateriais();
+  _renderDias();
   const obs = document.getElementById('log-obs');
   if (obs) obs.value = _log.obs || '';
 }
@@ -127,80 +222,111 @@ function _campoHora(rot, val, i, campo) {
 }
 
 function _renderEquipe() {
-  const tab = document.getElementById('log-equipe');
-  if (!tab) return;
-  let h = '<thead><tr><th>Pessoa</th><th>O que faz</th><th>Evento</th><th>Horário</th><th></th></tr></thead><tbody>';
-  _log.equipe.forEach((p, i) => {
-    h += '<tr>'
-      + _td(p.nome,    'equipe', i, 'nome',    'Nome')
-      + _td(p.tarefa,  'equipe', i, 'tarefa',  'Função / tarefa')
-      + _td(p.evento,  'equipe', i, 'evento',  'Clara / Miriam')
-      + _td(p.horario, 'equipe', i, 'horario', 'Ex.: 7h–14h')
-      + '<td class="log-c"><button class="log-del" title="Remover" onclick="logDel(\'equipe\',' + i + ')">🗑</button></td>'
-      + '</tr>';
-  });
-  h += '</tbody>';
-  tab.innerHTML = h;
+  const box = document.getElementById('log-equipe-lista');
+  if (!box) return;
+  box.innerHTML = (_log.equipe || []).map((p, i) =>
+    '<div class="log-pessoa-row">'
+    + '<span class="log-pessoa-ic">👤</span>'
+    + '<input class="log-inp" value="' + _le(p.nome) + '" placeholder="Nome da pessoa" onchange="logSetPessoa(' + i + ',this.value)">'
+    + '<button class="log-del" title="Remover" onclick="logDelPessoa(' + i + ')">🗑</button>'
+    + '</div>'
+  ).join('');
 }
 
-function _renderMateriais() {
-  const tab = document.getElementById('log-materiais');
-  if (!tab) return;
-  let h = '<thead><tr><th>Material</th><th>Fornecedor</th><th>Vai para</th><th>Recolher</th><th>Devolver</th><th>Status</th><th></th></tr></thead><tbody>';
-  _log.materiais.forEach((m, i) => {
-    h += '<tr>'
-      + _td(m.material,   'materiais', i, 'material',   'O que é')
-      + _td(m.fornecedor, 'materiais', i, 'fornecedor', 'De quem')
-      + _td(m.destino,    'materiais', i, 'destino',    'Clara / Miriam')
-      + _td(m.recolher,   'materiais', i, 'recolher',   'Quando/quem pega')
-      + _td(m.devolver,   'materiais', i, 'devolver',   'Quando devolver')
-      + '<td class="log-status">'
-      +   _chk(m.r, i, 'r', 'Recolhido') + _chk(m.m, i, 'm', 'Montado')
-      +   _chk(m.d, i, 'd', 'Desmontado') + _chk(m.v, i, 'v', 'Devolvido')
-      + '</td>'
-      + '<td class="log-c"><button class="log-del" title="Remover" onclick="logDel(\'materiais\',' + i + ')">🗑</button></td>'
-      + '</tr>';
+function _optsPessoas(sel) {
+  const nomes = (_log.equipe || []).map(p => p.nome).filter(n => n && n.trim());
+  let html = '<option value="">— escolher pessoa —</option>';
+  let achou = false;
+  nomes.forEach(n => { const s = (n === sel); if (s) achou = true; html += '<option' + (s ? ' selected' : '') + ' value="' + _le(n) + '">' + _le(n) + '</option>'; });
+  if (sel && !achou) html += '<option selected value="' + _le(sel) + '">' + _le(sel) + '</option>';
+  return html;
+}
+function _optsEventos(sel) {
+  const nomes = (_log.eventos || []).map(e => e.nome).filter(n => n && n.trim());
+  let html = '<option value="">— evento —</option>';
+  let achou = false;
+  nomes.forEach(n => { const s = (n === sel); if (s) achou = true; html += '<option' + (s ? ' selected' : '') + ' value="' + _le(n) + '">' + _le(n) + '</option>'; });
+  if (sel && !achou) html += '<option selected value="' + _le(sel) + '">' + _le(sel) + '</option>';
+  return html;
+}
+
+function _itemHTML(di, ii, it) {
+  return '<div class="log-item">'
+    + '<div class="log-item-top">'
+    +   '<input class="log-inp log-item-hora" type="time" value="' + _le(it.hora) + '" onchange="logSetItem(' + di + ',' + ii + ',\'hora\',this.value)">'
+    +   '<select class="log-inp log-item-pessoa" onchange="logSetItem(' + di + ',' + ii + ',\'pessoa\',this.value)">' + _optsPessoas(it.pessoa) + '</select>'
+    +   '<select class="log-inp log-item-evento" onchange="logSetItem(' + di + ',' + ii + ',\'evento\',this.value)">' + _optsEventos(it.evento) + '</select>'
+    +   '<button class="log-del" title="Remover linha" onclick="logDelItem(' + di + ',' + ii + ')">🗑</button>'
+    + '</div>'
+    + '<input class="log-inp log-item-desc" value="' + _le(it.atividade) + '" placeholder="O que essa pessoa vai fazer (ex.: recolher arranjos no fornecedor, montar mesa do bolo, entregar flores...)" onchange="logSetItem(' + di + ',' + ii + ',\'atividade\',this.value)">'
+    + '</div>';
+}
+
+function _renderDias() {
+  const box = document.getElementById('log-dias');
+  if (!box) return;
+  // ordena por data (dias sem data vão para o fim); índices seguem a ordem exibida
+  _log.dias.sort((a, b) => {
+    if (!a.data && !b.data) return 0;
+    if (!a.data) return 1;
+    if (!b.data) return -1;
+    return a.data < b.data ? -1 : a.data > b.data ? 1 : 0;
   });
-  h += '</tbody>';
-  tab.innerHTML = h;
-}
-function _td(val, secao, i, campo, ph) {
-  return '<td><input class="log-inp" value="' + _le(val) + '" placeholder="' + _le(ph) + '" onchange="logSet(\'' + secao + '\',' + i + ',\'' + campo + '\',this.value)"></td>';
-}
-function _chk(marcado, i, campo, titulo) {
-  return '<label class="log-chk" title="' + titulo + '"><input type="checkbox"' + (marcado ? ' checked' : '')
-    + ' onchange="logChk(' + i + ',\'' + campo + '\',this.checked)"><span>' + campo.toUpperCase() + '</span></label>';
+  box.innerHTML = _log.dias.map((d, di) => {
+    const itens = (d.itens || []).map((it, ii) => _itemHTML(di, ii, it)).join('');
+    const semana = _diaSemana(d.data);
+    return '<div class="log-dia">'
+      + '<div class="log-dia-cab">'
+      +   '<input class="log-inp log-dia-data" type="date" value="' + _le(d.data) + '" onchange="logSetDia(' + di + ',\'data\',this.value)">'
+      +   '<span class="log-dia-semana">' + _le(semana || 'escolha a data') + '</span>'
+      +   '<button class="log-del log-dia-del" title="Remover dia" onclick="logDelDia(' + di + ')">🗑 dia</button>'
+      + '</div>'
+      + '<div class="log-dia-itens">' + itens + '</div>'
+      + '<button class="log-add-min" onclick="logAddItem(' + di + ')">+ Adicionar linha</button>'
+      + '</div>';
+  }).join('');
 }
 
 /* ── Imprimir / PDF ────────────────────────────────────── */
 function imprimirLogistica() {
   if (document.getElementById('log-obs')) _log.obs = document.getElementById('log-obs').value;
-  const statusTxt = (m) => [m.r && 'Recolhido', m.m && 'Montado', m.d && 'Desmontado', m.v && 'Devolvido'].filter(Boolean).join(' · ') || '—';
-  const linha = (cells) => '<tr>' + cells.map(c => '<td>' + _le(c) + '</td>').join('') + '</tr>';
 
-  let html = '<h1>Logística</h1>';
-  _log.eventos.forEach(e => {
-    html += '<div class="ev"><h2>' + _le(e.nome || 'Evento') + '</h2><p>'
-      + [e.data ? _le(e.data.split('-').reverse().join('/')) : '', e.local ? _le(e.local) : ''].filter(Boolean).join(' · ') + '<br>'
-      + [e.h_montagem && 'Montagem: ' + _le(e.h_montagem), e.h_evento && 'Evento: ' + _le(e.h_evento), e.h_desmontagem && 'Desmontagem: ' + _le(e.h_desmontagem)].filter(Boolean).join(' · ')
-      + '</p></div>';
+  let html = '<h1>Logística da semana</h1>';
+
+  if ((_log.eventos || []).length) {
+    html += '<h2>Eventos</h2>';
+    _log.eventos.forEach(e => {
+      const linhaTop = [e.data ? _dataBR(e.data) : '', e.local].filter(Boolean).map(_le).join(' · ');
+      const linhaH = [e.h_montagem && 'Montagem ' + _le(e.h_montagem), e.h_evento && 'Início ' + _le(e.h_evento), e.h_desmontagem && 'Desmontagem ' + _le(e.h_desmontagem)].filter(Boolean).join(' · ');
+      html += '<div class="ev"><b>' + _le(e.nome || 'Evento') + '</b>' + (linhaTop ? ' — ' + linhaTop : '')
+        + (linhaH ? '<br><span class="sub">' + linhaH + '</span>' : '') + '</div>';
+    });
+  }
+
+  const roster = (_log.equipe || []).map(p => p.nome).filter(n => n && n.trim());
+  if (roster.length) html += '<h2>Equipe</h2><p>' + roster.map(_le).join(' · ') + '</p>';
+
+  html += '<h2>Agenda</h2>';
+  (_log.dias || []).forEach(d => {
+    const titulo = [_diaSemana(d.data), _dataBR(d.data)].filter(Boolean).join(' — ') || 'Sem data';
+    html += '<h3>' + _le(titulo) + '</h3>';
+    html += '<table><thead><tr><th>Horário</th><th>Pessoa</th><th>O que faz</th><th>Evento</th></tr></thead><tbody>';
+    (d.itens || []).forEach(it => {
+      html += '<tr><td>' + _le(it.hora || '') + '</td><td>' + _le(it.pessoa || '') + '</td><td>' + _le(it.atividade || '') + '</td><td>' + _le(it.evento || '') + '</td></tr>';
+    });
+    html += '</tbody></table>';
   });
 
-  html += '<h2>Equipe</h2><table><thead><tr><th>Pessoa</th><th>O que faz</th><th>Evento</th><th>Horário</th></tr></thead><tbody>'
-    + _log.equipe.map(p => linha([p.nome, p.tarefa, p.evento, p.horario])).join('') + '</tbody></table>';
-
-  html += '<h2>Materiais</h2><table><thead><tr><th>Material</th><th>Fornecedor</th><th>Vai para</th><th>Recolher</th><th>Devolver</th><th>Status</th></tr></thead><tbody>'
-    + _log.materiais.map(m => linha([m.material, m.fornecedor, m.destino, m.recolher, m.devolver, statusTxt(m)])).join('') + '</tbody></table>';
-
-  if (_log.obs && _log.obs.trim()) html += '<h2>Cronograma e observações</h2><pre>' + _le(_log.obs) + '</pre>';
+  if (_log.obs && _log.obs.trim()) html += '<h2>Observações</h2><pre>' + _le(_log.obs) + '</pre>';
 
   const w = window.open('', '_blank');
-  if (!w) { toast('Permita abrir a janela de impressão.', 'erro'); return; }
+  if (!w) { if (typeof toast === 'function') toast('Permita abrir a janela de impressão.', 'erro'); return; }
   w.document.write(
     '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Logística</title><style>'
     + 'body{font-family:Arial,sans-serif;color:#2a2a2a;padding:24px;font-size:12px;}'
     + 'h1{color:#3d5a47;font-size:22px;margin:0 0 12px;} h2{color:#3d5a47;font-size:15px;margin:18px 0 6px;border-bottom:1px solid #ddd6cc;padding-bottom:3px;}'
-    + '.ev{margin-bottom:8px;} .ev h2{border:none;margin:4px 0;} .ev p{margin:2px 0;}'
+    + 'h3{color:#3d5a47;font-size:13px;margin:14px 0 4px;}'
+    + '.ev{margin-bottom:8px;} .ev .sub{color:#6b6b6b;font-size:11px;}'
     + 'table{width:100%;border-collapse:collapse;margin-bottom:8px;} th,td{border:1px solid #ddd6cc;padding:5px 7px;text-align:left;vertical-align:top;} th{background:#f2ede4;}'
     + 'pre{white-space:pre-wrap;font-family:Arial,sans-serif;background:#faf7f2;padding:10px;border-radius:6px;}'
     + '</style></head><body>' + html + '</body></html>'
