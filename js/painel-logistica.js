@@ -253,7 +253,7 @@ function _optsEventos(sel) {
 function _itemHTML(di, ii, it) {
   return '<div class="log-item">'
     + '<div class="log-item-top">'
-    +   '<input class="log-inp log-item-hora" type="time" value="' + _le(it.hora) + '" onchange="logSetItem(' + di + ',' + ii + ',\'hora\',this.value)">'
+    +   '<input class="log-inp log-item-hora" type="text" value="' + _le(it.hora) + '" placeholder="Ex.: 8h" onchange="logSetItem(' + di + ',' + ii + ',\'hora\',this.value)">'
     +   '<button class="log-del" title="Remover linha" onclick="logDelItem(' + di + ',' + ii + ')">🗑</button>'
     + '</div>'
     + '<select class="log-inp log-item-pessoa" onchange="logSetItem(' + di + ',' + ii + ',\'pessoa\',this.value)">' + _optsPessoas(it.pessoa) + '</select>'
