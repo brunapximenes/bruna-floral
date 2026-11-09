@@ -254,11 +254,11 @@ function _itemHTML(di, ii, it) {
   return '<div class="log-item">'
     + '<div class="log-item-top">'
     +   '<input class="log-inp log-item-hora" type="time" value="' + _le(it.hora) + '" onchange="logSetItem(' + di + ',' + ii + ',\'hora\',this.value)">'
-    +   '<select class="log-inp log-item-pessoa" onchange="logSetItem(' + di + ',' + ii + ',\'pessoa\',this.value)">' + _optsPessoas(it.pessoa) + '</select>'
-    +   '<select class="log-inp log-item-evento" onchange="logSetItem(' + di + ',' + ii + ',\'evento\',this.value)">' + _optsEventos(it.evento) + '</select>'
     +   '<button class="log-del" title="Remover linha" onclick="logDelItem(' + di + ',' + ii + ')">🗑</button>'
     + '</div>'
-    + '<input class="log-inp log-item-desc" value="' + _le(it.atividade) + '" placeholder="O que essa pessoa vai fazer (ex.: recolher arranjos no fornecedor, montar mesa do bolo, entregar flores...)" onchange="logSetItem(' + di + ',' + ii + ',\'atividade\',this.value)">'
+    + '<select class="log-inp log-item-pessoa" onchange="logSetItem(' + di + ',' + ii + ',\'pessoa\',this.value)">' + _optsPessoas(it.pessoa) + '</select>'
+    + '<input class="log-inp log-item-desc" value="' + _le(it.atividade) + '" placeholder="O que essa pessoa vai fazer (ex.: recolher arranjos, montar mesa do bolo, entregar flores...)" onchange="logSetItem(' + di + ',' + ii + ',\'atividade\',this.value)">'
+    + '<select class="log-inp log-item-evento" onchange="logSetItem(' + di + ',' + ii + ',\'evento\',this.value)">' + _optsEventos(it.evento) + '</select>'
     + '</div>';
 }
 
@@ -277,9 +277,11 @@ function _renderDias() {
     const semana = _diaSemana(d.data);
     return '<div class="log-dia">'
       + '<div class="log-dia-cab">'
+      +   '<div class="log-dia-cab-top">'
+      +     '<span class="log-dia-semana">' + _le(semana || 'escolha a data') + '</span>'
+      +     '<button class="log-del log-dia-del" title="Remover dia" onclick="logDelDia(' + di + ')">🗑</button>'
+      +   '</div>'
       +   '<input class="log-inp log-dia-data" type="date" value="' + _le(d.data) + '" onchange="logSetDia(' + di + ',\'data\',this.value)">'
-      +   '<span class="log-dia-semana">' + _le(semana || 'escolha a data') + '</span>'
-      +   '<button class="log-del log-dia-del" title="Remover dia" onclick="logDelDia(' + di + ')">🗑 dia</button>'
       + '</div>'
       + '<div class="log-dia-itens">' + itens + '</div>'
       + '<button class="log-add-min" onclick="logAddItem(' + di + ')">+ Adicionar linha</button>'
