@@ -132,10 +132,11 @@ function _nomesAcomp(g) {
 function _cvCrianca(c) {
   if (typeof c === 'string') return _cvEsc(c);
   const nome = _cvEsc(c && c.nome ? c.nome : '');
-  const idade = (c && c.idade !== '' && c.idade != null) ? String(c.idade) : '';
+  const idade = (c && c.idade !== '' && c.idade != null) ? String(c.idade).trim() : '';
   if (!idade) return nome;
-  const unidade = (idade === '1') ? ' ano' : ' anos';
-  return (nome ? nome + ' ' : '') + '(' + _cvEsc(idade) + unidade + ')';
+  // só número → acrescenta "ano(s)"; se já tiver texto (ex.: "8 meses"), mostra como foi escrito
+  const txt = /^\d+$/.test(idade) ? (idade + (idade === '1' ? ' ano' : ' anos')) : idade;
+  return (nome ? nome + ' ' : '') + '(' + _cvEsc(txt) + ')';
 }
 
 function _renderTotais() {

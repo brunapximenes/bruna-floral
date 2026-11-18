@@ -104,7 +104,7 @@ function _renderCriancas(count) {
       + '<label>Criança ' + (i + 1) + '</label>'
       + '<div class="cf-crianca-linha">'
       +   '<input type="text" class="cf-nome-crianca" value="' + n + '" placeholder="Nome">'
-      +   '<input type="number" class="cf-idade-crianca" value="' + id + '" placeholder="Idade" min="0" max="17" inputmode="numeric">'
+      +   '<input type="text" class="cf-idade-crianca" value="' + id + '" placeholder="Ex.: 8 meses">'
       + '</div></div>';
   }
   box.innerHTML = html;
