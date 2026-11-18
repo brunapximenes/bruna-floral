@@ -94,7 +94,7 @@ function _renderConvidados() {
     const recado = g.mensagem ? '<span class="cv-recado" title="' + _cvEsc(g.mensagem) + '">💬 ' + _cvEsc(g.mensagem) + '</span>' : '';
     html += '<tr class="cv-row cv-' + g.status + '">'
       + '<td><input class="cv-inp cv-inp-nome" value="' + _cvEsc(g.nome) + '" '
-        + 'onchange="atualizarConvidado(\'' + g.id + '\',\'nome\',this.value)"></td>'
+        + 'onchange="atualizarConvidado(\'' + g.id + '\',\'nome\',this.value)">' + _nomesAcomp(g) + '</td>'
       + '<td class="cv-c"><input class="cv-inp cv-num" type="number" min="0" value="' + (Number(g.adultos) || 0) + '" '
         + 'onchange="atualizarConvidado(\'' + g.id + '\',\'adultos\',this.value)"></td>'
       + '<td class="cv-c"><input class="cv-inp cv-num" type="number" min="0" value="' + (Number(g.criancas) || 0) + '" '
@@ -114,6 +114,18 @@ function _renderConvidados() {
   html += '</tbody>';
   tab.innerHTML = html;
   _renderTotais();
+}
+
+/* Nomes dos acompanhantes/crianças informados na confirmação (se houver) */
+function _nomesAcomp(g) {
+  const ac = g.acompanhantes || {};
+  const a  = Array.isArray(ac.adultos)  ? ac.adultos.filter(Boolean)  : [];
+  const cr = Array.isArray(ac.criancas) ? ac.criancas.filter(Boolean) : [];
+  if (!a.length && !cr.length) return '';
+  const partes = [];
+  if (a.length)  partes.push('👤 ' + a.map(_cvEsc).join(', '));
+  if (cr.length) partes.push('🧒 ' + cr.map(_cvEsc).join(', '));
+  return '<div class="cv-acomp-nomes">' + partes.join('<br>') + '</div>';
 }
 
 function _renderTotais() {

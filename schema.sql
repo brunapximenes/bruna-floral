@@ -221,7 +221,9 @@ CREATE TABLE guests (
   criancas     INTEGER NOT NULL DEFAULT 0,
   mensagem     TEXT,
   confirmed_at TIMESTAMPTZ,
-  ordem        INTEGER DEFAULT 0
+  ordem        INTEGER DEFAULT 0,
+  -- Nomes informados na confirmação: { adultos: [nomes], criancas: [nomes] }
+  acompanhantes JSONB NOT NULL DEFAULT '{}'::jsonb
 );
 
 CREATE INDEX idx_guests_event ON guests (event_id);

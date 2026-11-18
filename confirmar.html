@@ -53,6 +53,11 @@
   .cf-acomp input[type=number]{ text-align:center; }
   .cf-hint{ font-size:11px; color:#9a948b; margin-top:3px; }
 
+  .cf-nomes:not(:empty){ margin:-4px 0 6px; padding:12px 14px; background:var(--creme2); border-radius:12px; }
+  .cf-nomes .cf-campo{ margin-bottom:12px; }
+  .cf-nomes .cf-campo:last-child{ margin-bottom:0; }
+  .cf-nomes label{ font-size:12px; }
+
   #cf-enviar{
     width:100%; padding:14px; border:none; border-radius:12px; background:var(--cf-btn); color:#fff;
     font-family:'Jost',sans-serif; font-size:15px; font-weight:500; cursor:pointer; margin-top:6px;
@@ -97,14 +102,16 @@
         <div class="cf-acomp">
           <div class="cf-campo">
             <label for="cf-adultos">Acompanhantes adultos</label>
-            <input id="cf-adultos" type="number" min="0" value="0" inputmode="numeric">
+            <input id="cf-adultos" type="number" min="0" value="0" inputmode="numeric" oninput="_renderNomes()">
             <div class="cf-hint">além de você</div>
           </div>
           <div class="cf-campo">
             <label for="cf-criancas">Crianças</label>
-            <input id="cf-criancas" type="number" min="0" value="0" inputmode="numeric">
+            <input id="cf-criancas" type="number" min="0" value="0" inputmode="numeric" oninput="_renderNomes()">
           </div>
         </div>
+        <div id="cf-nomes-adultos" class="cf-nomes"></div>
+        <div id="cf-nomes-criancas" class="cf-nomes"></div>
         <div class="cf-campo">
           <label for="cf-tel">Telefone (opcional)</label>
           <input id="cf-tel" type="tel" placeholder="(81) 9 9999-9999" autocomplete="tel">
@@ -123,6 +130,6 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="/js/config.js"></script>
 <script src="/js/supabase-client.js"></script>
-<script src="/js/confirmar.js?v=2"></script>
+<script src="/js/confirmar.js?v=3"></script>
 </body>
 </html>

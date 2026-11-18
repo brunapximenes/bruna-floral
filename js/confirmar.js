@@ -57,12 +57,41 @@ function _esc(s) {
   return (s == null ? '' : String(s))
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
+function _escAttr(s) { return _esc(s).replace(/"/g, '&quot;'); }
 
 /* Mostra/oculta os campos de acompanhantes conforme "vai / não vai" */
 function _toggleCampos() {
   const vai = document.querySelector('input[name="cf-vai"]:checked');
   const bloco = document.getElementById('cf-bloco-acomp');
   bloco.style.display = (vai && vai.value === 'sim') ? '' : 'none';
+  if (vai && vai.value === 'sim') _renderNomes();
+}
+
+/* Cria um campo de nome para cada acompanhante adulto e cada criança marcados,
+   preservando o que já foi digitado. */
+function _renderNomes() {
+  const a  = Math.max(0, Math.min(parseInt(document.getElementById('cf-adultos').value)  || 0, 20));
+  const cr = Math.max(0, Math.min(parseInt(document.getElementById('cf-criancas').value) || 0, 20));
+  _renderNomesCampos('cf-nomes-adultos',  'cf-nome-adulto',  a,  'Nome do acompanhante');
+  _renderNomesCampos('cf-nomes-criancas', 'cf-nome-crianca', cr, 'Nome da criança');
+}
+function _renderNomesCampos(containerId, cls, count, label) {
+  const box = document.getElementById(containerId);
+  if (!box) return;
+  const antigos = [];
+  box.querySelectorAll('input').forEach(inp => antigos.push(inp.value));
+  let html = '';
+  for (let i = 0; i < count; i++) {
+    const val = antigos[i] ? _escAttr(antigos[i]) : '';
+    html += '<div class="cf-campo">'
+      + '<label>' + label + ' ' + (i + 1) + '</label>'
+      + '<input type="text" class="' + cls + '" value="' + val + '" placeholder="Nome e sobrenome"></div>';
+  }
+  box.innerHTML = html;
+}
+function _coletarNomes(cls) {
+  return Array.from(document.querySelectorAll('.' + cls))
+    .map(i => i.value.trim()).filter(Boolean);
 }
 
 async function enviarConfirmacao() {
@@ -80,6 +109,8 @@ async function enviarConfirmacao() {
   const criancas = vai ? (parseInt(document.getElementById('cf-criancas').value) || 0) : 0;
   const telefone = document.getElementById('cf-tel').value.trim() || null;
   const mensagem = document.getElementById('cf-recado').value.trim() || null;
+  const nomesAdultos  = vai ? _coletarNomes('cf-nome-adulto')  : [];
+  const nomesCriancas = vai ? _coletarNomes('cf-nome-crianca') : [];
 
   btn.disabled = true;
   btn.textContent = 'Enviando...';
@@ -92,6 +123,7 @@ async function enviarConfirmacao() {
     adultos,
     criancas,
     mensagem,
+    acompanhantes: { adultos: nomesAdultos, criancas: nomesCriancas },
     confirmed_at: new Date().toISOString()
   };
 
