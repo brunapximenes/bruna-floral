@@ -124,8 +124,18 @@ function _nomesAcomp(g) {
   if (!a.length && !cr.length) return '';
   const partes = [];
   if (a.length)  partes.push('👤 ' + a.map(_cvEsc).join(', '));
-  if (cr.length) partes.push('🧒 ' + cr.map(_cvEsc).join(', '));
+  if (cr.length) partes.push('🧒 ' + cr.map(_cvCrianca).join(', '));
   return '<div class="cv-acomp-nomes">' + partes.join('<br>') + '</div>';
+}
+
+/* Formata uma criança: aceita texto antigo ("Nome") ou objeto novo {nome, idade} */
+function _cvCrianca(c) {
+  if (typeof c === 'string') return _cvEsc(c);
+  const nome = _cvEsc(c && c.nome ? c.nome : '');
+  const idade = (c && c.idade !== '' && c.idade != null) ? String(c.idade) : '';
+  if (!idade) return nome;
+  const unidade = (idade === '1') ? ' ano' : ' anos';
+  return (nome ? nome + ' ' : '') + '(' + _cvEsc(idade) + unidade + ')';
 }
 
 function _renderTotais() {

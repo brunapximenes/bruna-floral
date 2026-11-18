@@ -222,7 +222,7 @@ CREATE TABLE guests (
   mensagem     TEXT,
   confirmed_at TIMESTAMPTZ,
   ordem        INTEGER DEFAULT 0,
-  -- Nomes informados na confirmação: { adultos: [nomes], criancas: [nomes] }
+  -- Informados na confirmação: { adultos: [nomes], criancas: [{nome, idade}] }
   acompanhantes JSONB NOT NULL DEFAULT '{}'::jsonb
 );
 

@@ -72,8 +72,8 @@ function _toggleCampos() {
 function _renderNomes() {
   const a  = Math.max(0, Math.min(parseInt(document.getElementById('cf-adultos').value)  || 0, 20));
   const cr = Math.max(0, Math.min(parseInt(document.getElementById('cf-criancas').value) || 0, 20));
-  _renderNomesCampos('cf-nomes-adultos',  'cf-nome-adulto',  a,  'Nome do acompanhante');
-  _renderNomesCampos('cf-nomes-criancas', 'cf-nome-crianca', cr, 'Nome da criança');
+  _renderNomesCampos('cf-nomes-adultos', 'cf-nome-adulto', a, 'Nome do acompanhante');
+  _renderCriancas(cr);
 }
 function _renderNomesCampos(containerId, cls, count, label) {
   const box = document.getElementById(containerId);
@@ -89,9 +89,42 @@ function _renderNomesCampos(containerId, cls, count, label) {
   }
   box.innerHTML = html;
 }
+/* Crianças: nome + idade em cada uma (preserva o que já foi digitado) */
+function _renderCriancas(count) {
+  const box = document.getElementById('cf-nomes-criancas');
+  if (!box) return;
+  const nomes = [], idades = [];
+  box.querySelectorAll('.cf-nome-crianca').forEach(i => nomes.push(i.value));
+  box.querySelectorAll('.cf-idade-crianca').forEach(i => idades.push(i.value));
+  let html = '';
+  for (let i = 0; i < count; i++) {
+    const n  = nomes[i]  ? _escAttr(nomes[i])  : '';
+    const id = idades[i] ? _escAttr(idades[i]) : '';
+    html += '<div class="cf-campo">'
+      + '<label>Criança ' + (i + 1) + '</label>'
+      + '<div class="cf-crianca-linha">'
+      +   '<input type="text" class="cf-nome-crianca" value="' + n + '" placeholder="Nome">'
+      +   '<input type="number" class="cf-idade-crianca" value="' + id + '" placeholder="Idade" min="0" max="17" inputmode="numeric">'
+      + '</div></div>';
+  }
+  box.innerHTML = html;
+}
 function _coletarNomes(cls) {
   return Array.from(document.querySelectorAll('.' + cls))
     .map(i => i.value.trim()).filter(Boolean);
+}
+function _coletarCriancas() {
+  const box = document.getElementById('cf-nomes-criancas');
+  if (!box) return [];
+  const nomes  = box.querySelectorAll('.cf-nome-crianca');
+  const idades = box.querySelectorAll('.cf-idade-crianca');
+  const res = [];
+  for (let i = 0; i < nomes.length; i++) {
+    const nome  = nomes[i].value.trim();
+    const idade = idades[i] ? idades[i].value.trim() : '';
+    if (nome || idade) res.push({ nome: nome, idade: idade });
+  }
+  return res;
 }
 
 async function enviarConfirmacao() {
@@ -109,8 +142,8 @@ async function enviarConfirmacao() {
   const criancas = vai ? (parseInt(document.getElementById('cf-criancas').value) || 0) : 0;
   const telefone = document.getElementById('cf-tel').value.trim() || null;
   const mensagem = document.getElementById('cf-recado').value.trim() || null;
-  const nomesAdultos  = vai ? _coletarNomes('cf-nome-adulto')  : [];
-  const nomesCriancas = vai ? _coletarNomes('cf-nome-crianca') : [];
+  const nomesAdultos  = vai ? _coletarNomes('cf-nome-adulto') : [];
+  const nomesCriancas = vai ? _coletarCriancas() : [];
 
   btn.disabled = true;
   btn.textContent = 'Enviando...';
