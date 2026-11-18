@@ -129,15 +129,16 @@ function _nomesAcomp(g) {
 }
 
 /* Formata uma criança: aceita texto antigo ("Nome") ou objeto novo {nome, idade} */
-function _cvCrianca(c) {
-  if (typeof c === 'string') return _cvEsc(c);
-  const nome = _cvEsc(c && c.nome ? c.nome : '');
-  const idade = (c && c.idade !== '' && c.idade != null) ? String(c.idade).trim() : '';
-  if (!idade) return nome;
-  // só número → acrescenta "ano(s)"; se já tiver texto (ex.: "8 meses"), mostra como foi escrito
-  const txt = /^\d+$/.test(idade) ? (idade + (idade === '1' ? ' ano' : ' anos')) : idade;
-  return (nome ? nome + ' ' : '') + '(' + _cvEsc(txt) + ')';
+/* Texto puro de uma criança: aceita formato antigo ("Nome") ou novo {nome, idade} */
+function _criancaLabel(c) {
+  const nome = (c && typeof c === 'object') ? (c.nome || '') : (c || '');
+  const idadeRaw = (c && typeof c === 'object' && c.idade != null) ? String(c.idade).trim() : '';
+  if (!idadeRaw) return nome;
+  // só número → acrescenta "ano(s)"; se já tiver texto (ex.: "8 meses"), mostra como escrito
+  const idade = /^\d+$/.test(idadeRaw) ? (idadeRaw + (idadeRaw === '1' ? ' ano' : ' anos')) : idadeRaw;
+  return (nome ? nome + ' ' : '') + '(' + idade + ')';
 }
+function _cvCrianca(c) { return _cvEsc(_criancaLabel(c)); }
 
 function _renderTotais() {
   const box = document.getElementById('cv-totais');
@@ -300,6 +301,104 @@ async function resetCoresConfirmacao() {
   await _salvarCampoEventoCV('confirmar_cor_texto', null);
   await _salvarCampoEventoCV('confirmar_cor_botao', null);
   if (ok1) { _carregarPersonalizacao(); toast('Cores voltaram ao padrão ✓'); }
+}
+
+/* ── Exportar a lista completa (PDF e Excel/CSV) ────────── */
+const _CV_STATUS_TXT = { confirmado: 'Confirmado', pendente: 'Pendente', recusado: 'Não vai' };
+
+function _cvResumo() {
+  const conf = _convidados.filter(g => g.status === 'confirmado');
+  const adultosConf  = conf.reduce((s, g) => s + (Number(g.adultos) || 0), 0);
+  const criancasConf = conf.reduce((s, g) => s + (Number(g.criancas) || 0), 0);
+  return {
+    conf: conf.length,
+    pend: _convidados.filter(g => g.status === 'pendente').length,
+    rec:  _convidados.filter(g => g.status === 'recusado').length,
+    pessoas: conf.length + adultosConf + criancasConf
+  };
+}
+
+function _cvAcompText(g, html) {
+  const ac = g.acompanhantes || {};
+  const ad = Array.isArray(ac.adultos)  ? ac.adultos.filter(Boolean) : [];
+  const cr = Array.isArray(ac.criancas) ? ac.criancas.filter(x => x && (typeof x === 'string' ? x : (x.nome || x.idade))) : [];
+  const adTxt = ad.map(n => html ? _cvEsc(n) : n).join(', ');
+  const crTxt = cr.map(c => html ? _cvCrianca(c) : _criancaLabel(c)).join(', ');
+  return [adTxt && ('Adultos: ' + adTxt), crTxt && ('Crianças: ' + crTxt)].filter(Boolean).join(html ? '<br>' : ' | ');
+}
+
+function exportarConvidadosPDF() {
+  if (!eventoAtual) return;
+  if (!_convidados.length) { toast('Nenhum convidado na lista ainda.', 'erro'); return; }
+  const titulo = 'Lista de convidados — ' + (eventoAtual.nomes || 'Evento');
+  const r = _cvResumo();
+
+  let rows = '';
+  _convidados.forEach(g => {
+    const total = 1 + (Number(g.adultos) || 0) + (Number(g.criancas) || 0);
+    rows += '<tr>'
+      + '<td>' + _cvEsc(g.nome || '') + '</td>'
+      + '<td>' + (_CV_STATUS_TXT[g.status] || _cvEsc(g.status)) + '</td>'
+      + '<td class="n">' + (Number(g.adultos) || 0) + '</td>'
+      + '<td class="n">' + (Number(g.criancas) || 0) + '</td>'
+      + '<td class="n">' + total + '</td>'
+      + '<td>' + _cvAcompText(g, true) + '</td>'
+      + '<td>' + _cvEsc(g.telefone || '') + '</td>'
+      + '<td>' + _cvEsc(g.mensagem || '') + '</td>'
+      + '</tr>';
+  });
+
+  const html = '<h1>' + _cvEsc(titulo) + '</h1>'
+    + '<p class="res"><b>' + r.pessoas + '</b> pessoas confirmadas · '
+      + r.conf + ' convites confirmados · ' + r.pend + ' pendentes · ' + r.rec + ' não vão</p>'
+    + '<table><thead><tr><th>Nome principal</th><th>Status</th><th>Ad.</th><th>Cri.</th><th>Total</th>'
+      + '<th>Acompanhantes</th><th>Telefone</th><th>Recado</th></tr></thead><tbody>' + rows + '</tbody></table>';
+
+  const w = window.open('', '_blank');
+  if (!w) { toast('Permita abrir a janela de impressão.', 'erro'); return; }
+  w.document.write(
+    '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>' + _cvEsc(titulo) + '</title><style>'
+    + 'body{font-family:Arial,sans-serif;color:#2a2a2a;padding:24px;font-size:12px;}'
+    + 'h1{color:#3d5a47;font-size:18px;margin:0 0 6px;} .res{color:#555;margin:0 0 12px;}'
+    + 'table{width:100%;border-collapse:collapse;} th,td{border:1px solid #ddd6cc;padding:5px 7px;text-align:left;vertical-align:top;} th{background:#f2ede4;} td.n{text-align:center;}'
+    + '</style></head><body>' + html + '</body></html>'
+  );
+  w.document.close();
+  w.focus();
+  setTimeout(() => { w.print(); }, 350);
+}
+
+function _cvSlug(s) {
+  return String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'evento';
+}
+
+function exportarConvidadosCSV() {
+  if (!eventoAtual) return;
+  if (!_convidados.length) { toast('Nenhum convidado na lista ainda.', 'erro'); return; }
+  const esc = v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
+  const linhas = [];
+  linhas.push(['Nome principal', 'Status', 'Adultos', 'Criancas', 'Total',
+               'Acompanhantes adultos', 'Criancas (nomes e idades)', 'Telefone', 'Recado'].map(esc).join(';'));
+  _convidados.forEach(g => {
+    const total = 1 + (Number(g.adultos) || 0) + (Number(g.criancas) || 0);
+    const ac = g.acompanhantes || {};
+    const ad = Array.isArray(ac.adultos)  ? ac.adultos.filter(Boolean).join(', ') : '';
+    const cr = Array.isArray(ac.criancas) ? ac.criancas.map(_criancaLabel).filter(Boolean).join(', ') : '';
+    linhas.push([
+      g.nome || '', _CV_STATUS_TXT[g.status] || g.status, Number(g.adultos) || 0, Number(g.criancas) || 0, total,
+      ad, cr, g.telefone || '', g.mensagem || ''
+    ].map(esc).join(';'));
+  });
+  const csv = '﻿' + linhas.join('\r\n');   // BOM p/ acentos abrirem certo no Excel
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'convidados-' + _cvSlug(eventoAtual.nomes) + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); document.body.removeChild(a); }, 100);
+  toast('Lista baixada ✓');
 }
 
 /* ── Compartilhar o link ───────────────────────────────── */
