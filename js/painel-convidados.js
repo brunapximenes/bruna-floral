@@ -91,7 +91,9 @@ function _renderConvidados() {
 
   _convidados.forEach(g => {
     const total = 1 + (Number(g.adultos) || 0) + (Number(g.criancas) || 0);
-    const recado = g.mensagem ? '<span class="cv-recado" title="' + _cvEsc(g.mensagem) + '">💬 ' + _cvEsc(g.mensagem) + '</span>' : '';
+    const recado = g.mensagem
+      ? '<button class="cv-recado-btn" onclick="verRecado(\'' + g.id + '\')" title="Ver recado completo">💬 ' + _cvEsc(g.mensagem) + '</button>'
+      : '';
     html += '<tr class="cv-row cv-' + g.status + '">'
       + '<td><input class="cv-inp cv-inp-nome" value="' + _cvEsc(g.nome) + '" '
         + 'onchange="atualizarConvidado(\'' + g.id + '\',\'nome\',this.value)">' + _nomesAcomp(g) + '</td>'
@@ -301,6 +303,22 @@ async function resetCoresConfirmacao() {
   await _salvarCampoEventoCV('confirmar_cor_texto', null);
   await _salvarCampoEventoCV('confirmar_cor_botao', null);
   if (ok1) { _carregarPersonalizacao(); toast('Cores voltaram ao padrão ✓'); }
+}
+
+/* ── Ver o recado completo em pop-up ────────────────────── */
+function verRecado(id) {
+  const g = _convidados.find(x => x.id === id);
+  if (!g) return;
+  const nome = document.getElementById('cv-recado-nome');
+  const texto = document.getElementById('cv-recado-texto');
+  const pop = document.getElementById('cv-recado-pop');
+  if (nome) nome.textContent = g.nome || 'convidado';
+  if (texto) texto.textContent = g.mensagem || '';
+  if (pop) pop.style.display = 'flex';
+}
+function fecharRecado() {
+  const pop = document.getElementById('cv-recado-pop');
+  if (pop) pop.style.display = 'none';
 }
 
 /* ── Exportar a lista completa (PDF e Excel/CSV) ────────── */

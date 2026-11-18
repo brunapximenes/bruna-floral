@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Painel — Bruna Ximenes</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/style.css?v=47">
+<link rel="stylesheet" href="/css/style.css?v=48">
 <style>
 /* ── LOGIN ──────────────────────────────────────────── */
 #tela-login {
@@ -881,6 +881,15 @@
   </div>
 </div>
 
+<!-- Pop-up do recado completo de um convidado -->
+<div id="cv-recado-pop" class="modal-overlay" style="display:none" onclick="if(event.target===this)fecharRecado()">
+  <div class="modal-box">
+    <div class="modal-titulo">💬 Recado de <span id="cv-recado-nome"></span></div>
+    <p class="modal-texto" id="cv-recado-texto" style="white-space:pre-wrap"></p>
+    <button class="modal-btn-cancelar" onclick="fecharRecado()">Fechar</button>
+  </div>
+</div>
+
 <!-- Modal de confirmação de exclusão / arquivamento -->
 <div id="modal-excluir" class="modal-overlay" style="display:none">
   <div class="modal-box">
@@ -916,7 +925,7 @@
 <script src="/js/exportar-sheets.js"></script>
 <script src="/js/painel-descritivo.js?v=31"></script>
 <script src="/js/painel-anotacoes.js?v=1"></script>
-<script src="/js/painel-convidados.js?v=9"></script>
+<script src="/js/painel-convidados.js?v=10"></script>
 <script src="/js/painel-logistica.js?v=6"></script>
 <script src="/js/assinatura.js?v=1"></script>
 <script src="/js/painel-contrato.js?v=17"></script>
